@@ -1,0 +1,41 @@
+diff --git a/tinyfilemanager.php b/tinyfilemanager.php
+index 5b57b7b..05cb50e 100644
+--- a/tinyfilemanager.php
++++ b/tinyfilemanager.php
+@@ -70,6 +70,9 @@ $root_url = '';
+ // $_SERVER['HTTP_HOST'].'/folder'
+ $http_host = $_SERVER['HTTP_HOST'];
+ 
++// Home URL. Link for Home Button.
++$home_url = '?p=';
++
+ // input encoding for iconv
+ $iconv_input_encoding = 'UTF-8';
+ 
+@@ -575,7 +578,7 @@ if ((isset($_SESSION[FM_SESSION_ID]['logged'], $auth_users[$_SESSION[FM_SESSION_
+         $use_curl = false;
+         $temp_file = tempnam(sys_get_temp_dir(), "upload-");
+         $fileinfo = new stdClass();
+-        $fileinfo->name = trim(basename($url), ".\x00..\x20");
++        $fileinfo->name = trim(urldecode(basename($url)), ".\x00..\x20");
+ 
+         $allowed = (FM_UPLOAD_EXTENSION) ? explode(',', FM_UPLOAD_EXTENSION) : false;
+         $ext = strtolower(pathinfo($fileinfo->name, PATHINFO_EXTENSION));
+@@ -3420,7 +3423,7 @@ class FM_Zipper_Tar
+  */
+ function fm_show_nav_path($path)
+ {
+-    global $lang, $sticky_navbar, $editFile;
++    global $lang, $sticky_navbar, $editFile, $home_url;
+     $isStickyNavBar = $sticky_navbar ? 'fixed-top' : '';
+     $getTheme = fm_get_theme();
+     $getTheme .= " navbar-light";
+@@ -3439,7 +3442,7 @@ function fm_show_nav_path($path)
+ 
+             <?php
+             $path = fm_clean_path($path);
+-            $root_url = "<a href='?p='><i class='fa fa-home' aria-hidden='true' title='" . FM_ROOT_PATH . "'></i></a>";
++            $root_url = "<a href='".$home_url."'><i class='fa fa-home' aria-hidden='true' title='" . FM_ROOT_PATH . "'></i></a>";
+             $sep = '<i class="bread-crumb"> / </i>';
+             if ($path != '') {
+                 $exploded = explode('/', $path);

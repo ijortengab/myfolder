@@ -1,0 +1,243 @@
+server {
+	root /var/www/project/myfolder.my.id/scripts/tinyfilemanager;
+    server_name myfolder.my.id;
+	if ($arg_p ~* 'menu%2F(.*)') {
+		return 302 /menu/$1/;
+	}
+	if ($arg_p ~* '(private|public|menu)') {
+		return 302 /$1/;
+	}
+    # priority 1, equals.
+	location = /tinyfilemanager.php {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    location = /login/ {
+        auth_basic off;
+        return 302 http://myfolder.my.id/;
+    }
+    # priority 2, prefix.
+    location ^~ /menu/logout/ {
+        auth_basic off;
+        root /var/www/project/myfolder.my.id/web;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+	location ^~ /private/ {
+        root /var/www/project/myfolder.my.id/web;
+        # All request is send to PHP script.
+        try_files $uri /private/index.php;
+        location ~* \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/run/php/php-fpm.sock;
+        }
+	}
+	location ^~ /public/ {
+        root /var/www/project/myfolder.my.id/web;
+        # All request is send to PHP script.
+        try_files $uri /public/index.php;
+        location ~* \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/run/php/php-fpm.sock;
+        }
+	}
+    # priority 3, regex.
+    location ~ /menu/.*/ {
+        root /var/www/project/myfolder.my.id/web;
+        index index.php;
+        location ~* \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/run/php/php-fpm.sock;
+        }
+    }
+    # priority lowest.
+    location / {
+        if (-d "/var/www/project/myfolder.my.id/web$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
+    }
+    # ---
+    auth_basic           "Please login";
+    auth_basic_user_file /var/www/project/myfolder.my.id/.htpasswd;
+    # ---
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/myfolder.my.id/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/myfolder.my.id/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    server_name public.myfolder.my.id;
+    root /var/www/project/myfolder.my.id/scripts/tinyfilemanager;
+    index tinyfilemanager.php;
+    # File PHP akan menjadi text.
+    default_type text/plain;
+    location = /tinyfilemanager.php {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    # priority lowest.
+    location / {
+        root /var/www/project/myfolder.my.id/public;
+        if (-d "/var/www/project/myfolder.my.id/public$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
+    }
+    # ---
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/myfolder.my.id-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/myfolder.my.id-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    server_name admin.myfolder.my.id;
+    client_max_body_size 1024M;
+    root /var/www/project/myfolder.my.id/scripts/tinyfilemanager;
+    index tinyfilemanager.php;
+    # File PHP akan menjadi text.
+    default_type text/plain;
+    location = /tinyfilemanager.php {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    # Buat shortcut.
+    # /adduser => /scripts/adduser.php
+    # /passwd => /scripts/passwd.php
+    if ($uri ~ /([a-z]+)$) {
+        set $file $1;
+    }
+    if (-f "/var/www/project/myfolder.my.id/scripts/$file.php") {
+        rewrite ^(.*)$ /scripts/$file.php;
+    }
+    location /scripts/ {
+        root /var/www/project/myfolder.my.id;
+        location ~* \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/run/php/php-fpm.sock;
+        }
+    }
+    # priority lowest.
+    location / {
+        root /var/www/project/myfolder.my.id;
+        if (-d "/var/www/project/myfolder.my.id$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
+    }
+    # ---
+    auth_basic           "Please login";
+    auth_basic_user_file /var/www/project/myfolder.my.id/.htpasswd;
+    # ---
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/myfolder.my.id-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/myfolder.my.id-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    server_name ~^(?<user>[^-]+)\.myfolder\.my\.id;
+    if (!-d "/var/www/project/myfolder.my.id/storage/$user/public") {
+        return 404;
+    }
+    root /var/www/project/myfolder.my.id/storage/$user/public;
+    autoindex on;
+    # Let user hide listing directory by create their own index.html file.
+    index index.html;
+    # File PHP akan menjadi text.
+    default_type text/plain;
+    # ---
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/myfolder.my.id-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/myfolder.my.id-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    server_name ~^(?<user>.+)-private\.myfolder\.my\.id;
+    client_max_body_size 1024M;    
+    index tinyfilemanager.php;
+    root /var/www/project/myfolder.my.id/storage/$remote_user/scripts;
+    location = /tinyfilemanager.php {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    location = /menu/logout/logout.php {
+        auth_basic off;
+        root /var/www/project/myfolder.my.id/web;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    # priority lowest.
+    location / {
+        if (-d "/var/www/project/myfolder.my.id/storage/$remote_user/private$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
+        root /var/www/project/myfolder.my.id/storage/$remote_user/private;
+    }
+
+    # ---
+    auth_basic           "Please login";
+    auth_basic_user_file /var/www/project/myfolder.my.id/.htpasswd;
+    # ---
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/myfolder.my.id-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/myfolder.my.id-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    server_name ~^(?<user>.+)-public\.myfolder\.my\.id;
+    client_max_body_size 1024M;
+    index tinyfilemanager.php;
+    root /var/www/project/myfolder.my.id/storage/$remote_user/scripts;
+    location = /tinyfilemanager.php {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    location = /menu/logout/logout.php {
+        auth_basic off;
+        root /var/www/project/myfolder.my.id/web;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    if ( $remote_user = '' ) {
+        set $redirect yes;
+    }
+    if (-f "/var/www/project/myfolder.my.id/storage/$user/public$uri") {
+        set $redirect yes$redirect;
+    }
+    if ( $redirect = 'yesyes' ) {
+        return https://$user.myfolder.my.id$uri;
+    }
+    # priority lowest.
+    location / {
+        if (-d "/var/www/project/myfolder.my.id/storage/$remote_user/public$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
+        root /var/www/project/myfolder.my.id/storage/$remote_user/public;
+    }
+    # ---
+    auth_basic           "Please login";
+    auth_basic_user_file /var/www/project/myfolder.my.id/.htpasswd;
+    # ---
+    listen [::]:443 ssl; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/myfolder.my.id-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/myfolder.my.id-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+}
+server {
+    if ($host = myfolder.my.id) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+    listen 80;
+    listen [::]:80;
+    server_name myfolder.my.id;
+    return 404; # managed by Certbot
+}
