@@ -234,13 +234,23 @@ atau https://admin.$domain/deluser
 
 ## FYI
 
-Total terdapat 5 host.
+Total terdapat 6 host.
  - https://$domain/ untuk tempat login user.
  - https://admin.$domain/ untuk tempat login admin.
  - https://$user-private.$domain/ untuk management file private.
  - https://$user-public.$domain/ untuk management file public.
- - https://$user.$domain/ untuk share file public.
+ - https://$user.$domain/ untuk destinasi link share file user untuk public.
+ - https://public.$domain/ untuk destinasi link share file global untuk public.
 
 User yang ingin memindahkan file dari dan ke `private` dan `public` dapat
 melakukan nya di host `https://$user-private.$domain/`. Terdapat
 symbolic link ke directory `public`.
+
+Menu untuk user, terdapat di halaman utama https://$domain/. Terdapat menu untuk
+logout dan ganti password. Yakni:
+ - https://$domain/menu/password
+ - https://$domain/menu/logout
+
+## Issue
+
+Belum di test untuk CSRF.
