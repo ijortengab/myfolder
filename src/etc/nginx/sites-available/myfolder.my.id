@@ -73,6 +73,11 @@ server {
     index tinyfilemanager.php;
     # File PHP akan menjadi text.
     default_type text/plain;
+    # Untuk menonaktifkan fitur public storage, tambahkan file 403.html
+    # di dalam direktori public.
+    if (-f /var/www/project/myfolder.my.id/public/404.html) {
+        return 404;
+    }
     location = /tinyfilemanager.php {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php-fpm.sock;
@@ -106,6 +111,7 @@ server {
     # Buat shortcut.
     # /adduser => /scripts/adduser.php
     # /passwd => /scripts/passwd.php
+    # /deluser => /scripts/deluser.php
     if ($uri ~ /([a-z]+)$) {
         set $file $1;
     }
