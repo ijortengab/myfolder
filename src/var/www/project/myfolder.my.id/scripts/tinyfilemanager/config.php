@@ -11,11 +11,21 @@ do {
         // Example:
         // - https://admin.myfolder.my.id/?p=&all
         // - https://admin.myfolder.my.id/?all
+        // - https://admin.myfolder.my.id/storage/user?all
+        // - https://admin.myfolder.my.id/?p=storage/user&all
         if (isset($_GET['p']) && in_array($_GET['p'], array('','/'))) {
             $exclude_items = array(
                 '.htpasswd',
                 'scripts',
                 'web',
+            );
+            if (isset($_GET['all'])) {
+                $exclude_items = array();
+            }
+        }
+        if (isset($_GET['p']) && preg_match('/^\/?storage\/[^\/]+\/?$/', $_GET['p'])) {
+            $exclude_items = array(
+                'scripts',
             );
             if (isset($_GET['all'])) {
                 $exclude_items = array();
