@@ -6,6 +6,18 @@ do {
             http_response_code(403);
             die('Forbidden.');
         }
+        // For experienced user, you must add `&all` in URL to show
+        // excluded items.
+        if (isset($_GET['p']) && $_GET['p'] == '') {
+            $exclude_items = array(
+                '.htpasswd',
+                'scripts',
+                'web',
+            );
+            if (isset($_GET['all'])) {
+                $exclude_items = array();
+            }
+        }
         $default_timezone = 'Asia/Jakarta';
         $root_path = '/var/www/project/'.$domain;
         $global_readonly = false;
@@ -13,7 +25,7 @@ do {
         break;
     }
     if ('public.'.$domain == $_SERVER['HTTP_HOST']) {
-        // Variable $CONFIG untuk subdomain public di konfigurasi disini, karena 
+        // Variable $CONFIG untuk subdomain public di konfigurasi disini, karena
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
@@ -23,26 +35,30 @@ do {
         $use_auth = false;
         break;
     }
-    if ($domain == $_SERVER['HTTP_HOST']) {
+	if ($domain == $_SERVER['HTTP_HOST']) {
+        if ($_SERVER['REMOTE_USER'] == 'admin') {
+            header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
+            exit;
+        }
         $default_timezone = 'Asia/Jakarta';
-        $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
-        $root_path = '/var/www/project/'.$domain.'/web';
+		$user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
+		$root_path = '/var/www/project/'.$domain.'/web';
         $use_auth = false;
         $global_readonly = true;
         if (!is_dir($user_storage)) {
-            if (!mkdir($user_storage, 0777, true)) {
+            if (!mkdir($user_storage, 0755, true)) {
                 die('Failed to create directories...');
             }
         }
         $public = $user_storage.'/public';
         if (!is_dir($public)) {
-            if (!mkdir($public, 0777, true)) {
+            if (!mkdir($public, 0755, true)) {
                 die('Failed to create directories...');
             }
         }
         $private = $user_storage.'/private';
         if (!is_dir($private)) {
-            if (!mkdir($private, 0777, true)) {
+            if (!mkdir($private, 0755, true)) {
                 die('Failed to create directories...');
             }
             // Buat symbolic link relative.
@@ -53,7 +69,7 @@ do {
         }
         $scripts = $user_storage.'/scripts';
         if (!is_dir($scripts)) {
-            if (!mkdir($scripts, 0777, true)) {
+            if (!mkdir($scripts, 0755, true)) {
                 die('Failed to create directories...');
             }
         }
@@ -87,8 +103,8 @@ do {
         if (!is_link($newfile)) {
             symlink($file, $newfile);
         }
-        break;
-    }
+		break;
+	}
     preg_match('/^(?<user>.+)-(?<scope>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
     if ($matches) {
         $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
@@ -249,5 +265,5 @@ do {
         }
         break;
     }
-    die('Host not allowed. :'.$_SERVER['HTTP_HOST']);
+	die('Host not allowed. :'.$_SERVER['HTTP_HOST']);
 } while (false);
