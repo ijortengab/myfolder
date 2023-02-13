@@ -251,6 +251,16 @@ logout dan ganti password. Yakni:
  - https://$domain/menu/password
  - https://$domain/menu/logout
 
+Public repository berada pada alamat `https://public.$domain/` dan point ke
+directory `/var/www/project/$domain/public`.
+
+Untuk menonaktifkan public repository, buat file kosong bernama `404.html`.
+
+```
+cd /var/www/project/$domain/public
+touch 404.html
+```
+
 ## Issue
 
 Belum di test untuk CSRF.
