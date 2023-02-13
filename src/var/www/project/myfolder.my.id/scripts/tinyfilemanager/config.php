@@ -23,10 +23,10 @@ do {
         $use_auth = false;
         break;
     }
-	if ($domain == $_SERVER['HTTP_HOST']) {
+    if ($domain == $_SERVER['HTTP_HOST']) {
         $default_timezone = 'Asia/Jakarta';
-		$user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
-		$root_path = '/var/www/project/'.$domain.'/web';
+        $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
+        $root_path = '/var/www/project/'.$domain.'/web';
         $use_auth = false;
         $global_readonly = true;
         if (!is_dir($user_storage)) {
@@ -87,8 +87,8 @@ do {
         if (!is_link($newfile)) {
             symlink($file, $newfile);
         }
-		break;
-	}
+        break;
+    }
     preg_match('/^(?<user>.+)-(?<scope>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
     if ($matches) {
         $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
@@ -249,5 +249,5 @@ do {
         }
         break;
     }
-	die('Host not allowed. :'.$_SERVER['HTTP_HOST']);
+    die('Host not allowed. :'.$_SERVER['HTTP_HOST']);
 } while (false);
