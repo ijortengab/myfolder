@@ -1,6 +1,6 @@
 # MyFolder
 
-This Repository is configuration of https://myfolder.my.id.
+This Repository is configuration of https://public.myfolder.my.id.
 
 The configuration is turn your site in to simple cloud storage.
 
@@ -232,9 +232,9 @@ https://admin.$domain/scripts/deluser.php
 
 atau https://admin.$domain/deluser
 
-## FYI
+## Finish
 
-Total terdapat 6 host.
+Total terdapat minimal 6 host.
  - https://$domain/ untuk tempat login user.
  - https://admin.$domain/ untuk tempat login admin.
  - https://$user-private.$domain/ untuk management file private.
@@ -254,3 +254,54 @@ logout dan ganti password. Yakni:
 ## Issue
 
 Belum di test untuk CSRF.
+
+## Tips
+
+Bagaimana menjadikan folder di laptop, agar dapat diakses melalui cloud?
+
+Misalnya kita menggunakan skenario sbb:
+
+ - domain yang digunakan adalah `myfolder.my.id`
+ - user yang akan digunakan adalah `laptop`
+ - penyimpanan akan menggunakan scope `private`
+ - directory remote adalah `mnt`, relative terhadap private.
+
+Maka:
+
+Buat mount point.
+
+```
+mkdir -p                    /var/www/project/myfolder.my.id/storage/laptop/private/mnt
+chown -R www-data:www-data  /var/www/project/myfolder.my.id/storage/laptop
+```
+
+Dari local, kita `ssh` login ke server dan buat remote port forwarding.
+
+```
+ssh root@myfolder.my.id -R 22000:127.0.0.1:22
+```
+
+Dari cloud/server, kita sshfs ke local melalui port forwarding.
+
+```
+sshfs -p 22000 -o allow_other \
+    ijortengab@127.0.0.1:/cygdrive/c/Users/ijortengab \
+    /var/www/project/myfolder.my.id/storage/laptop/private/mnt
+```
+
+Sesuikan path source dan path target relative dari server remote. Command diatas menggunakan:
+
+ - path source: `ijortengab@127.0.0.1:/cygdrive/c/Users/ijortengab`
+ - path target: `/var/www/project/myfolder.my.id/storage/laptop/private/mnt`
+
+Jika semua berjalan lancar, maka sekarang direktori laptop local dapat diakses melalui URL:
+
+```
+https://laptop-private.myfolder.my.id/mnt/
+```
+
+Untuk unmount, gunakan command sbb:
+
+```
+fusermount -u /var/www/project/myfolder.my.id/storage/laptop/private/mnt
+```
