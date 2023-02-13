@@ -6,9 +6,12 @@ do {
             http_response_code(403);
             die('Forbidden.');
         }
-        // For experienced user, you must add `&all` in URL to show
-        // excluded items.
-        if (isset($_GET['p']) && $_GET['p'] == '') {
+        // For experienced user, you must add key query `all` in URL to
+        // show excluded items.
+        // Example:
+        // - https://admin.myfolder.my.id/?p=&all
+        // - https://admin.myfolder.my.id/?all
+        if (isset($_GET['p']) && in_array($_GET['p'], array('','/'))) {
             $exclude_items = array(
                 '.htpasswd',
                 'scripts',
