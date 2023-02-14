@@ -44,6 +44,7 @@ do {
         $root_path = '/var/www/project/'.$domain.'/public';
         $global_readonly = true;
         $use_auth = false;
+        $home_url = 'https://public.'.$domain;
         // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
         // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
         if (isset($_GET['p']) && !in_array($_GET['p'], array('','/'))) {
