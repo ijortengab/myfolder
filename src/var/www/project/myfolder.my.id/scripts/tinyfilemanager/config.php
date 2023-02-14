@@ -61,7 +61,7 @@ do {
                 }
             }
             $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
-            header('Location: https://public.'.$domain.$parent_directory.'/'.urlencode($_GET['dl']));
+            header('Location: https://public.'.$domain.$parent_directory.'/'.urlencode($_GET['dl']).'?filename='.urlencode($_GET['dl']).'&download=1');
             exit;
         }
         // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
@@ -176,7 +176,6 @@ do {
                 exit;
             }
         }
-
         // Symlink ke arah directory public tidak boleh di hapus.
         // Di-rename masih boleh.
         if ($matches['scope'] == 'private' && isset($_GET['del']) && isset($_GET['p']) && $_GET['p'] == '') {
@@ -187,7 +186,6 @@ do {
                 die('Forbidden.');
             }
         }
-
         // Ambil alih save setting. Buat agar tidak mengubah file utama.
         // Save Config
         if (isset($_POST['type']) && $_POST['type'] == "settings") {

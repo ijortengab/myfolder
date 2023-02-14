@@ -78,6 +78,16 @@ server {
     if (-f /var/www/project/myfolder.my.id/public/404.html) {
         return 404;
     }
+    if ($arg_download = "1") {
+        rewrite ^/(.*)$ /.~/$1?download=0;
+    }
+    # Dilarang membuat direktori bernama `.~` didalam direktori public.
+    # karena reserved untuk manipulasi force download.
+    location /.~/ {
+        internal;
+        alias /var/www/project/myfolder.my.id/public/;
+        add_header Content-disposition "attachment; filename=$arg_filename";
+    }
     location = /tinyfilemanager.php {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php-fpm.sock;
