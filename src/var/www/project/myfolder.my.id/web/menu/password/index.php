@@ -1,5 +1,5 @@
 <?php
-$domain = 'myfolder.my.id';
+include(__DIR__.'/../../../scripts/config.php');
 $database = '/var/www/project/'.$domain.'/.htpasswd';
 $directory_database = dirname($database);
 $mode = 'default';

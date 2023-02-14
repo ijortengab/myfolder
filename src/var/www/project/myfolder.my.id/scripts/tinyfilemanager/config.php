@@ -1,5 +1,5 @@
 <?php
-$domain = 'myfolder.my.id';
+include(__DIR__.'/../config.php');
 do {
     if ('admin.'.$domain == $_SERVER['HTTP_HOST']) {
         if ($_SERVER['REMOTE_USER'] != 'admin') {
@@ -9,10 +9,10 @@ do {
         // For experienced user, you must add key query `all` in URL to
         // show excluded items.
         // Example:
-        // - https://admin.myfolder.my.id/?p=&all
-        // - https://admin.myfolder.my.id/?all
-        // - https://admin.myfolder.my.id/storage/user?all
-        // - https://admin.myfolder.my.id/?p=storage/user&all
+        // - https://admin.$domain/?p=&all
+        // - https://admin.$domain/?all
+        // - https://admin.$domain/storage/user?all
+        // - https://admin.$domain/?p=storage/user&all
         if (isset($_GET['p']) && in_array($_GET['p'], array('','/'))) {
             $exclude_items = array(
                 '.htpasswd',
@@ -31,7 +31,6 @@ do {
                 $exclude_items = array();
             }
         }
-        $default_timezone = 'Asia/Jakarta';
         $root_path = '/var/www/project/'.$domain;
         $global_readonly = false;
         $use_auth = false;
@@ -42,12 +41,11 @@ do {
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
-        $default_timezone = 'Asia/Jakarta';
         $root_path = '/var/www/project/'.$domain.'/public';
         $global_readonly = true;
         $use_auth = false;
-        // Arahkan agar "https://public.myfolder.my.id/?p=mnt" redirect ke
-        // https://public.myfolder.my.id/mnt/. Hati-hati terhadap unlimited self redirect.
+        // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
+        // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
         if (isset($_GET['p']) && !in_array($_GET['p'], array('','/'))) {
             $uri = $_SERVER['REQUEST_URI'];
             $parts = parse_url($uri);
@@ -68,7 +66,6 @@ do {
             header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
             exit;
         }
-        $default_timezone = 'Asia/Jakarta';
         $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
         $root_path = '/var/www/project/'.$domain.'/web';
         $use_auth = false;
@@ -137,7 +134,6 @@ do {
     if ($matches) {
         $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
         include_once($user_config);
-        $default_timezone = 'Asia/Jakarta';
         $use_auth = false;
         $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'];
         $global_readonly = false;

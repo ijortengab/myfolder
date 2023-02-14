@@ -1,5 +1,5 @@
 <?php
-$domain = 'myfolder.my.id';
+include(__DIR__.'/../../../scripts/config.php');
 $from = empty($_GET['from']) ? 'init' : $_GET['from'];
 $user = $_SERVER['PHP_AUTH_USER'];
 switch ($from) {

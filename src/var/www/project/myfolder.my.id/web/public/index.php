@@ -1,5 +1,4 @@
 <?php
-// $s = $_SERVER;
 $uri = $_SERVER['REQUEST_URI'];
 $parts = parse_url($uri);
 $path = '';

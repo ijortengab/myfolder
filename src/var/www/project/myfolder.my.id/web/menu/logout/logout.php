@@ -1,5 +1,5 @@
 <?php
-$domain = 'myfolder.my.id';
+include(__DIR__.'/../../../scripts/config.php');
 $host = $_SERVER['HTTP_HOST'];
 $user = empty($_SERVER['PHP_AUTH_USER']) ? null : $_SERVER['PHP_AUTH_USER'];
 preg_match('/^(?<user>.+)-(?<scope>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
