@@ -230,44 +230,43 @@ https://admin:$password@$domain/
 
 if logged in, you'll redirect to https://admin.$domain/
 
-## Management User
-
-Untuk menambah user:
-
-https://admin.$domain/scripts/adduser.php
-
-atau https://admin.$domain/adduser
-
-Untuk mengedit password user:
-
-https://admin.$domain/scripts/passwd.php
-
-atau https://admin.$domain/passwd
-
-Untuk menghapus user:
-
-https://admin.$domain/scripts/deluser.php
-
-atau https://admin.$domain/deluser
-
 ## Finish
 
 Total terdapat minimal 6 host.
- - https://$domain/ untuk tempat login user.
- - https://admin.$domain/ untuk tempat login admin.
+ - https://$domain/ untuk tempat login user atau admin.
+ - https://admin.$domain/ untuk management seluruh file.
  - https://$user-private.$domain/ untuk management file private.
  - https://$user-public.$domain/ untuk management file public.
  - https://$user.$domain/ untuk destinasi link share file user untuk public.
  - https://public.$domain/ untuk destinasi link share file global untuk public.
 
-User yang ingin memindahkan file dari dan ke `private` dan `public` dapat
-melakukan nya di host `https://$user-private.$domain/`. Terdapat
-symbolic link ke directory `public`.
+## Admin
 
-Menu untuk user, terdapat di halaman utama https://$domain/. Terdapat menu untuk
-logout dan ganti password. Yakni:
- - https://$domain/menu/password
- - https://$domain/menu/logout
+Untuk menambah user, visit:
+
+https://admin.$domain/scripts/adduser.php
+
+atau https://admin.$domain/adduser
+
+Untuk mengedit password user, visit:
+
+https://admin.$domain/scripts/passwd.php
+
+atau https://admin.$domain/passwd
+
+Untuk menghapus user, visit:
+
+https://admin.$domain/scripts/deluser.php
+
+atau https://admin.$domain/deluser
+
+Untuk logout, visit:
+
+https://admin.$domain/scripts/logout.php
+
+atau https://admin.$domain/logout
+
+## Public
 
 Public repository berada pada alamat `https://public.$domain/` dan point ke
 directory `/var/www/project/$domain/public`.
@@ -278,6 +277,17 @@ Untuk menonaktifkan public repository, buat file kosong bernama `404.html`.
 cd /var/www/project/$domain/public
 touch 404.html
 ```
+
+## User
+
+User yang ingin memindahkan file dari dan ke `private` dan `public` dapat
+melakukan nya di host `https://$user-private.$domain/`. Terdapat
+symbolic link ke directory `public`.
+
+Menu untuk user, terdapat di halaman utama https://$domain/. Terdapat menu untuk
+logout dan ganti password. Yakni:
+ - https://$domain/menu/password
+ - https://$domain/menu/logout
 
 ## Issue
 
