@@ -45,6 +45,25 @@ do {
         $global_readonly = true;
         $use_auth = false;
         $home_url = 'https://public.'.$domain;
+        // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
+        if (isset($_GET['dl'])) {
+            // Redirect.
+            $uri = $_SERVER['REQUEST_URI'];
+            $parts = parse_url($uri);
+            $parent_directory = '';
+            if (isset($parts['path'])) {
+                $parent_directory = trim($parts['path'],'/');
+            }
+            if (isset($parts['query'])) {
+                parse_str($parts['query'], $query);
+                if (isset($query['p'])) {
+                    $parent_directory = $query['p'];
+                }
+            }
+            $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
+            header('Location: https://public.'.$domain.$parent_directory.'/'.urlencode($_GET['dl']));
+            exit;
+        }
         // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
         // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
         if (isset($_GET['p']) && !in_array($_GET['p'], array('','/'))) {
@@ -139,7 +158,6 @@ do {
         $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'];
         $global_readonly = false;
         $home_url = 'https://'.$domain;
-
         // Browse ke directory symlink public tidak diperbolehkan
         // dan perlu diredirect ke subdomain public.
         // User nanti bisa mengcopy link dari directory public dan menduga
@@ -260,7 +278,6 @@ do {
             header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-'.$matches['scope'].'.'.$domain.'/'.$parent_directory);
             exit;
         }
-
         // Setelah save setting, ternyata:
         // - modal tidak ketutup sendiri.
         // - perubahan tidak segera terlihat karena adanya
