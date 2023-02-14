@@ -18,6 +18,10 @@ switch ($from) {
     case 'self' :
         $redirect = 'https://'.$domain.'/login/';
         break;
+
+    case 'admin' :
+        $redirect = 'https://'.$domain.'/menu/logout/logout.php';
+        break;
 }
 ?>
 <script>

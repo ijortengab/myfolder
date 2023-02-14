@@ -118,6 +118,12 @@ server {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:/run/php/php-fpm.sock;
     }
+    location = /scripts/logout.php {
+        auth_basic off;
+        root /var/www/project/myfolder.my.id;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
     # Buat shortcut.
     # /adduser => /scripts/adduser.php
     # /passwd => /scripts/passwd.php
