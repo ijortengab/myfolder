@@ -15,6 +15,7 @@ ____() { echo; }
 # Variable.
 domain='myfolder.my.id'
 database='/var/www/project/'$domain'/.htpasswd'
+touch $database
 
 # Nginx
 yellow Mencari informasi nginx.
@@ -65,5 +66,4 @@ password=$_password
 
 # Execute.
 mkdir -p $(dirname $database)
-touch $database
 echo "$password" | htpasswd -i "$database" "$username"
