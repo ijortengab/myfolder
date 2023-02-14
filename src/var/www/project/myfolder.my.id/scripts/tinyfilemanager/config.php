@@ -154,6 +154,10 @@ do {
     }
     preg_match('/^(?<user>.+)-(?<scope>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
     if ($matches) {
+        if ($_SERVER['REMOTE_USER'] != $matches['user']) {
+            header('Location: https://'.$domain.'/');
+            exit;
+        }
         $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
         include_once($user_config);
         $use_auth = false;
