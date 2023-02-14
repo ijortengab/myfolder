@@ -53,7 +53,7 @@ server {
 }
 ```
 
-Install certbot, and request ceritificate.
+Install certbot, and request ceritificate for $domain dan auto install.
 
 ```
 certbot -i nginx -d $domain
@@ -75,13 +75,19 @@ certbot -i nginx \
 rm "$mktemp"
 ```
 
-Jika berhasil, maka harusnya ada file certicate.
+Jika berhasil, maka harusnya ada file certificate.
 
 ```
 if [ -f /etc/letsencrypt/live/$domain/fullchain.pem ];then echo file exist.; fi
 ```
 
-Request hanya ceritifacte untuk wildcard subdomain.
+Request ceritifacte untuk wildcard subdomain dan tidak perlu auto install.
+
+```
+certbot certonly -d '*.'"$domain"
+```
+
+Atau bagi pengguna VPS Digital Ocean. Simpan token pada file `~/token`.
 
 ```
 digitalocean_credentials=$(<~/token)
@@ -97,7 +103,7 @@ certbot certonly \
 rm "$mktemp"
 ```
 
-Jika berhasil, maka harusnya ada file certicate.
+Jika berhasil, maka harusnya ada file certificate.
 
 ```
 if [ -f /etc/letsencrypt/live/$domain-0001/fullchain.pem ];then echo file exist.; fi
@@ -114,8 +120,10 @@ cd myfolder
 Rename directory and file.
 
 ```
-mv src/var/www/project/myfolder.my.id src/var/www/project/$domain
-mv src/etc/nginx/sites-available/myfolder.my.id src/etc/nginx/sites-available/$domain
+mv src/var/www/project/myfolder.my.id \
+   src/var/www/project/$domain
+mv src/etc/nginx/sites-available/myfolder.my.id \
+   src/etc/nginx/sites-available/$domain
 ```
 
 Edit file contains domain.
@@ -126,7 +134,7 @@ grep -r -l 'myfolder\.my\.id' | while IFS= read line; do \
 done
 ```
 
-Edit file nginx config contains domain variant regex.
+Edit file nginx config which contains domain variant regex.
 
 ```
 find=$(sed "s/\./\\\./g" <<< "myfolder\.my\.id")
@@ -200,17 +208,27 @@ Kasih semua permission ke user dimana PHP-FPM berjalan, misalnya `www-data`-nya 
 chown -R www-data:www-data /var/www/project/$domain
 ```
 
-Reload nginx.
+Enable virtual host and reload nginx.
 
 ```
+cd /etc/nginx/sites-enabled/
+ln -s ../sites-available/$domain
 nginx -s reload
 ```
 
-Kunjungi subdomain admin.
+Visit website then log in as admin.
 
 ```
-https://admin.$domain/
+https://$domain/
 ```
+
+or direct via URL.
+
+```
+https://admin:$password@$domain/
+```
+
+if logged in, you'll redirect to https://admin.$domain/
 
 ## Management User
 
