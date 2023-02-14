@@ -66,7 +66,9 @@ do {
         }
         // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
         // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
-        if (isset($_GET['p']) && !in_array($_GET['p'], array('','/'))) {
+        $arg_view = isset($_GET['view']);
+        $arg_p = isset($_GET['p']);
+        if (!$arg_view && $arg_p && !in_array($_GET['p'], array('','/'))) {
             $uri = $_SERVER['REQUEST_URI'];
             $parts = parse_url($uri);
             $parent_directory = '';
