@@ -16,8 +16,16 @@ do {
         if (isset($_GET['p']) && in_array($_GET['p'], array('','/'))) {
             $exclude_items = array(
                 '.htpasswd',
-                'scripts',
                 'web',
+            );
+            if (isset($_GET['all'])) {
+                $exclude_items = array();
+            }
+        }
+        if (isset($_GET['p']) && preg_match('/^\/?scripts\/?$/', $_GET['p'])) {
+            $exclude_items = array(
+                'tinyfilemanager',
+                'adduser.sh',
             );
             if (isset($_GET['all'])) {
                 $exclude_items = array();

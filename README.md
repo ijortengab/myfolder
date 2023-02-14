@@ -270,6 +270,7 @@ atau https://admin.$domain/logout
 To show excluded items, you must add key query `all` in URL.
  - https://admin.$domain/?all
  - https://admin.$domain/storage/$user/?all
+ - https://admin.$domain/scripts/?all
 
 ## Public
 
