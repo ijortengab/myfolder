@@ -46,6 +46,21 @@ do {
         $root_path = '/var/www/project/'.$domain.'/public';
         $global_readonly = true;
         $use_auth = false;
+        // Arahkan agar "https://public.myfolder.my.id/?p=mnt" redirect ke
+        // https://public.myfolder.my.id/mnt/. Hati-hati terhadap unlimited self redirect.
+        if (isset($_GET['p']) && !in_array($_GET['p'], array('','/'))) {
+            $uri = $_SERVER['REQUEST_URI'];
+            $parts = parse_url($uri);
+            $parent_directory = '';
+            if (isset($parts['query'])) {
+                parse_str($parts['query'], $query);
+                if (isset($query['p'])) {
+                    $parent_directory = $query['p'];
+                    header('Location: https://public.'.$domain.'/'.trim($parent_directory, '/').'/');
+                    exit;
+                }
+            }
+        }
         break;
     }
     if ($domain == $_SERVER['HTTP_HOST']) {
