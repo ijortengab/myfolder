@@ -230,13 +230,14 @@ https://admin:$password@$domain/
 
 if logged in, you'll redirect to https://admin.$domain/
 
+
 ## Finish
 
 Total terdapat minimal 6 host.
  - https://$domain/ untuk tempat login user atau admin.
  - https://admin.$domain/ untuk management seluruh file.
- - https://$user-private.$domain/ untuk management file private.
- - https://$user-public.$domain/ untuk management file public.
+ - https://$user-private.$domain/ for manage user's file inside private directory.
+ - https://$user-public.$domain/ for manage user's file inside public directory.
  - https://$user.$domain/ untuk destinasi link share file user untuk public.
  - https://public.$domain/ untuk destinasi link share file global untuk public.
 
@@ -265,6 +266,10 @@ Untuk logout, visit:
 https://admin.$domain/scripts/logout.php
 
 atau https://admin.$domain/logout
+
+To show excluded items, you must add key query `all` in URL.
+ - https://admin.$domain/?all
+ - https://admin.$domain/storage/$user/?all
 
 ## Public
 
