@@ -1,6 +1,11 @@
 <?php
 include(__DIR__.'/../config.php');
 
+$arg_p = '';
+if (isset($_GET['p'])) {
+    $arg_p = trim($_GET['p'], '/');
+}
+
 // Rewrite URL.
 // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
 // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
@@ -39,31 +44,25 @@ do {
         // - https://admin.$domain/?all
         // - https://admin.$domain/storage/user?all
         // - https://admin.$domain/?p=storage/user&all
-        if (isset($_GET['p']) && in_array($_GET['p'], array('','/'))) {
+        if ($arg_p == '') {
             $exclude_items = array(
                 '.htpasswd',
                 'web',
             );
-            if (isset($_GET['all'])) {
-                $exclude_items = array();
-            }
         }
-        if (isset($_GET['p']) && preg_match('/^\/?scripts\/?$/', $_GET['p'])) {
+        elseif (preg_match('/^\/?scripts\/?$/', $arg_p)) {
             $exclude_items = array(
                 'tinyfilemanager',
                 'adduser.sh',
             );
-            if (isset($_GET['all'])) {
-                $exclude_items = array();
-            }
         }
-        if (isset($_GET['p']) && preg_match('/^\/?storage\/[^\/]+\/?$/', $_GET['p'])) {
+        elseif (preg_match('/^\/?storage\/[^\/]+\/?$/', $arg_p)) {
             $exclude_items = array(
                 'scripts',
             );
-            if (isset($_GET['all'])) {
-                $exclude_items = array();
-            }
+        }
+        if (isset($_GET['all'])) {
+            $exclude_items = array();
         }
         $root_path = '/var/www/project/'.$domain;
         $global_readonly = false;
@@ -175,6 +174,11 @@ do {
     preg_match('/^(?<user>[^-]+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
     if ($matches) {
         $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
+        $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
+        if (is_file($root_path.$parent_directory.'/403.html')) {
+            http_response_code(403);
+            die('Forbidden.');
+        }
         $global_readonly = true;
         $use_auth = false;
         // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
@@ -217,12 +221,8 @@ do {
         // dan perlu diredirect ke subdomain public.
         // User nanti bisa mengcopy link dari directory public dan menduga
         // itu bisa diakses public.
-        if ($_SERVER['REQUEST_METHOD'] == 'GET' &&
-            $matches['scope'] == 'private' &&
-            isset($_GET['p']) &&
-            ($path = trim($_GET['p'], '/')) != ''
-            ) {
-            $dirs = explode('/', $path);
+        if ($matches['scope'] == 'private' && $arg_p != '') {
+            $dirs = explode('/', $arg_p);
             $first = array_shift($dirs);
             $parent_directory = implode('/', $dirs);
             $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
@@ -233,7 +233,7 @@ do {
         }
         // Symlink ke arah directory public tidak boleh di hapus.
         // Di-rename masih boleh.
-        if ($matches['scope'] == 'private' && isset($_GET['del']) && isset($_GET['p']) && $_GET['p'] == '') {
+        if ($matches['scope'] == 'private' && isset($_GET['del']) && $arg_p == '') {
             $del = $_GET['del'];
             $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
             if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
