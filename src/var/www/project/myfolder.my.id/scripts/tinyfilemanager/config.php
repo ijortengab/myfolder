@@ -252,6 +252,58 @@ switch ($subdomain) {
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
         break;
 
+    case 'user_public':
+        $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
+        $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
+        if (is_file($root_path.$parent_directory.'/403.html')) {
+            http_response_code(403);
+            die('Forbidden.');
+        }
+        if (is_file($root_path.$parent_directory.'/gallery.html') &&
+            is_file ('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php')
+        ) {
+            chdir($root_path.$parent_directory);
+            include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
+            exit;
+        }
+        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
+        include_once($user_config);
+        break;
+
+    case 'user':
+        if ($_SERVER['REMOTE_USER'] != $matches_user) {
+            header('Location: https://'.$domain.'/');
+            exit;
+        }
+        $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
+        include_once($user_config);
+        $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
+        // Browse ke directory symlink public tidak diperbolehkan
+        // dan perlu diredirect ke subdomain public.
+        // User nanti bisa mengcopy link dari directory public dan menduga
+        // itu bisa diakses public.
+        if ($matches_scope == 'private' && $arg_p != '') {
+            $dirs = explode('/', $arg_p);
+            $first = array_shift($dirs);
+            $parent_directory = implode('/', $dirs);
+            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
+            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+                header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-public.'.$domain.'/'.$parent_directory);
+                exit;
+            }
+        }
+        // Symlink ke arah directory public tidak boleh di hapus.
+        // Di-rename masih boleh.
+        if ($matches_scope == 'private' && isset($_GET['del']) && $arg_p == '') {
+            $del = $_GET['del'];
+            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
+            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+                http_response_code(403);
+                die('Forbidden. Link to Public Directory cannot delete.');
+            }
+        }
+        break;
+
     default:
         if ($_SERVER['REMOTE_USER'] == 'admin') {
             header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
@@ -316,57 +368,4 @@ switch ($subdomain) {
         if (!is_link($newfile)) {
             symlink($file, $newfile);
         }
-        break;
-
-    case 'user_public':
-        $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
-        $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
-        if (is_file($root_path.$parent_directory.'/403.html')) {
-            http_response_code(403);
-            die('Forbidden.');
-        }
-        if (is_file($root_path.$parent_directory.'/gallery.html') &&
-            is_file ('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php')
-        ) {
-            chdir($root_path.$parent_directory);
-            include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
-            exit;
-        }
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
-        include_once($user_config);
-        break;
-
-    case 'user':
-        if ($_SERVER['REMOTE_USER'] != $matches_user) {
-            header('Location: https://'.$domain.'/');
-            exit;
-        }
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
-        include_once($user_config);
-        $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
-        // Browse ke directory symlink public tidak diperbolehkan
-        // dan perlu diredirect ke subdomain public.
-        // User nanti bisa mengcopy link dari directory public dan menduga
-        // itu bisa diakses public.
-        if ($matches_scope == 'private' && $arg_p != '') {
-            $dirs = explode('/', $arg_p);
-            $first = array_shift($dirs);
-            $parent_directory = implode('/', $dirs);
-            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
-            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
-                header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-public.'.$domain.'/'.$parent_directory);
-                exit;
-            }
-        }
-        // Symlink ke arah directory public tidak boleh di hapus.
-        // Di-rename masih boleh.
-        if ($matches_scope == 'private' && isset($_GET['del']) && $arg_p == '') {
-            $del = $_GET['del'];
-            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
-            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
-                http_response_code(403);
-                die('Forbidden. Link to Public Directory cannot delete.');
-            }
-        }
-        break;
 }
