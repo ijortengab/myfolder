@@ -135,6 +135,9 @@ server {
         rewrite ^(.*)$ /scripts/$file.php;
     }
     location /scripts/ {
+        if (-d "/var/www/project/myfolder.my.id$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
         root /var/www/project/myfolder.my.id;
         location ~* \.php$ {
             include snippets/fastcgi-php.conf;
@@ -143,10 +146,10 @@ server {
     }
     # priority lowest.
     location / {
-        root /var/www/project/myfolder.my.id;
         if (-d "/var/www/project/myfolder.my.id$uri") {
             rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
         }
+        root /var/www/project/myfolder.my.id;
     }
     # ---
     auth_basic           "Please login";
