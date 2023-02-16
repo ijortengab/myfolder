@@ -253,6 +253,11 @@ switch ($subdomain) {
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
+        $user_config = '/var/www/project/'.$domain.'/storage/public/scripts/config.php';
+        if (is_file($user_config)) {
+            include_once($user_config);
+        }
+
         break;
 
     case 'user_public':
@@ -318,23 +323,6 @@ switch ($subdomain) {
                 die('Failed to create directories...');
             }
         }
-        $public = $user_storage.'/public';
-        if (!is_dir($public)) {
-            if (!mkdir($public, 0755, true)) {
-                die('Failed to create directories...');
-            }
-        }
-        $private = $user_storage.'/private';
-        if (!is_dir($private)) {
-            if (!mkdir($private, 0755, true)) {
-                die('Failed to create directories...');
-            }
-            // Buat symbolic link relative.
-            chdir($private);
-            if (!is_link('public')) {
-                symlink('../public', 'public');
-            }
-        }
         $scripts = $user_storage.'/scripts';
         if (!is_dir($scripts)) {
             if (!mkdir($scripts, 0755, true)) {
@@ -370,5 +358,35 @@ switch ($subdomain) {
         $newfile = $scripts.'/translation.json';
         if (!is_link($newfile)) {
             symlink($file, $newfile);
+        }
+        if ($_SERVER['REMOTE_USER'] == 'public') {
+            // Buat symbolic link relative.
+            chdir($user_storage);
+            if (!is_link('public')) {
+                symlink('../../public', 'public');
+            }
+            if ($arg_p == '') {
+                $exclude_items = array(
+                    'private',
+                );
+            }
+            break;
+        }
+        $public = $user_storage.'/public';
+        if (!is_dir($public)) {
+            if (!mkdir($public, 0755, true)) {
+                die('Failed to create directories...');
+            }
+        }
+        $private = $user_storage.'/private';
+        if (!is_dir($private)) {
+            if (!mkdir($private, 0755, true)) {
+                die('Failed to create directories...');
+            }
+            // Buat symbolic link relative.
+            chdir($private);
+            if (!is_link('public')) {
+                symlink('../public', 'public');
+            }
         }
 }
