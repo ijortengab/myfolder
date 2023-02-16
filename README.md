@@ -230,7 +230,6 @@ https://admin:$password@$domain/
 
 if logged in, you'll redirect to https://admin.$domain/
 
-
 ## Finish
 
 Total terdapat minimal 6 host.
@@ -383,3 +382,14 @@ Copy PHP Script.
 ```
 cp index.php /var/www/project/$domain/scripts/InstaGallery
 ```
+
+## Optional 2
+
+Buat user public.
+
+```
+cd /var/www/project/$domain/scripts
+./adduser.sh public
+```
+
+Anda bisa mendelegasikan public repository ke user terpisah tanpa akses admin.
