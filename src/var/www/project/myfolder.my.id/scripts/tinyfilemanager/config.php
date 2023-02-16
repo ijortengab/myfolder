@@ -95,7 +95,10 @@ do {
                 }
             }
             $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
-            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.$_GET['dl'].'&download=1');
+            // Pada nginx, variable $arg_filename tidak mengubah + nya urlencode menjadi spasi.
+            // Sehingga perlu kita ubah manual disini.
+            // add_header Content-disposition "attachment; filename=$arg_filename";
+            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.str_replace('+','%20',urlencode($_GET['dl'])).'&download=1');
             exit;
         }
         break;
@@ -190,7 +193,10 @@ do {
                 }
             }
             $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
-            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.$_GET['dl'].'&download=1');
+            // Pada nginx, variable $arg_filename tidak mengubah + nya urlencode menjadi spasi.
+            // Sehingga perlu kita ubah manual disini.
+            // add_header Content-disposition "attachment; filename=$arg_filename";
+            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.str_replace('+','%20',urlencode($_GET['dl'])).'&download=1');
             exit;
         }
         break;
