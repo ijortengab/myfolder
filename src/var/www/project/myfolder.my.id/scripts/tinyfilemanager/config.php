@@ -93,7 +93,7 @@ do {
                 }
             }
             $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
-            header('Location: https://public.'.$domain.$parent_directory.'/'.urlencode($_GET['dl']).'?filename='.urlencode($_GET['dl']).'&download=1');
+            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.$_GET['dl'].'&download=1');
             exit;
         }
         break;
@@ -167,7 +167,33 @@ do {
         }
         break;
     }
-    preg_match('/^(?<user>.+)-(?<scope>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
+    preg_match('/^(?<user>[^-]+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
+    if ($matches) {
+        $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
+        $global_readonly = true;
+        $use_auth = false;
+        // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
+        if (isset($_GET['dl'])) {
+            // Redirect.
+            $uri = $_SERVER['REQUEST_URI'];
+            $parts = parse_url($uri);
+            $parent_directory = '';
+            if (isset($parts['path'])) {
+                $parent_directory = trim($parts['path'],'/');
+            }
+            if (isset($parts['query'])) {
+                parse_str($parts['query'], $query);
+                if (isset($query['p'])) {
+                    $parent_directory = $query['p'];
+                }
+            }
+            $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
+            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.$_GET['dl'].'&download=1');
+            exit;
+        }
+        break;
+    }
+    preg_match('/^(?<user>.+)-(?<scope>public|private)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
     if ($matches) {
         if ($_SERVER['REMOTE_USER'] != $matches['user']) {
             header('Location: https://'.$domain.'/');

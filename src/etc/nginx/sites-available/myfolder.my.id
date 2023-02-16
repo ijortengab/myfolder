@@ -94,10 +94,10 @@ server {
     }
     # priority lowest.
     location / {
-        root /var/www/project/myfolder.my.id/public;
         if (-d "/var/www/project/myfolder.my.id/public$uri") {
             rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
         }
+        root /var/www/project/myfolder.my.id/public;
     }
     # ---
     listen [::]:443 ssl; # managed by Certbot
@@ -164,12 +164,36 @@ server {
     if (!-d "/var/www/project/myfolder.my.id/storage/$user/public") {
         return 404;
     }
-    root /var/www/project/myfolder.my.id/storage/$user/public;
-    autoindex on;
-    # Let user hide listing directory by create their own index.html file.
-    index index.html;
+    root /var/www/project/myfolder.my.id/storage/$user/scripts;
+    index tinyfilemanager.php;
     # File PHP akan menjadi text.
     default_type text/plain;
+    # Untuk menonaktifkan fitur public storage, tambahkan file 404.html
+    # di dalam direktori public.
+    if (-f /var/www/project/myfolder.my.id/storage/$user/public/404.html) {
+        return 404;
+    }
+    if ($arg_download = "1") {
+        rewrite ^/(.*)$ /.~/$1?download=0;
+    }
+    # Dilarang membuat direktori bernama `.~` didalam direktori public.
+    # karena reserved untuk manipulasi force download.
+    location /.~/ {
+        internal;
+        alias /var/www/project/myfolder.my.id/storage/$user/public/;
+        add_header Content-disposition "attachment; filename=$arg_filename";
+    }
+    location = /tinyfilemanager.php {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php-fpm.sock;
+    }
+    # priority lowest.
+    location / {
+        if (-d "/var/www/project/myfolder.my.id/storage/$user/public$uri") {
+            rewrite ^/(.*)$ /tinyfilemanager.php?p=$uri;
+        }
+        root /var/www/project/myfolder.my.id/storage/$user/public;
+    }
     # ---
     listen [::]:443 ssl; # managed by Certbot
     listen 443 ssl; # managed by Certbot
