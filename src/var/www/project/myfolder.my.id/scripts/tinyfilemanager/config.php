@@ -179,6 +179,13 @@ do {
             http_response_code(403);
             die('Forbidden.');
         }
+        if (is_file($root_path.$parent_directory.'/gallery.html') &&
+            is_file ('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php')
+        ) {
+            chdir($root_path.$parent_directory);
+            include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
+            exit;
+        }
         $global_readonly = true;
         $use_auth = false;
         // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.

@@ -295,6 +295,13 @@ logout dan ganti password. Yakni:
  - https://$domain/menu/password
  - https://$domain/menu/logout
 
+Untuk menonaktifkan user public repository, buat file kosong bernama `404.html`.
+
+Untuk menonaktifkan listing direktori pada user public repository, buat file kosong
+bernama `403.html` pada direktori tersebut.
+
+Untuk mengaktifkan gallery per direktori, buat file kosong bernama `gallery.html` (optional).
+
 ## Issue
 
 Belum di test untuk CSRF.
@@ -348,4 +355,31 @@ Untuk unmount, gunakan command sbb:
 
 ```
 fusermount -u /var/www/project/myfolder.my.id/storage/laptop/private/mnt
+```
+
+## Optional
+
+```
+domain=ui.web.id
+```
+
+Optional. Clone InstaGallery repo.
+
+```
+cd /tmp
+git clone https://github.com/stuporglue/InstaGallery.git
+cd InstaGallery
+```
+
+Pindah ke commit `dfa6925` (Mon Nov 23 21:58:29 2020 -0600) dan update patch.
+
+```
+git checkout dfa6925
+git apply /var/www/project/$domain/scripts/InstaGallery/update.patch
+```
+
+Copy PHP Script.
+
+```
+cp index.php /var/www/project/$domain/scripts/InstaGallery
 ```
