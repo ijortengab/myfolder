@@ -4,24 +4,26 @@ include(__DIR__.'/../config.php');
 // Rewrite URL.
 // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
 // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
-$request_uri = $_SERVER['REQUEST_URI'];
-$parts = parse_url($request_uri);
-if (isset($parts['query'])) {
-   parse_str($parts['query'], $query);
-   $result = array_diff_key($query, array('p' => ''));
-   if (empty($result)) {
-        // Hanya ada query `p` saja, maka:
-        $selected_directory = $query['p'];
-        switch ($selected_directory) {
-            case '':
-                header('Location: https://'.$_SERVER['HTTP_HOST'].'/');
-                break;
-            default:
-                header('Location: https://'.$_SERVER['HTTP_HOST'].'/'.trim($selected_directory, '/').'/');
-                break;
-        }
-        exit;
-   }
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    $request_uri = $_SERVER['REQUEST_URI'];
+    $parts = parse_url($request_uri);
+    if (isset($parts['query'])) {
+       parse_str($parts['query'], $query);
+       $result = array_diff_key($query, array('p' => ''));
+       if (empty($result)) {
+            // Hanya ada query `p` saja, maka:
+            $selected_directory = $query['p'];
+            switch ($selected_directory) {
+                case '':
+                    header('Location: https://'.$_SERVER['HTTP_HOST'].'/');
+                    break;
+                default:
+                    header('Location: https://'.$_SERVER['HTTP_HOST'].'/'.trim($selected_directory, '/').'/');
+                    break;
+            }
+            exit;
+       }
+    }
 }
 
 do {
