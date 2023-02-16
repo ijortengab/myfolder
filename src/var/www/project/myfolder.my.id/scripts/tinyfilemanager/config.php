@@ -190,8 +190,8 @@ switch ($subdomain) {
         break;
 }
 
-do {
-    if ($subdomain == 'admin') {
+switch ($subdomain) {
+    case 'admin':
         if ($_SERVER['REMOTE_USER'] != 'admin') {
             http_response_code(403);
             die('Forbidden.');
@@ -244,15 +244,15 @@ do {
             $exclude_items = array();
         }
         break;
-    }
-    if ($subdomain == 'public') {
+
+    case 'public':
         // Variable $CONFIG untuk subdomain public di konfigurasi disini, karena
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
         break;
-    }
-    if ($subdomain === null) {
+
+    default:
         if ($_SERVER['REMOTE_USER'] == 'admin') {
             header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
             exit;
@@ -317,8 +317,8 @@ do {
             symlink($file, $newfile);
         }
         break;
-    }
-    if ($subdomain == 'user_public') {
+
+    case 'user_public':
         $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
         $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
         if (is_file($root_path.$parent_directory.'/403.html')) {
@@ -335,8 +335,8 @@ do {
         $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
         include_once($user_config);
         break;
-    }
-    if ($subdomain == 'user') {
+
+    case 'user':
         if ($_SERVER['REMOTE_USER'] != $matches_user) {
             header('Location: https://'.$domain.'/');
             exit;
@@ -369,5 +369,4 @@ do {
             }
         }
         break;
-    }
-} while (false);
+}
