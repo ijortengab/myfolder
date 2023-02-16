@@ -186,6 +186,8 @@ do {
             include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
             exit;
         }
+        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
+        include_once($user_config);
         $global_readonly = true;
         $use_auth = false;
         // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
