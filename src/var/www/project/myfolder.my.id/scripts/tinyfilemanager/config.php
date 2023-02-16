@@ -1,257 +1,85 @@
 <?php
 include(__DIR__.'/../config.php');
 
+// Populate `$arg_p`.
 $arg_p = '';
 if (isset($_GET['p'])) {
     $arg_p = trim($_GET['p'], '/');
 }
 
+// Populate `$parent_directory`.
+// /path/to/folder => $parent_directory = /path/to/folder
+// /path/to/folder?p= => $parent_directory = ''
+// /path/to/folder?p=/home/ => $parent_directory = 'home'
+$parts = parse_url($_SERVER['REQUEST_URI']);
+$parent_directory = '';
+if (isset($parts['path'])) {
+    $parent_directory = trim($parts['path'],'/');
+}
+if (isset($parts['query'])) {
+    parse_str($parts['query'], $query);
+    if (isset($query['p'])) {
+        $parent_directory = $query['p'];
+    }
+}
+$parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
+
+// Validate host.
+$subdomain = null;
+do {
+    switch ($_SERVER['HTTP_HOST']) {
+        case $domain:
+            break 2;
+
+        case 'admin.'.$domain:
+            $subdomain = 'admin';
+            $user_config = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
+            $post_redirect = 'https://admin.'.$domain.$parent_directory;
+            break 2;
+
+        case 'public.'.$domain:
+            $subdomain = 'public';
+            break 2;
+    }
+    if (preg_match('/^(?<user>.+)-(?<scope>public|private)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
+        $subdomain = 'user';
+        $matches_user = $matches['user'];
+        $matches_scope = $matches['scope'];
+        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches_user. '/scripts/config.php';
+        $post_redirect = 'https://'.$matches_user.'-'.$matches_scope.'.'.$domain.$parent_directory;
+        break;
+    }
+    if (preg_match('/^(?<user>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
+        $subdomain = 'user_public';
+        $matches_user = $matches['user'];
+        break;
+    }
+    die('Host not allowed: '.$_SERVER['HTTP_HOST']).'.';
+}
+while (false);
+
 // Rewrite URL.
 // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
 // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-    $request_uri = $_SERVER['REQUEST_URI'];
-    $parts = parse_url($request_uri);
+    $parts = parse_url($_SERVER['REQUEST_URI']);
     if (isset($parts['query'])) {
-       parse_str($parts['query'], $query);
-       $result = array_diff_key($query, array('p' => ''));
-       if (empty($result)) {
+        parse_str($parts['query'], $query);
+        $result = array_diff_key($query, array('p' => ''));
+        if (empty($result)) {
             // Hanya ada query `p` saja, maka:
-            $selected_directory = $query['p'];
-            switch ($selected_directory) {
-                case '':
-                    header('Location: https://'.$_SERVER['HTTP_HOST'].'/');
-                    break;
-                default:
-                    header('Location: https://'.$_SERVER['HTTP_HOST'].'/'.trim($selected_directory, '/').'/');
-                    break;
-            }
-            exit;
-       }
+            $query_p = $query['p'];
+            $query_p = empty($query_p) ? $query_p : '/'.$query_p;
+            header('Location: https://'.$_SERVER['HTTP_HOST'].$query_p.'/');
+        }
     }
 }
 
-do {
-    if ('admin.'.$domain == $_SERVER['HTTP_HOST']) {
-        if ($_SERVER['REMOTE_USER'] != 'admin') {
-            http_response_code(403);
-            die('Forbidden.');
-        }
-        // For experienced user, you must add key query `all` in URL to
-        // show excluded items.
-        // Example:
-        // - https://admin.$domain/?p=&all
-        // - https://admin.$domain/?all
-        // - https://admin.$domain/storage/user?all
-        // - https://admin.$domain/?p=storage/user&all
-        if ($arg_p == '') {
-            $exclude_items = array(
-                '.htpasswd',
-                'web',
-            );
-        }
-        elseif (preg_match('/^\/?scripts\/?$/', $arg_p)) {
-            $exclude_items = array(
-                'tinyfilemanager',
-                'adduser.sh',
-            );
-        }
-        elseif (preg_match('/^\/?storage\/[^\/]+\/?$/', $arg_p)) {
-            $exclude_items = array(
-                'scripts',
-            );
-        }
-        if (isset($_GET['all'])) {
-            $exclude_items = array();
-        }
-        $root_path = '/var/www/project/'.$domain;
-        $global_readonly = false;
-        $use_auth = false;
-        break;
-    }
-    if ('public.'.$domain == $_SERVER['HTTP_HOST']) {
-        // Variable $CONFIG untuk subdomain public di konfigurasi disini, karena
-        // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
-        // script tinyfilemanager.php
-        $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
-        $root_path = '/var/www/project/'.$domain.'/public';
-        $global_readonly = true;
-        $use_auth = false;
-        $home_url = 'https://public.'.$domain;
-        // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
-        if (isset($_GET['dl'])) {
-            // Redirect.
-            $uri = $_SERVER['REQUEST_URI'];
-            $parts = parse_url($uri);
-            $parent_directory = '';
-            if (isset($parts['path'])) {
-                $parent_directory = trim($parts['path'],'/');
-            }
-            if (isset($parts['query'])) {
-                parse_str($parts['query'], $query);
-                if (isset($query['p'])) {
-                    $parent_directory = $query['p'];
-                }
-            }
-            $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
-            // Pada nginx, variable $arg_filename tidak mengubah + nya urlencode menjadi spasi.
-            // Sehingga perlu kita ubah manual disini.
-            // add_header Content-disposition "attachment; filename=$arg_filename";
-            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.str_replace('+','%20',urlencode($_GET['dl'])).'&download=1');
-            exit;
-        }
-        break;
-    }
-    if ($domain == $_SERVER['HTTP_HOST']) {
-        if ($_SERVER['REMOTE_USER'] == 'admin') {
-            header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
-            exit;
-        }
-        $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
-        $root_path = '/var/www/project/'.$domain.'/web';
-        $use_auth = false;
-        $global_readonly = true;
-        if (!is_dir($user_storage)) {
-            if (!mkdir($user_storage, 0755, true)) {
-                die('Failed to create directories...');
-            }
-        }
-        $public = $user_storage.'/public';
-        if (!is_dir($public)) {
-            if (!mkdir($public, 0755, true)) {
-                die('Failed to create directories...');
-            }
-        }
-        $private = $user_storage.'/private';
-        if (!is_dir($private)) {
-            if (!mkdir($private, 0755, true)) {
-                die('Failed to create directories...');
-            }
-            // Buat symbolic link relative.
-            chdir($private);
-            if (!is_link('public')) {
-                symlink('../public', 'public');
-            }
-        }
-        $scripts = $user_storage.'/scripts';
-        if (!is_dir($scripts)) {
-            if (!mkdir($scripts, 0755, true)) {
-                die('Failed to create directories...');
-            }
-        }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/tinyfilemanager.php';
-        $newfile = $scripts.'/tinyfilemanager.php';
-        if (!is_link($newfile)) {
-            symlink($file, $newfile);
-        }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.tpl.php';
-        $newfile = $scripts.'/config.php';
-        if (!is_file($newfile)) {
-            if (!copy($file, $newfile)) {
-                echo "failed to copy $file...\n";
-            }
-            include_once($newfile);
-        }
-        else {
-            $file = new SplFileObject($newfile);
-            $n = 0;
-            while (!$file->eof()) {
-                $line = trim($file->fgets());
-                if ($n++ == 2) {
-                    break;
-                }
-            }
-            preg_match("/^.+'(.+)'.+$/", $line, $matches);
-            $CONFIG = $matches[1];
-        }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/translation.json';
-        $newfile = $scripts.'/translation.json';
-        if (!is_link($newfile)) {
-            symlink($file, $newfile);
-        }
-        break;
-    }
-    preg_match('/^(?<user>[^-]+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
-    if ($matches) {
-        $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
-        $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
-        if (is_file($root_path.$parent_directory.'/403.html')) {
-            http_response_code(403);
-            die('Forbidden.');
-        }
-        if (is_file($root_path.$parent_directory.'/gallery.html') &&
-            is_file ('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php')
-        ) {
-            chdir($root_path.$parent_directory);
-            include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
-            exit;
-        }
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
-        include_once($user_config);
-        $global_readonly = true;
-        $use_auth = false;
-        // Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
-        if (isset($_GET['dl'])) {
-            // Redirect.
-            $uri = $_SERVER['REQUEST_URI'];
-            $parts = parse_url($uri);
-            $parent_directory = '';
-            if (isset($parts['path'])) {
-                $parent_directory = trim($parts['path'],'/');
-            }
-            if (isset($parts['query'])) {
-                parse_str($parts['query'], $query);
-                if (isset($query['p'])) {
-                    $parent_directory = $query['p'];
-                }
-            }
-            $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
-            // Pada nginx, variable $arg_filename tidak mengubah + nya urlencode menjadi spasi.
-            // Sehingga perlu kita ubah manual disini.
-            // add_header Content-disposition "attachment; filename=$arg_filename";
-            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.str_replace('+','%20',urlencode($_GET['dl'])).'&download=1');
-            exit;
-        }
-        break;
-    }
-    preg_match('/^(?<user>.+)-(?<scope>public|private)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches);
-    if ($matches) {
-        if ($_SERVER['REMOTE_USER'] != $matches['user']) {
-            header('Location: https://'.$domain.'/');
-            exit;
-        }
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
-        include_once($user_config);
-        $use_auth = false;
-        $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'];
-        $global_readonly = false;
-        $home_url = 'https://'.$domain;
-        // Browse ke directory symlink public tidak diperbolehkan
-        // dan perlu diredirect ke subdomain public.
-        // User nanti bisa mengcopy link dari directory public dan menduga
-        // itu bisa diakses public.
-        if ($matches['scope'] == 'private' && $arg_p != '') {
-            $dirs = explode('/', $arg_p);
-            $first = array_shift($dirs);
-            $parent_directory = implode('/', $dirs);
-            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
-            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
-                header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-public.'.$domain.'/'.$parent_directory);
-                exit;
-            }
-        }
-        // Symlink ke arah directory public tidak boleh di hapus.
-        // Di-rename masih boleh.
-        if ($matches['scope'] == 'private' && isset($_GET['del']) && $arg_p == '') {
-            $del = $_GET['del'];
-            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
-            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
-                http_response_code(403);
-                die('Forbidden.');
-            }
-        }
-        // Ambil alih save setting. Buat agar tidak mengubah file utama.
-        // Save Config
+// Ambil alih save setting. Buat agar tidak mengubah file utama.
+// Save Config
+switch ($subdomain) {
+    case 'user':
+    case 'admin':
         if (isset($_POST['type']) && $_POST['type'] == "settings") {
             class FM_Config_Alt {
                 var $data;
@@ -324,50 +152,220 @@ do {
                 $cfg->data['theme'] = $te3;
             }
             $cfg->save($user_config);
-            // Redirect.
-            $uri = $_SERVER['REQUEST_URI'];
-            $parts = parse_url($uri);
-            $parent_directory = '';
-            if (isset($parts['path'])) {
-                $parent_directory = trim($parts['path'],'/');
-            }
-            if (isset($parts['query'])) {
-                parse_str($parts['query'], $query);
-                if (isset($query['p'])) {
-                    $parent_directory = $query['p'];
-                }
-            }
-            header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-'.$matches['scope'].'.'.$domain.'/'.$parent_directory);
-            exit;
-        }
-        // Setelah save setting, ternyata:
-        // - modal tidak ketutup sendiri.
-        // - perubahan tidak segera terlihat karena adanya
-        //   proses menulis file script .php
-        // Kita pakai tricy dengan cara:
-        // - redirect ke domain utama
-        // - beri tambahan waktu delay (dengan sleep)
-        //   agar perubahan dapat dirasakan setelah save.
-        if (preg_match('/settings=1/', $_SERVER['HTTP_REFERER']) && preg_match('/settings=1/', $_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_METHOD'] == 'GET') {
-            // Trigger save setting button on click.
-            $uri = $_SERVER['REQUEST_URI'];
-            $parts = parse_url($uri);
-            $parent_directory = '';
-            if (isset($parts['path'])) {
-                $parent_directory = trim($parts['path'],'/');
-            }
-            if (isset($parts['query'])) {
-                parse_str($parts['query'], $query);
-                if (isset($query['p'])) {
-                    $parent_directory = $query['p'];
-                }
-            }
-            // Beri waktu, agar perubahan file dapat dibaca ulang.
-            sleep(2);
-            header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$domain.'/'.$matches['scope'].'/'.$parent_directory);
+            header("Location: $post_redirect");
             exit;
         }
         break;
+}
+
+// Arahkan agar download file tidak menggunakan PHP, langsung direct via Nginx.
+switch ($subdomain) {
+    case 'public':
+    case 'user_public':
+        if (isset($_GET['dl'])) {
+            // Pada nginx, variable $arg_filename tidak mengubah + nya urlencode menjadi spasi.
+            // Sehingga perlu kita ubah manual disini.
+            // add_header Content-disposition "attachment; filename=$arg_filename";
+            header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.str_replace('+','%20',urlencode($_GET['dl'])).'&download=1');
+            exit;
+        }
+        break;
+}
+
+do {
+    if ($subdomain == 'admin') {
+        if ($_SERVER['REMOTE_USER'] != 'admin') {
+            http_response_code(403);
+            die('Forbidden.');
+        }
+        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.tpl.php';
+        $newfile = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
+        if (!is_file($newfile)) {
+            if (!copy($file, $newfile)) {
+                echo "failed to copy $file...\n";
+            }
+            include_once($newfile);
+        }
+        else {
+            $file = new SplFileObject($newfile);
+            $n = 0;
+            while (!$file->eof()) {
+                $line = trim($file->fgets());
+                if ($n++ == 2) {
+                    break;
+                }
+            }
+            preg_match("/^.+'(.+)'.+$/", $line, $matches);
+            $CONFIG = $matches[1];
+        }
+        // For experienced user, you must add key query `all` in URL to
+        // show excluded items.
+        // Example:
+        // - https://admin.$domain/?p=&all
+        // - https://admin.$domain/?all
+        // - https://admin.$domain/storage/user?all
+        // - https://admin.$domain/?p=storage/user&all
+        if ($arg_p == '') {
+            $exclude_items = array(
+                '.htpasswd',
+                'web',
+            );
+        }
+        elseif (preg_match('/^\/?scripts\/?$/', $arg_p)) {
+            $exclude_items = array(
+                'tinyfilemanager',
+                'adduser.sh',
+            );
+        }
+        elseif (preg_match('/^\/?storage\/[^\/]+\/?$/', $arg_p)) {
+            $exclude_items = array(
+                'scripts',
+            );
+        }
+        if (isset($_GET['all'])) {
+            $exclude_items = array();
+        }
+        $root_path = '/var/www/project/'.$domain;
+        $global_readonly = false;
+        $use_auth = false;
+        break;
     }
-    die('Host not allowed: '.$_SERVER['HTTP_HOST']).'.';
+    if ($subdomain == 'public') {
+        // Variable $CONFIG untuk subdomain public di konfigurasi disini, karena
+        // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
+        // script tinyfilemanager.php
+        $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
+        $root_path = '/var/www/project/'.$domain.'/public';
+        $global_readonly = true;
+        $use_auth = false;
+        $home_url = 'https://public.'.$domain;
+
+        break;
+    }
+    if ($subdomain === null) {
+        if ($_SERVER['REMOTE_USER'] == 'admin') {
+            header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
+            exit;
+        }
+        $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
+        $root_path = '/var/www/project/'.$domain.'/web';
+        $use_auth = false;
+        $global_readonly = true;
+        if (!is_dir($user_storage)) {
+            if (!mkdir($user_storage, 0755, true)) {
+                die('Failed to create directories...');
+            }
+        }
+        $public = $user_storage.'/public';
+        if (!is_dir($public)) {
+            if (!mkdir($public, 0755, true)) {
+                die('Failed to create directories...');
+            }
+        }
+        $private = $user_storage.'/private';
+        if (!is_dir($private)) {
+            if (!mkdir($private, 0755, true)) {
+                die('Failed to create directories...');
+            }
+            // Buat symbolic link relative.
+            chdir($private);
+            if (!is_link('public')) {
+                symlink('../public', 'public');
+            }
+        }
+        $scripts = $user_storage.'/scripts';
+        if (!is_dir($scripts)) {
+            if (!mkdir($scripts, 0755, true)) {
+                die('Failed to create directories...');
+            }
+        }
+        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/tinyfilemanager.php';
+        $newfile = $scripts.'/tinyfilemanager.php';
+        if (!is_link($newfile)) {
+            symlink($file, $newfile);
+        }
+        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.tpl.php';
+        $newfile = $scripts.'/config.php';
+        if (!is_file($newfile)) {
+            if (!copy($file, $newfile)) {
+                echo "failed to copy $file...\n";
+            }
+            include_once($newfile);
+        }
+        else {
+            $file = new SplFileObject($newfile);
+            $n = 0;
+            while (!$file->eof()) {
+                $line = trim($file->fgets());
+                if ($n++ == 2) {
+                    break;
+                }
+            }
+            preg_match("/^.+'(.+)'.+$/", $line, $matches);
+            $CONFIG = $matches[1];
+        }
+        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/translation.json';
+        $newfile = $scripts.'/translation.json';
+        if (!is_link($newfile)) {
+            symlink($file, $newfile);
+        }
+        break;
+    }
+    if ($subdomain == 'user_public') {
+        $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
+        $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
+        if (is_file($root_path.$parent_directory.'/403.html')) {
+            http_response_code(403);
+            die('Forbidden.');
+        }
+        if (is_file($root_path.$parent_directory.'/gallery.html') &&
+            is_file ('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php')
+        ) {
+            chdir($root_path.$parent_directory);
+            include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
+            exit;
+        }
+        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
+        include_once($user_config);
+        $global_readonly = true;
+        $use_auth = false;
+        break;
+    }
+    if ($subdomain == 'user') {
+        if ($_SERVER['REMOTE_USER'] != $matches_user) {
+            header('Location: https://'.$domain.'/');
+            exit;
+        }
+        $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
+        include_once($user_config);
+        $use_auth = false;
+        $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
+        $global_readonly = false;
+        $home_url = 'https://'.$domain;
+        // Browse ke directory symlink public tidak diperbolehkan
+        // dan perlu diredirect ke subdomain public.
+        // User nanti bisa mengcopy link dari directory public dan menduga
+        // itu bisa diakses public.
+        if ($matches_scope == 'private' && $arg_p != '') {
+            $dirs = explode('/', $arg_p);
+            $first = array_shift($dirs);
+            $parent_directory = implode('/', $dirs);
+            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
+            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+                header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-public.'.$domain.'/'.$parent_directory);
+                exit;
+            }
+        }
+        // Symlink ke arah directory public tidak boleh di hapus.
+        // Di-rename masih boleh.
+        if ($matches_scope == 'private' && isset($_GET['del']) && $arg_p == '') {
+            $del = $_GET['del'];
+            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
+            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+                http_response_code(403);
+                die('Forbidden.');
+            }
+        }
+        break;
+    }
 } while (false);
