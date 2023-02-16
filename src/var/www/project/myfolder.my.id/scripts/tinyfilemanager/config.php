@@ -1,5 +1,29 @@
 <?php
 include(__DIR__.'/../config.php');
+
+// Rewrite URL.
+// Arahkan agar "https://public.$domain/?p=mnt" redirect ke
+// https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
+$request_uri = $_SERVER['REQUEST_URI'];
+$parts = parse_url($request_uri);
+if (isset($parts['query'])) {
+   parse_str($parts['query'], $query);
+   $result = array_diff_key($query, array('p' => ''));
+   if (empty($result)) {
+        // Hanya ada query `p` saja, maka:
+        $selected_directory = $query['p'];
+        switch ($selected_directory) {
+            case '':
+                header('Location: https://'.$_SERVER['HTTP_HOST'].'/');
+                break;
+            default:
+                header('Location: https://'.$_SERVER['HTTP_HOST'].'/'.trim($selected_directory, '/').'/');
+                break;
+        }
+        exit;
+   }
+}
+
 do {
     if ('admin.'.$domain == $_SERVER['HTTP_HOST']) {
         if ($_SERVER['REMOTE_USER'] != 'admin') {
@@ -71,23 +95,6 @@ do {
             $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
             header('Location: https://public.'.$domain.$parent_directory.'/'.urlencode($_GET['dl']).'?filename='.urlencode($_GET['dl']).'&download=1');
             exit;
-        }
-        // Arahkan agar "https://public.$domain/?p=mnt" redirect ke
-        // https://public.$domain/mnt/. Hati-hati terhadap unlimited self redirect.
-        $arg_view = isset($_GET['view']);
-        $arg_p = isset($_GET['p']);
-        if (!$arg_view && $arg_p && !in_array($_GET['p'], array('','/'))) {
-            $uri = $_SERVER['REQUEST_URI'];
-            $parts = parse_url($uri);
-            $parent_directory = '';
-            if (isset($parts['query'])) {
-                parse_str($parts['query'], $query);
-                if (isset($query['p'])) {
-                    $parent_directory = $query['p'];
-                    header('Location: https://public.'.$domain.'/'.trim($parent_directory, '/').'/');
-                    exit;
-                }
-            }
         }
         break;
     }
