@@ -10,7 +10,8 @@ if (isset($_GET['p'])) {
 // Populate `$parent_directory`.
 // /path/to/folder => $parent_directory = /path/to/folder
 // /path/to/folder?p= => $parent_directory = ''
-// /path/to/folder?p=/home/ => $parent_directory = 'home'
+// /path/to/folder?p=/home/ => $parent_directory = '/home'
+// /public/?p=storage&kita=1 $parent_directory = '/storage'
 $parts = parse_url($_SERVER['REQUEST_URI']);
 $parent_directory = '';
 if (isset($parts['path'])) {
@@ -19,7 +20,7 @@ if (isset($parts['path'])) {
 if (isset($parts['query'])) {
     parse_str($parts['query'], $query);
     if (isset($query['p'])) {
-        $parent_directory = $query['p'];
+        $parent_directory = trim($query['p'], '/');
     }
 }
 $parent_directory = empty($parent_directory) ? $parent_directory : '/'.$parent_directory;
@@ -216,6 +217,7 @@ switch ($subdomain) {
             preg_match("/^.+'(.+)'.+$/", $line, $matches);
             $CONFIG = $matches[1];
         }
+
         // For experienced user, you must add key query `all` in URL to
         // show excluded items.
         // Example:
@@ -229,17 +231,18 @@ switch ($subdomain) {
                 'web',
             );
         }
-        elseif (preg_match('/^\/?scripts\/?$/', $arg_p)) {
+        elseif ($arg_p == 'scripts') {
             $exclude_items = array(
                 'tinyfilemanager',
                 'adduser.sh',
             );
         }
-        elseif (preg_match('/^\/?storage\/[^\/]+\/?$/', $arg_p)) {
+        elseif (preg_match('/^storage\/[^\/]+$/', $arg_p)) {
             $exclude_items = array(
                 'scripts',
             );
         }
+        // Cancel all.
         if (isset($_GET['all'])) {
             $exclude_items = array();
         }
