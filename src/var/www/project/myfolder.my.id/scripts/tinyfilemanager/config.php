@@ -29,16 +29,28 @@ $subdomain = null;
 do {
     switch ($_SERVER['HTTP_HOST']) {
         case $domain:
+            $root_path = '/var/www/project/'.$domain.'/web';
+            $use_auth = false;
+            $global_readonly = true;
+            $home_url = 'https://'.$_SERVER['HTTP_HOST'];
             break 2;
 
         case 'admin.'.$domain:
             $subdomain = 'admin';
             $user_config = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
             $post_redirect = 'https://admin.'.$domain.$parent_directory;
+            $root_path = '/var/www/project/'.$domain;
+            $global_readonly = false;
+            $use_auth = false;
+            $home_url = 'https://'.$_SERVER['HTTP_HOST'];
             break 2;
 
         case 'public.'.$domain:
             $subdomain = 'public';
+            $root_path = '/var/www/project/'.$domain.'/public';
+            $global_readonly = true;
+            $use_auth = false;
+            $home_url = 'https://'.$_SERVER['HTTP_HOST'];
             break 2;
     }
     if (preg_match('/^(?<user>.+)-(?<scope>public|private)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
@@ -47,11 +59,17 @@ do {
         $matches_scope = $matches['scope'];
         $user_config = '/var/www/project/'.$domain.'/storage/'.$matches_user. '/scripts/config.php';
         $post_redirect = 'https://'.$matches_user.'-'.$matches_scope.'.'.$domain.$parent_directory;
+        $use_auth = false;
+        $global_readonly = false;
+        $home_url = 'https://'.$domain;
         break;
     }
     if (preg_match('/^(?<user>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
         $subdomain = 'user_public';
         $matches_user = $matches['user'];
+        $global_readonly = true;
+        $use_auth = false;
+        $home_url = 'https://'.$_SERVER['HTTP_HOST'];
         break;
     }
     die('Host not allowed: '.$_SERVER['HTTP_HOST']).'.';
@@ -225,9 +243,6 @@ do {
         if (isset($_GET['all'])) {
             $exclude_items = array();
         }
-        $root_path = '/var/www/project/'.$domain;
-        $global_readonly = false;
-        $use_auth = false;
         break;
     }
     if ($subdomain == 'public') {
@@ -235,11 +250,6 @@ do {
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
-        $root_path = '/var/www/project/'.$domain.'/public';
-        $global_readonly = true;
-        $use_auth = false;
-        $home_url = 'https://public.'.$domain;
-
         break;
     }
     if ($subdomain === null) {
@@ -248,9 +258,6 @@ do {
             exit;
         }
         $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
-        $root_path = '/var/www/project/'.$domain.'/web';
-        $use_auth = false;
-        $global_readonly = true;
         if (!is_dir($user_storage)) {
             if (!mkdir($user_storage, 0755, true)) {
                 die('Failed to create directories...');
@@ -327,8 +334,6 @@ do {
         }
         $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
         include_once($user_config);
-        $global_readonly = true;
-        $use_auth = false;
         break;
     }
     if ($subdomain == 'user') {
@@ -338,10 +343,7 @@ do {
         }
         $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
         include_once($user_config);
-        $use_auth = false;
         $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
-        $global_readonly = false;
-        $home_url = 'https://'.$domain;
         // Browse ke directory symlink public tidak diperbolehkan
         // dan perlu diredirect ke subdomain public.
         // User nanti bisa mengcopy link dari directory public dan menduga
@@ -363,7 +365,7 @@ do {
             $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
             if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
                 http_response_code(403);
-                die('Forbidden.');
+                die('Forbidden. Link to Public Directory cannot delete.');
             }
         }
         break;
