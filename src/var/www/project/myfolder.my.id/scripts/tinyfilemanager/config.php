@@ -30,7 +30,7 @@ $subdomain = null;
 do {
     switch ($_SERVER['HTTP_HOST']) {
         case $domain:
-            $root_path = '/var/www/project/'.$domain.'/web';
+            $root_path = $installation_directory.'/web';
             $use_auth = false;
             $global_readonly = true;
             $home_url = 'https://'.$_SERVER['HTTP_HOST'];
@@ -38,16 +38,16 @@ do {
 
         case 'admin.'.$domain:
             $subdomain = 'admin';
-            $user_config = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
+            $user_config = $installation_directory.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
             $post_redirect = 'https://admin.'.$domain.$parent_directory;
-            $root_path = '/var/www/project/'.$domain;
+            $root_path = $installation_directory;
             $use_auth = false;
             $home_url = 'https://'.$_SERVER['HTTP_HOST'];
             break 2;
 
         case 'public.'.$domain:
             $subdomain = 'public';
-            $root_path = '/var/www/project/'.$domain.'/public';
+            $root_path = $installation_directory.'/public';
             $global_readonly = true;
             $use_auth = false;
             $home_url = 'https://'.$_SERVER['HTTP_HOST'];
@@ -57,7 +57,7 @@ do {
         $subdomain = 'user';
         $matches_user = $matches['user'];
         $matches_scope = $matches['scope'];
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches_user. '/scripts/config.php';
+        $user_config = $installation_directory.'/storage/'.$matches_user. '/scripts/config.php';
         $post_redirect = 'https://'.$matches_user.'-'.$matches_scope.'.'.$domain.$parent_directory;
         $use_auth = false;
         $global_readonly = false;
@@ -196,8 +196,8 @@ switch ($subdomain) {
             http_response_code(403);
             die('Forbidden.');
         }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.tpl.php';
-        $newfile = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
+        $file = $installation_directory.'/scripts/tinyfilemanager/config.tpl.php';
+        $newfile = $installation_directory.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
         if (!is_file($newfile)) {
             if (!copy($file, $newfile)) {
                 echo "failed to copy $file...\n";
@@ -216,7 +216,6 @@ switch ($subdomain) {
             preg_match("/^.+'(.+)'.+$/", $line, $matches);
             $CONFIG = $matches[1];
         }
-
         // For experienced user, you must add key query `all` in URL to
         // show excluded items.
         // Example:
@@ -237,6 +236,7 @@ switch ($subdomain) {
                 'InstaGallery',
                 'tinyfilemanager',
                 'adduser.sh',
+                'config.sh',
                 'config.php',
             );
             $global_readonly = true;
@@ -257,7 +257,7 @@ switch ($subdomain) {
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
-        $user_config = '/var/www/project/'.$domain.'/storage/public/scripts/config.php';
+        $user_config = $installation_directory.'/storage/public/scripts/config.php';
         if (is_file($user_config)) {
             include_once($user_config);
         }
@@ -265,20 +265,20 @@ switch ($subdomain) {
         break;
 
     case 'user_public':
-        $root_path = '/var/www/project/'.$domain.'/storage/'.$matches['user'].'/public';
+        $root_path = $installation_directory.'/storage/'.$matches['user'].'/public';
         $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
         if (is_file($root_path.$parent_directory.'/403.html')) {
             http_response_code(403);
             die('Forbidden.');
         }
         if (is_file($root_path.$parent_directory.'/gallery.html') &&
-            is_file ('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php')
+            is_file ($installation_directory.'/scripts/InstaGallery/index.php')
         ) {
             chdir($root_path.$parent_directory);
-            include('/var/www/project/'.$domain.'/scripts/InstaGallery/index.php');
+            include($installation_directory.'/scripts/InstaGallery/index.php');
             exit;
         }
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$matches['user']. '/scripts/config.php';
+        $user_config = $installation_directory.'/storage/'.$matches['user']. '/scripts/config.php';
         include_once($user_config);
         break;
 
@@ -287,9 +287,9 @@ switch ($subdomain) {
             header('Location: https://'.$domain.'/');
             exit;
         }
-        $user_config = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
+        $user_config = $installation_directory.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
         include_once($user_config);
-        $root_path = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
+        $root_path = $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
         // Browse ke directory symlink public tidak diperbolehkan
         // dan perlu diredirect ke subdomain public.
         // User nanti bisa mengcopy link dari directory public dan menduga
@@ -298,8 +298,8 @@ switch ($subdomain) {
             $dirs = explode('/', $arg_p);
             $first = array_shift($dirs);
             $parent_directory = implode('/', $dirs);
-            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
-            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+            $realpath = realpath($installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
+            if ($realpath == $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
                 header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-public.'.$domain.'/'.$parent_directory);
                 exit;
             }
@@ -308,8 +308,8 @@ switch ($subdomain) {
         // Di-rename masih boleh.
         if ($matches_scope == 'private' && isset($_GET['del']) && $arg_p == '') {
             $del = $_GET['del'];
-            $realpath = realpath('/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
-            if ($realpath == '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+            $realpath = realpath($installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
+            if ($realpath == $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
                 http_response_code(403);
                 die('Forbidden. Link to Public Directory cannot delete.');
             }
@@ -321,7 +321,7 @@ switch ($subdomain) {
             header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
             exit;
         }
-        $user_storage = '/var/www/project/'.$domain.'/storage/'.$_SERVER['REMOTE_USER'];
+        $user_storage = $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'];
         if (!is_dir($user_storage)) {
             if (!mkdir($user_storage, 0755, true)) {
                 die('Failed to create directories...');
@@ -333,12 +333,12 @@ switch ($subdomain) {
                 die('Failed to create directories...');
             }
         }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/tinyfilemanager.php';
+        $file = $installation_directory.'/scripts/tinyfilemanager/tinyfilemanager.php';
         $newfile = $scripts.'/tinyfilemanager.php';
         if (!is_link($newfile)) {
             symlink($file, $newfile);
         }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.tpl.php';
+        $file = $installation_directory.'/scripts/tinyfilemanager/config.tpl.php';
         $newfile = $scripts.'/config.php';
         if (!is_file($newfile)) {
             if (!copy($file, $newfile)) {
@@ -358,7 +358,7 @@ switch ($subdomain) {
             preg_match("/^.+'(.+)'.+$/", $line, $matches);
             $CONFIG = $matches[1];
         }
-        $file = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/translation.json';
+        $file = $installation_directory.'/scripts/tinyfilemanager/translation.json';
         $newfile = $scripts.'/translation.json';
         if (!is_link($newfile)) {
             symlink($file, $newfile);

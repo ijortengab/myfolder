@@ -1,6 +1,6 @@
 <?php
 include(__DIR__.'/../../../scripts/config.php');
-$database = '/var/www/project/'.$domain.'/.htpasswd';
+$database = $installation_directory.'/.htpasswd';
 $directory_database = dirname($database);
 $mode = 'default';
 if (!is_writable($directory_database)) {

@@ -12,9 +12,13 @@ _() { echo -n "$@"; }
 __() { echo -n '    '; [ -n "$1" ] && echo "$@" || echo -n ; }
 ____() { echo; }
 
+__FILE__=$(realpath "$0")
+__DIR__=$(dirname "$__FILE__")
+[ -f "${__DIR__}/config.sh" ] || { red Config file '`'config.sh'`' is not found.; x; }
+source "${__DIR__}/config.sh"
+
 # Variable.
-domain='myfolder.my.id'
-database='/var/www/project/'$domain'/.htpasswd'
+database=$installation_directory'/.htpasswd'
 touch $database
 
 # Nginx

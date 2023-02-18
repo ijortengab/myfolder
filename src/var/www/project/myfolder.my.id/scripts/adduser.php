@@ -1,7 +1,7 @@
 <?php
 include(__DIR__.'/config.php');
 date_default_timezone_set($default_timezone);
-$database = '/var/www/project/'.$domain.'/.htpasswd';
+$database = $installation_directory.'/.htpasswd';
 $directory_database = dirname($database);
 $mode = 'default';
 if (!is_writable($directory_database)) {

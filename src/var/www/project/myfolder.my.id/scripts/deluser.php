@@ -1,7 +1,7 @@
 <?php
 include(__DIR__.'/config.php');
 date_default_timezone_set($default_timezone);
-$database = '/var/www/project/'.$domain.'/.htpasswd';
+$database = $installation_directory.'/.htpasswd';
 $directory_database = dirname($database);
 $mode = 'default';
 if (!is_writable($directory_database)) {
@@ -61,7 +61,7 @@ if (isset($_POST['username'])) {
     });
     if ($result) {
         $mode = 'success';
-        $olddir = '/var/www/project/'.$domain.'/storage/'.$username;
+        $olddir = $installation_directory.'/storage/'.$username;
         if (is_link($olddir.'/scripts/tinyfilemanager.php')) {
             unlink($olddir.'/scripts/tinyfilemanager.php');
         }
@@ -74,7 +74,7 @@ if (isset($_POST['username'])) {
         if (is_dir($olddir.'/scripts')) {
             rmdir($olddir.'/scripts');
         }
-        $newdir = '/var/www/project/'.$domain.'/storage/'.$username.'_'.date('Ymd_His');
+        $newdir = $installation_directory.'/storage/'.$username.'_'.date('Ymd_His');
         if (is_dir($olddir)) {
             rename($olddir, $newdir);
         }
