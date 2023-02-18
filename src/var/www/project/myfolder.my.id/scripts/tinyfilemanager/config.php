@@ -41,7 +41,6 @@ do {
             $user_config = '/var/www/project/'.$domain.'/scripts/tinyfilemanager/config.'.$_SERVER['REMOTE_USER'].'.php';
             $post_redirect = 'https://admin.'.$domain.$parent_directory;
             $root_path = '/var/www/project/'.$domain;
-            $global_readonly = false;
             $use_auth = false;
             $home_url = 'https://'.$_SERVER['HTTP_HOST'];
             break 2;
@@ -225,17 +224,22 @@ switch ($subdomain) {
         // - https://admin.$domain/?all
         // - https://admin.$domain/storage/user?all
         // - https://admin.$domain/?p=storage/user&all
+        $global_readonly = false;
         if ($arg_p == '') {
             $exclude_items = array(
                 '.htpasswd',
                 'web',
             );
+            $global_readonly = true;
         }
         elseif ($arg_p == 'scripts') {
             $exclude_items = array(
+                'InstaGallery',
                 'tinyfilemanager',
                 'adduser.sh',
+                'config.php',
             );
+            $global_readonly = true;
         }
         elseif (preg_match('/^storage\/[^\/]+$/', $arg_p)) {
             $exclude_items = array(
