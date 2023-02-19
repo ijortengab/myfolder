@@ -278,12 +278,19 @@ To show excluded items, you must add key query `all` in URL.
 Public repository berada pada alamat `https://public.$domain/` dan point ke
 directory `/var/www/project/$domain/public`.
 
-Untuk menonaktifkan public repository, buat file kosong bernama `404.html`.
+Untuk menonaktifkan public repository, buat file kosong bernama `404.html`
+didalam folder (direktori) pada level pertama.
 
 ```
 cd /var/www/project/$domain/public
 touch 404.html
 ```
+
+Untuk menonaktifkan listing file pada salah satu folder (direktori) pada
+public repository, buat file kosong bernama `403.html` pada folder tersebut.
+
+Untuk mengaktifkan tampilan gallery pada salah satu folder (direktori) pada
+public repository, buat file kosong bernama `gallery.html` pada folder tersebut.
 
 ## User
 
@@ -296,12 +303,14 @@ logout dan ganti password. Yakni:
  - https://$domain/menu/password
  - https://$domain/menu/logout
 
-Untuk menonaktifkan user public repository, buat file kosong bernama `404.html`.
+Untuk menonaktifkan user public repository, buat file kosong bernama `404.html`
+didalam folder (direktori) pada level pertama.
 
-Untuk menonaktifkan listing direktori pada user public repository, buat file kosong
-bernama `403.html` pada direktori tersebut.
+Untuk menonaktifkan listing file pada salah satu folder (direktori) pada user
+public repository, buat file kosong bernama `403.html` pada folder tersebut.
 
-Untuk mengaktifkan gallery per direktori, buat file kosong bernama `gallery.html` (optional).
+Untuk mengaktifkan tampilan gallery pada salah satu folder (direktori) pada user
+public repository, buat file kosong bernama `gallery.html` pada folder tersebut.
 
 ## Issue
 

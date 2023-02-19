@@ -67,6 +67,7 @@ do {
     if (preg_match('/^(?<user>[_a-z][_a-z0-9]*)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
         $subdomain = 'user_public';
         $matches_user = $matches['user'];
+        $root_path = $user_storage_directory.'/'.$matches_user.'/public';
         $global_readonly = true;
         $use_auth = false;
         $home_url = 'https://'.$_SERVER['HTTP_HOST'];
@@ -187,6 +188,17 @@ switch ($subdomain) {
             header('Location: https://'.$_SERVER['HTTP_HOST'].$parent_directory.'/'.$_GET['dl'].'?filename='.str_replace('+','%20',urlencode($_GET['dl'])).'&download=1');
             exit;
         }
+        if (is_file($root_path.$parent_directory.'/403.html')) {
+            http_response_code(403);
+            die('Forbidden.');
+        }
+        if (is_file($root_path.$parent_directory.'/gallery.html') &&
+            is_file ($installation_directory.'/scripts/InstaGallery/index.php')
+        ) {
+            chdir($root_path.$parent_directory);
+            include($installation_directory.'/scripts/InstaGallery/index.php');
+            exit;
+        }
         break;
 }
 
@@ -280,23 +292,9 @@ switch ($subdomain) {
         if (is_file($user_config)) {
             include_once($user_config);
         }
-
         break;
 
     case 'user_public':
-        $root_path = $user_storage_directory.'/'.$matches_user.'/public';
-        $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
-        if (is_file($root_path.$parent_directory.'/403.html')) {
-            http_response_code(403);
-            die('Forbidden.');
-        }
-        if (is_file($root_path.$parent_directory.'/gallery.html') &&
-            is_file ($installation_directory.'/scripts/InstaGallery/index.php')
-        ) {
-            chdir($root_path.$parent_directory);
-            include($installation_directory.'/scripts/InstaGallery/index.php');
-            exit;
-        }
         $user_config = $user_storage_directory.'/'.$matches_user. '/scripts/config.php';
         include_once($user_config);
         break;
