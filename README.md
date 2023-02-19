@@ -358,6 +358,8 @@ fusermount -u /var/www/project/myfolder.my.id/storage/laptop/private/mnt
 
 ## Optional
 
+Turn user public folder into gallery.
+
 ```
 domain=ui.web.id
 ```
@@ -393,3 +395,26 @@ cd /var/www/project/$domain/scripts
 ```
 
 Anda bisa mendelegasikan public repository ke user terpisah tanpa akses admin.
+
+## Optional 3
+
+Terdapat tiga direktori sebagai berikut:
+
+ - Installation Directory, default value adalah di: `/var/www/project/$domain`
+ - User Storage Directory, default value adalah di: `/var/www/project/$domain/storage`
+ - Public Storage Directory, default value adalah di: `/var/www/project/$domain/public`
+
+Ketiga value diatas dapat diubah dengan cara edit file `config.php`.
+
+```
+cd /var/www/project/$domain/scripts
+vi config.php
+```
+
+Kemudian perbarui informasi konfigurasi nginx virtual host dengan cara:
+
+```
+cd /var/www/project/$domain/scripts
+./nginx-build-config.sh > /etc/nginx/sites-available/$domain
+nginx -s reload
+```

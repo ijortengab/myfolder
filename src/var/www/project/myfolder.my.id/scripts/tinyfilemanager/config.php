@@ -238,6 +238,9 @@ switch ($subdomain) {
                 'adduser.sh',
                 'config.sh',
                 'config.php',
+                'config.local.php',
+                'nginx-build-config.sh',
+                'nginx.tpl.conf',
             );
             $global_readonly = true;
         }
@@ -261,7 +264,7 @@ switch ($subdomain) {
         // subdomain admin akan mengambil alih Variable $CONFIG yang disimpan di
         // script tinyfilemanager.php
         $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":true,"theme":"ligth"}';
-        $user_config = $installation_directory.'/storage/public/scripts/config.php';
+        $user_config = $user_storage_directory.'/public/scripts/config.php';
         if (is_file($user_config)) {
             include_once($user_config);
         }
@@ -340,7 +343,10 @@ switch ($subdomain) {
         $file = $installation_directory.'/scripts/tinyfilemanager/tinyfilemanager.php';
         $newfile = $scripts.'/tinyfilemanager.php';
         if (!is_link($newfile)) {
-            symlink($file, $newfile);
+            if (!symlink($file, $newfile)) {
+                die('Failed to create symbolic link...');
+            }
+
         }
         $file = $installation_directory.'/scripts/tinyfilemanager/config.tpl.php';
         $newfile = $scripts.'/config.php';
@@ -365,17 +371,29 @@ switch ($subdomain) {
         $file = $installation_directory.'/scripts/tinyfilemanager/translation.json';
         $newfile = $scripts.'/translation.json';
         if (!is_link($newfile)) {
-            symlink($file, $newfile);
+            if (!symlink($file, $newfile)) {
+                die('Failed to create symbolic link...');
+            }
         }
         if ($_SERVER['REMOTE_USER'] == 'public') {
             // Buat symbolic link relative.
             chdir($user_storage);
             if (!is_link('public')) {
-                symlink('../../public', 'public');
+                if ($public_storage_directory == realpath('../../public')) {
+                    if (!symlink('../../public', 'public')) {
+                        die('Failed to create symbolic link...');
+                    }
+                }
+                else {
+                    if (!symlink($public_storage_directory, 'public')) {
+                        die('Failed to create symbolic link...');
+                    }
+                }
             }
             if ($arg_p == '') {
                 $exclude_items = array(
                     'private',
+                    'README.md',
                 );
             }
             break;
