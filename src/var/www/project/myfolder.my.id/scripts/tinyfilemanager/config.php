@@ -216,6 +216,7 @@ switch ($subdomain) {
             preg_match("/^.+'(.+)'.+$/", $line, $matches);
             $CONFIG = $matches[1];
         }
+
         // For experienced user, you must add key query `all` in URL to
         // show excluded items.
         // Example:
@@ -230,6 +231,17 @@ switch ($subdomain) {
                 'web',
             );
             $global_readonly = true;
+            chdir($installation_directory);
+            if ($public_storage_directory != realpath('public')) {
+                if (!symlink($public_storage_directory, 'public')) {
+                    die('Failed to create symbolic link...');
+                }
+            }
+            if ($user_storage_directory != realpath('storage')) {
+                if (!symlink($user_storage_directory, 'storage')) {
+                    die('Failed to create symbolic link...');
+                }
+            }
         }
         elseif ($arg_p == 'scripts') {
             $exclude_items = array(
