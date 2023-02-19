@@ -11,7 +11,7 @@ if (isset($_GET['p'])) {
 // /path/to/folder => $parent_directory = /path/to/folder
 // /path/to/folder?p= => $parent_directory = ''
 // /path/to/folder?p=/home/ => $parent_directory = '/home'
-// /public/?p=storage&kita=1 $parent_directory = '/storage'
+// /public/?p=public&kita=1 $parent_directory = '/public'
 $parts = parse_url($_SERVER['REQUEST_URI']);
 $parent_directory = '';
 if (isset($parts['path'])) {
@@ -53,7 +53,7 @@ do {
             $home_url = 'https://'.$_SERVER['HTTP_HOST'];
             break 2;
     }
-    if (preg_match('/^(?<user>.+)-(?<scope>public|private)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
+    if (preg_match('/^(?<user>[_a-z][_a-z0-9]*)-(?<scope>public|private)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
         $subdomain = 'user';
         $matches_user = $matches['user'];
         $matches_scope = $matches['scope'];
@@ -64,7 +64,7 @@ do {
         $home_url = 'https://'.$domain;
         break;
     }
-    if (preg_match('/^(?<user>.+)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
+    if (preg_match('/^(?<user>[_a-z][_a-z0-9]*)\.'.preg_quote($domain).'$/', $_SERVER['HTTP_HOST'], $matches)) {
         $subdomain = 'user_public';
         $matches_user = $matches['user'];
         $global_readonly = true;
@@ -241,10 +241,14 @@ switch ($subdomain) {
             );
             $global_readonly = true;
         }
-        elseif (preg_match('/^storage\/[^\/]+$/', $arg_p)) {
+        // pattern untuk user adalah: [_a-z][_a-z0-9]*
+        elseif (preg_match('/^.*\/(?<user>[_a-z][_a-z0-9]*)\/scripts$/', $arg_p)) {
             $exclude_items = array(
-                'scripts',
+                'config.php',
+                'tinyfilemanager.php',
+                'translation.json',
             );
+            $global_readonly = true;
         }
         // Cancel all.
         if (isset($_GET['all'])) {

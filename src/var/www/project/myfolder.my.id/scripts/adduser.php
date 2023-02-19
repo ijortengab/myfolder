@@ -30,30 +30,35 @@ function WhileLocked($pathname, callable $function, $proj = ' ') {
 if (isset($_POST['password'])) {
     $password = $_POST['password'];
     $username = $_POST['username'];
-    $result = WhileLocked($database, function () use ($database, $username, $password) {
-        // Reference: https://stackoverflow.com/a/3004080
-        $reading = fopen($database, 'r');
-        $found = false;
-        while (!feof($reading)) {
-            $line = fgets($reading);
-            if (preg_match('/^'.preg_quote($username.':').'(.+)/', $line, $matches)) {
-                $found = true;
-                break;
-            }
-        }
-        fclose($reading);
-        if (!$found) {
-            $encrypted_password = password_hash($password, PASSWORD_BCRYPT);
-            $content = $username.':'.$encrypted_password;
-            file_put_contents($database, $content.PHP_EOL, FILE_APPEND);
-            return true;
-        }
-    });
-    if ($result) {
-        $mode = 'success';
+    if (!preg_match('/^(?<user>[_a-z][_a-z0-9]*)$/', $username)) {
+        $mode = 'error';
     }
     else {
-        $mode = 'failed';
+        $result = WhileLocked($database, function () use ($database, $username, $password) {
+            // Reference: https://stackoverflow.com/a/3004080
+            $reading = fopen($database, 'r');
+            $found = false;
+            while (!feof($reading)) {
+                $line = fgets($reading);
+                if (preg_match('/^'.preg_quote($username.':').'(.+)/', $line, $matches)) {
+                    $found = true;
+                    break;
+                }
+            }
+            fclose($reading);
+            if (!$found) {
+                $encrypted_password = password_hash($password, PASSWORD_BCRYPT);
+                $content = $username.':'.$encrypted_password;
+                file_put_contents($database, $content.PHP_EOL, FILE_APPEND);
+                return true;
+            }
+        });
+        if ($result) {
+            $mode = 'success';
+        }
+        else {
+            $mode = 'failed';
+        }
     }
 }
 ?>
@@ -64,6 +69,13 @@ if (isset($_POST['password'])) {
 </head>
 <body>
 <?php switch ($mode): ?>
+<?php case 'error': ?>
+<script>
+(function () {
+    alert('Format for username is not correct.');
+    window.location = "<?php echo 'https://admin.'.$domain.'/scripts/adduser.php'; ?>";
+})()
+</script>
 <?php case 'success': ?>
 <script>
 (function () {

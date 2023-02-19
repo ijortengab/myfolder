@@ -163,7 +163,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 server {
-    server_name ~^(?<user>[^-]+)\.myfolder\.my\.id;
+    server_name ~^(?<user>[_a-z][_a-z0-9]*)\.myfolder\.my\.id;
     if (!-d "/var/www/project/myfolder.my.id/storage/$user/public") {
         return 404;
     }
@@ -206,7 +206,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 server {
-    server_name ~^(?<user>.+)-private\.myfolder\.my\.id;
+    server_name ~^(?<user>[_a-z][_a-z0-9]*)-private\.myfolder\.my\.id;
     client_max_body_size 1024M;    
     index tinyfilemanager.php;
     root /var/www/project/myfolder.my.id/storage/$remote_user/scripts;
@@ -240,7 +240,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 server {
-    server_name ~^(?<user>.+)-public\.myfolder\.my\.id;
+    server_name ~^(?<user>[_a-z][_a-z0-9]*)-public\.myfolder\.my\.id;
     client_max_body_size 1024M;
     index tinyfilemanager.php;
     root /var/www/project/myfolder.my.id/storage/$remote_user/scripts;

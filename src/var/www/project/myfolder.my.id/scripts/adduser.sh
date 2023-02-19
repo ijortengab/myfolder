@@ -51,7 +51,7 @@ fi
 [ -n "$_username" ] || { red "Argument <username> required."; x; }
 [[ $_username = *" "* ]] && { red "Argument <username> can not contain space."; x; }
 [ -n "$_username" ] && {
-    if ! grep -q -E '^[a-z][a-z0-9]+' <<< "$_username";then
+    if ! grep -q -E '^[_a-z][_a-z0-9]*' <<< "$_username";then
         red "Argument <username> contains invalid characters."; x
     fi
     if grep -q "^$_username\:" "$database";then
