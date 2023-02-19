@@ -177,16 +177,18 @@ git checkout 200d9d6
 git apply /var/www/project/$domain/scripts/tinyfilemanager/update.patch
 ```
 
+Pull dan rebase.
+
+```
+git add tinyfilemanager.php
+git commit -m "update patch"
+git pull origin master --rebase
+```
+
 Copy PHP Script.
 
 ```
 cp tinyfilemanager.php /var/www/project/$domain/scripts/tinyfilemanager
-```
-
-Kembali ke semula.
-
-```
-git switch -
 ```
 
 Copy Translation.
@@ -409,6 +411,13 @@ Ketiga value diatas dapat diubah dengan cara edit file `config.php`.
 ```
 cd /var/www/project/$domain/scripts
 vi config.php
+```
+
+atau buat file override config, yakni `config.local.php`.
+
+```
+cd /var/www/project/$domain/scripts
+vi config.local.php
 ```
 
 Kemudian perbarui informasi konfigurasi nginx virtual host dengan cara:
