@@ -47,7 +47,7 @@ do {
 
         case 'public.'.$domain:
             $subdomain = 'public';
-            $root_path = $installation_directory.'/public';
+            $root_path = $public_storage_directory;
             $global_readonly = true;
             $use_auth = false;
             $home_url = 'https://'.$_SERVER['HTTP_HOST'];
@@ -57,7 +57,7 @@ do {
         $subdomain = 'user';
         $matches_user = $matches['user'];
         $matches_scope = $matches['scope'];
-        $user_config = $installation_directory.'/storage/'.$matches_user. '/scripts/config.php';
+        $user_config = $user_storage_directory.'/'.$matches_user. '/scripts/config.php';
         $post_redirect = 'https://'.$matches_user.'-'.$matches_scope.'.'.$domain.$parent_directory;
         $use_auth = false;
         $global_readonly = false;
@@ -269,7 +269,7 @@ switch ($subdomain) {
         break;
 
     case 'user_public':
-        $root_path = $installation_directory.'/storage/'.$matches['user'].'/public';
+        $root_path = $user_storage_directory.'/'.$matches_user.'/public';
         $parent_directory = empty($arg_p) ? $arg_p : '/'.$arg_p;
         if (is_file($root_path.$parent_directory.'/403.html')) {
             http_response_code(403);
@@ -282,7 +282,7 @@ switch ($subdomain) {
             include($installation_directory.'/scripts/InstaGallery/index.php');
             exit;
         }
-        $user_config = $installation_directory.'/storage/'.$matches['user']. '/scripts/config.php';
+        $user_config = $user_storage_directory.'/'.$matches_user. '/scripts/config.php';
         include_once($user_config);
         break;
 
@@ -291,9 +291,9 @@ switch ($subdomain) {
             header('Location: https://'.$domain.'/');
             exit;
         }
-        $user_config = $installation_directory.'/storage/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
+        $user_config = $user_storage_directory.'/'.$_SERVER['REMOTE_USER']. '/scripts/config.php';
         include_once($user_config);
-        $root_path = $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
+        $root_path = $user_storage_directory.'/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope;
         // Browse ke directory symlink public tidak diperbolehkan
         // dan perlu diredirect ke subdomain public.
         // User nanti bisa mengcopy link dari directory public dan menduga
@@ -302,8 +302,8 @@ switch ($subdomain) {
             $dirs = explode('/', $arg_p);
             $first = array_shift($dirs);
             $parent_directory = implode('/', $dirs);
-            $realpath = realpath($installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$first);
-            if ($realpath == $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+            $realpath = realpath($user_storage_directory.'/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope.'/'.$first);
+            if ($realpath == $user_storage_directory.'/'.$_SERVER['REMOTE_USER'].'/public') {
                 header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@'.$_SERVER['REMOTE_USER'].'-public.'.$domain.'/'.$parent_directory);
                 exit;
             }
@@ -312,8 +312,8 @@ switch ($subdomain) {
         // Di-rename masih boleh.
         if ($matches_scope == 'private' && isset($_GET['del']) && $arg_p == '') {
             $del = $_GET['del'];
-            $realpath = realpath($installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/'.$matches['scope'].'/'.$del);
-            if ($realpath == $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'].'/public') {
+            $realpath = realpath($user_storage_directory.'/'.$_SERVER['REMOTE_USER'].'/'.$matches_scope.'/'.$del);
+            if ($realpath == $user_storage_directory.'/'.$_SERVER['REMOTE_USER'].'/public') {
                 http_response_code(403);
                 die('Forbidden. Link to Public Directory cannot delete.');
             }
@@ -325,7 +325,7 @@ switch ($subdomain) {
             header('Location: https://'.$_SERVER['PHP_AUTH_USER'].':'.$_SERVER['PHP_AUTH_PW'].'@admin.'.$domain);
             exit;
         }
-        $user_storage = $installation_directory.'/storage/'.$_SERVER['REMOTE_USER'];
+        $user_storage = $user_storage_directory.'/'.$_SERVER['REMOTE_USER'];
         if (!is_dir($user_storage)) {
             if (!mkdir($user_storage, 0755, true)) {
                 die('Failed to create directories...');

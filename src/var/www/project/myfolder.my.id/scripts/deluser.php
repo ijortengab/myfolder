@@ -61,7 +61,7 @@ if (isset($_POST['username'])) {
     });
     if ($result) {
         $mode = 'success';
-        $olddir = $installation_directory.'/storage/'.$username;
+        $olddir = $user_storage_directory.'/'.$username;
         if (is_link($olddir.'/scripts/tinyfilemanager.php')) {
             unlink($olddir.'/scripts/tinyfilemanager.php');
         }
@@ -74,7 +74,7 @@ if (isset($_POST['username'])) {
         if (is_dir($olddir.'/scripts')) {
             rmdir($olddir.'/scripts');
         }
-        $newdir = $installation_directory.'/storage/'.$username.'_'.date('Ymd_His');
+        $newdir = $user_storage_directory.'/'.$username.'_'.date('Ymd_His');
         if (is_dir($olddir)) {
             rename($olddir, $newdir);
         }
