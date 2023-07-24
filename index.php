@@ -1,4 +1,24 @@
 <?php
+/**
+server {
+    listen 80;
+    listen [::]:80;
+    root /var/www/myfolder.localhost;
+    index index.php;
+    server_name myfolder.localhost;
+    location ^~ /web/.well-known/myfolder/download/ {
+        alias '/mnt/c/cygwin64/home/IjorTengab/github.com/ijortengab/rcm/';
+    }
+    location /web/ {
+        try_files $uri /web/index.php$is_args$args;
+    }
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+}
+ */
+
 $project_directory=__DIR__;
 $target_directory = '/mnt/c/cygwin64/home/IjorTengab/github.com/ijortengab/rcm';
 // $target_directory = '/mnt/c/Windows/System32/drivers';
@@ -241,14 +261,10 @@ class Request {
         return false;
     }
 }
-
 // https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Response.php
-
 class Response {
-
 }
 class Application {
-
 }
 $request = new \Request;
 $path_info = $request->getPathInfo();
@@ -259,7 +275,6 @@ $base_path = $request->getBasePath();
 	// return new \Response("Hello world");
 // });
 // $app->run();
-
 if (is_dir($target_directory.$path_info)) {
     if (substr($path_info, -1) != '/') {
         header('Location: ' . $base_path.$path_info.'/');
@@ -272,24 +287,15 @@ if (is_file($target_directory.$path_info)) {
     readfile($file);
     exit;
 }
-
-// $debugname = 'path_info'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-// $debugname = 'base_path'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-// die('a');
 $config = [
     'path_info' => $request->getPathInfo(),
     'base_path' => $request->getBasePath(),
 ];
 $config_json = json_encode($config);
 if (isset($_POST['action']) && $_POST['action'] == 'ls -la') {
-    // $current_directory=$target_directory.$path_info;
     $current_directory=$target_directory.$_POST['directory'];
-    // $debugname = 'current_directory'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-
     $ls = scandir($current_directory);
-
     $ls = array_diff($ls, ['.','..']);
-    // $debugname = 'ls'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
     $ls_la = [];
     foreach ($ls as $each) {
         $_ls_la = [
@@ -315,7 +321,20 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
     $current_directory=$target_directory.$_POST['directory'];
     $list_directory = scandir($current_directory);
     $list_directory = array_diff($list_directory, ['.','..']);
-    $list_directory = array_values($list_directory);
+    // Direktori diatas
+    $old_pwd = getcwd();
+    chdir($current_directory);
+    $dotdir_only = glob('.*', GLOB_ONLYDIR);
+    $dotdir_only = array_diff($dotdir_only, ['.','..']);
+    $dir_only = glob('*', GLOB_ONLYDIR);
+    $dir_only = array_merge($dotdir_only, $dir_only);
+    chdir($old_pwd);
+    $file_only = array_diff($list_directory, $dir_only);
+    // sort($dir_only);
+    // natcasesort($dir_only);
+    $list_directory = array_merge($dir_only, $file_only);
+    // Sorting Folder like files.
+    // $list_directory = array_values($list_directory);
     $list_directory_json = json_encode($list_directory);
     header("Content-Type: application/json");
     echo $list_directory_json;
@@ -326,7 +345,10 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+<!-- https://icons.getbootstrap.com/#usage -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 <!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css"> -->
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"> -->
 </head >
 <body>
   <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
@@ -338,7 +360,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
+            <a class="nav-link active" aria-current="page" href="#"><i class="bi-alarm"></i> Home</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Link</a>
@@ -399,166 +421,122 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
     </tr>
   </tbody>
 </table>
-<?php
-// $a = scandir($target_directory);
-// $debugname = 'project_directory'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-// $debugname = 'target_directory'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-// $debugname = 'a'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-?>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
-<!-- <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script> -->
 <script>
 config=JSON.parse('<?=$config_json?>')
 url=config.base_path+config.path_info
-var data = {
-    action: 'ls',
-    directory: config.path_info
-}
-function ls() {
-    // url=config.base_path+config.path_info
-    // console.log(url);
-    var data = {
-        action: 'ls',
-        directory: config.path_info
-    }
-    var jqxhr = $.ajax({
-      type: "POST",
-      url: url,
-      data: data
-    });
-    jqxhr.done(function (data) {
-        drawColumnName(data).then(drawColumnOther)
-    });
-
-}
-console.log(config);
-var jqxhr = $.ajax({
-  type: "POST",
-  url: url,
-  data: data
-});
-
-function tempe(event) {
-    // console.log(this);
-    // console.log(e);
-    // console.log(this);
+function gotoLink(event) {
     $this = $(this);
     if ($this.data('type') == '.') {
         event.preventDefault();
-        console.log(config.path_info);
         var name = $this.data('info').name
-        console.log(this);
         config.path_info = config.path_info + name + '/'
-        console.log(config);
-        ls();
-        // history.replaceState({}, "", name + '/');
         history.pushState({path_info: config.path_info}, "", name + '/');
-
-        // const url = new URL(location);
-// url.searchParams.set("foo", "bar");
-// history.pushState({}, "", url);
-
+        refreshDirectory();
     }
-
 }
-
-addEventListener("popstate", (event) => {});
-onpopstate = (event) => {
-    console.log(event);
-    console.log(this);
-    console.log('ok');
-    var path_info = event.state.path_info;
-    if (typeof path_info == 'undefined') {
-        config.path_info = '/'
+function getClassByType(type) {
+    switch (type) {
+        case 'sh':
+        case 'gitignore':
+            return 'bi bi-file-earmark-code'
+        case 'md':
+            return 'bi bi-file-earmark-richtext'
+        default:
+            return 'bi bi-file-earmark-text'
     }
-    else {
-        config.path_info = path_info
-    }
-    console.log(path_info);
-    ls()
-};
-
+}
+$('a.navbar-brand').attr('href',config.base_path);
 function drawColumnName(data) {
-    var defer = $.Deferred();
     console.log('drawColumnName()');
-    $table = $('#table-main');
-    $tbody = $table.find('tbody').empty();
+    var defer = $.Deferred();
+    var $table = $('#table-main');
+    var $tbody = $table.find('tbody').empty();
     for (i in data) {
         var $tr = $('<tr></tr>').data('info',data[i]).html('<th scope="row"></th>').appendTo($tbody);
-        // var $tr = $('<tr><th scope="row"></th></tr>').appendTo($tbody);
         var $td = $('<td></td>').appendTo($tr);
         var href = config.base_path+config.path_info+data[i]
-        var $a = $('<a></a>').on('click',tempe).text(data[i]).attr('href',href).appendTo($td);
+        var $a = $('<a></a>')
+            .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
+            .on('click',gotoLink)
+            .text(data[i]).attr('href',href).appendTo($td);
         $('<td class="mtime"></td><td class="type"></td><td class="size"></td>').appendTo($tr);
     }
-    console.log('slow 1 detik bosque');
+    // console.log('sleep 2');
     // setTimeout(function () {
         defer.resolve();
-    // }, 1000);
+    // }, 2000);
     return defer;
 }
-
-function drawColumnOther() {
+function drawColumnOther(data) {
     console.log('drawColumnOther()');
-    var data = {
-        action: 'ls -la',
-        directory: config.path_info
-    }
-    var jqxhr = $.ajax({
-      type: "POST",
-      url: url,
-      data: data
-    });
-
-    function checkAge(age) {
-        console.log(age);
-    }
-
-    jqxhr.done(function (data) {
-
-    $table = $('#table-main');
-    $tbody = $table.find('tbody');
-        for (i in data) {
-            var info = data[i]
-            var ehm = $tbody.find('tr').filter(function (i) {
-                var $this = $(this);
-                if ($this.data('info') == info.name) {
-                    // console.log(info.name);
-                    // console.log($this);
-                    $this.find("td.mtime").text(info.mtime)
-                    $this.find("td.size").text(info.size)
-                    if (info.type == '.') {
-                        $this.find("td.type").text('File folder')
-                        $a = $this.find("td > a");
-                        var href = $a.attr('href');
-                        $a.attr('href', href+'/');
-                        $a.data('info',info);
-                        $a.data('type',info.type);
+    var $table = $('#table-main');
+    var $tbody = $table.find('tbody');
+    for (i in data) {
+        var info = data[i]
+        var ehm = $tbody.find('tr').filter(function (i) {
+            var $this = $(this);
+            if ($this.data('info') == info.name) {
+                $this.find("td.mtime").text(info.mtime)
+                $this.find("td.size").text(info.size)
+                if (info.type == '.') {
+                    $this.find("td.type").text('File folder')
+                    var $a = $this.find("td > a");
+                    $a.before('<i class="bi bi-folder"></i> ');
+                    var href = $a.attr('href');
+                    $a.attr('href', href+'/');
+                    $a.data('info',info);
+                    $a.data('type',info.type);
+                }
+                else {
+                    var $a = $this.find("td > a");
+                    var biclass = getClassByType(info.type)
+                    if (biclass != '') {
+                        $a.before('<i class="'+biclass+'"></i> ');
                     }
                     else {
-                        $this.find("td.type").text(info.type)
-
+                        $a.before('<i class="bi bi-filetype-'+info.type+'"></i> ');
                     }
+                    $this.find("td.type").text(info.type)
                 }
-            });//.data(info.name);
-            // console.log(ehm);
-
-            // var $tr = $('<tr><th scope="row"></th></tr>').appendTo($tbody);
-            // var $td = $('<td></td>').appendTo($tr);
-            // var href = config.base_path+config.path_info+data[i]
-            // var $a = $('<a></a>').text(data[i]).attr('href',href).appendTo($td);
-            // $('<td></td><td></td><td></td>').appendTo($tr);
-        }
-
-    });
+            }
+        });
+    }
 }
-jqxhr.done(function (data) {
-    drawColumnName(data).then(drawColumnOther)
-});
-$('a.navbar-brand').attr('href',config.base_path);
-
-history.pushState({ name: "Example" }, "pushState example", "");
+url=config.base_path+config.path_info
+function refreshDirectory() {
+    var ls = $.ajax({
+      type: "POST",
+      url: url,
+      data: {
+        action: 'ls',
+        directory: config.path_info
+      }
+    });
+    var ls_la = $.ajax({
+      type: "POST",
+      url: url,
+      data: {
+        action: 'ls -la',
+        directory: config.path_info
+      }
+    });
+    ls.done(function (data) {
+        drawColumnName(data).then(function () {
+            ls_la.done(function (data) {
+                drawColumnOther(data)
+            })
+        })
+    })
+}
+refreshDirectory()
+history.replaceState({path_info: config.path_info}, "", "");
+window.onpopstate = (event) => {
+    var path_info = event.state.path_info;
+    config.path_info = path_info
+    refreshDirectory()
+};
 </script>
 </body>
 </html>
