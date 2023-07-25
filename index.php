@@ -1,30 +1,11 @@
 <?php
-/**
-server {
-    listen 80;
-    listen [::]:80;
-    root /var/www/myfolder.localhost;
-    index index.php;
-    server_name myfolder.localhost;
-    location ^~ /web/.well-known/myfolder/download/ {
-        alias '/mnt/c/cygwin64/home/IjorTengab/github.com/ijortengab/rcm/';
-    }
-    location /web/ {
-        try_files $uri /web/index.php$is_args$args;
-    }
-    location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
-        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
-    }
-}
- */
-
 $project_directory=__DIR__;
 $target_directory = '/mnt/c/cygwin64/home/IjorTengab/github.com/ijortengab/rcm';
-// $target_directory = '/mnt/c/Windows/System32/drivers';
-// $target_directory=__DIR__;
+$target_directory=__DIR__;
+$target_directory = '/mnt/c/cygwin64/home/IjorTengab/';
+$target_directory = '/mnt/c/Windows/System32/drivers';
 // $target_directory=$_SERVER['HOME'];
-rtrim($target_directory, '/');
+$target_directory = rtrim($target_directory, '/');
 // Based on Symfony Request version 2.8.18.
 class Request {
     protected $server;
@@ -269,12 +250,6 @@ class Application {
 $request = new \Request;
 $path_info = $request->getPathInfo();
 $base_path = $request->getBasePath();
-// $app = new \Application($request,);
-// $app->post();
-// $app->get('/', function(){
-	// return new \Response("Hello world");
-// });
-// $app->run();
 if (is_dir($target_directory.$path_info)) {
     if (substr($path_info, -1) != '/') {
         header('Location: ' . $base_path.$path_info.'/');
@@ -351,7 +326,8 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
 <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"> -->
 </head >
 <body>
-  <nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top">
+<div class="sticky-top">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">MyFolder</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -359,34 +335,17 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#"><i class="bi-alarm"></i> Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Dropdown
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled">Disabled</a>
-          </li>
-        </ul>
-        <form class="d-flex" role="search">
-          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
-          <button class="btn btn-outline-success" type="submit">Search</button>
-        </form>
       </div>
     </div>
   </nav>
+  <div class="container-fluid bg-body-secondary">
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i></a></li>
+  </ol>
+</nav>
+</div>
+</div>
 <table id="table-main" class="table" data-toggle="table" data-search="true">
   <thead>
     <tr>
@@ -424,15 +383,24 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 <script>
-config=JSON.parse('<?=$config_json?>')
-url=config.base_path+config.path_info
+var MyFolder = MyFolder || {config:{}}
+MyFolder.config = JSON.parse('<?=$config_json?>')
+console.log(MyFolder);
+url=MyFolder.config.base_path+MyFolder.config.path_info
 function gotoLink(event) {
     $this = $(this);
     if ($this.data('type') == '.') {
         event.preventDefault();
-        var name = $this.data('info').name
-        config.path_info = config.path_info + name + '/'
-        history.pushState({path_info: config.path_info}, "", name + '/');
+        var info = $this.data('info')
+        if (typeof info.directory !== 'undefined') {
+            MyFolder.config.path_info = info.directory
+            history.pushState({path_info: MyFolder.config.path_info}, "", MyFolder.config.base_path + info.directory);
+        }
+        else {
+            var name = $this.data('info').name
+            MyFolder.config.path_info = MyFolder.config.path_info + name + '/'
+            history.pushState({path_info: MyFolder.config.path_info}, "", name + '/');
+        }
         refreshDirectory();
     }
 }
@@ -447,7 +415,6 @@ function getClassByType(type) {
             return 'bi bi-file-earmark-text'
     }
 }
-$('a.navbar-brand').attr('href',config.base_path);
 function drawColumnName(data) {
     console.log('drawColumnName()');
     var defer = $.Deferred();
@@ -456,7 +423,7 @@ function drawColumnName(data) {
     for (i in data) {
         var $tr = $('<tr></tr>').data('info',data[i]).html('<th scope="row"></th>').appendTo($tbody);
         var $td = $('<td></td>').appendTo($tr);
-        var href = config.base_path+config.path_info+data[i]
+        var href = MyFolder.config.base_path + MyFolder.config.path_info+data[i];
         var $a = $('<a></a>')
             .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
             .on('click',gotoLink)
@@ -475,7 +442,7 @@ function drawColumnOther(data) {
     var $tbody = $table.find('tbody');
     for (i in data) {
         var info = data[i]
-        var ehm = $tbody.find('tr').filter(function (i) {
+        $tbody.find('tr').filter(function (i) {
             var $this = $(this);
             if ($this.data('info') == info.name) {
                 $this.find("td.mtime").text(info.mtime)
@@ -504,14 +471,14 @@ function drawColumnOther(data) {
         });
     }
 }
-url=config.base_path+config.path_info
+url=MyFolder.config.base_path+MyFolder.config.path_info
 function refreshDirectory() {
     var ls = $.ajax({
       type: "POST",
       url: url,
       data: {
         action: 'ls',
-        directory: config.path_info
+        directory: MyFolder.config.path_info
       }
     });
     var ls_la = $.ajax({
@@ -519,7 +486,7 @@ function refreshDirectory() {
       url: url,
       data: {
         action: 'ls -la',
-        directory: config.path_info
+        directory: MyFolder.config.path_info
       }
     });
     ls.done(function (data) {
@@ -529,12 +496,45 @@ function refreshDirectory() {
             })
         })
     })
+    console.log('mantab');
+    console.log(MyFolder);
+    var array = MyFolder.config.path_info.split('/').slice(1,-1);
+    var $ol = $('ol.breadcrumb').empty();
+    var $li = $('<li></li>').addClass('breadcrumb-item');
+    var url = MyFolder.config.base_path;
+    var directory = '';
+    var info = {type: '.', name: '', directory: directory+'/'}
+    var $a = $('<a></a>')
+        .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
+        .attr('href',url+'/')
+        .on('click',gotoLink)
+        .data('info',info)
+        .data('type',info.type)
+        .text(info.name).appendTo($li);
+    $('<i class="bi bi-house-door"></i>').appendTo($a);
+    $li.appendTo($ol);
+    for (i in array) {
+        url+='/'+array[i]
+        directory+='/'+array[i]
+        var $li = $('<li></li>').addClass('breadcrumb-item');
+        var info = {type: '.', name: array[i], directory: directory+'/'}
+        var $a = $('<a></a>')
+            .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
+            .attr('href',url+'/')
+            .on('click',gotoLink)
+            .data('info',info)
+            .data('type',info.type)
+            .text(info.name).appendTo($li);
+        $li.appendTo($ol);
+    }
 }
+$('a.navbar-brand').attr('href',MyFolder.config.base_path);
 refreshDirectory()
-history.replaceState({path_info: config.path_info}, "", "");
+history.replaceState({path_info: MyFolder.config.path_info}, "", "");
 window.onpopstate = (event) => {
+    console.log('onpopstate Trigger()');
     var path_info = event.state.path_info;
-    config.path_info = path_info
+    MyFolder.config.path_info = path_info
     refreshDirectory()
 };
 </script>
