@@ -280,10 +280,25 @@ class Request {
         return false;
     }
 }
-// https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Response.php
+// Credit:
+// - https://symfony.com/doc/2.8/components/http_foundation.html#sending-the-response
+// - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Response.php
 class Response {
+    protected $content;
+    protected $statusCode;
+    public function __construct($content = '', $status = 200, $headers = array())
+    {
+        $this->content = $content;
+        $this->statusCode = $status;
+    }
+    public function setContent($content)
+    {
+        $this->content = $content;
+        return $this;
+    }
     public function send()
     {
+        echo $this->content;
     }
 }
 // Credit:
@@ -329,7 +344,6 @@ class JsonResponse extends Response {
         $this->data = $data;
         return $this;
     }
-
     public function send()
     {
         header("Content-Type: application/json");
@@ -418,11 +432,12 @@ class Controller {
             'base_path' => $request->getBasePath(),
         );
         $config_json = json_encode($config);
-        echo strtr(TemplateFile::autoIndex(), array(
+        $content = strtr(TemplateFile::autoIndex(), array(
             '{{ config.base }}' => $config_json,
             '{{ config.base_path }}' => $base_path,
             ));
-        // return $this;
+        $response = new Response($content);
+        $response->send();
     }
     /**
      *
@@ -455,7 +470,6 @@ class Controller {
                     $response = new JsonResponse();
                     $response->setData($list_directory);
                     return $response->send();
-
                 case 'ls -la':
                     // Do something.
                     $ls_la = array();
@@ -477,12 +491,10 @@ class Controller {
                     $response = new JsonResponse();
                     $response->setData($ls_la);
                     return $response->send();
-
                 default:
                     // Do something.
                     break;
             }
-            echo $action;
         }
     }
     /**
@@ -494,10 +506,12 @@ class Controller {
         switch ($path) {
             case 'script.js':
                 header('Content-Type: application/javascript; charset=utf-8');
-                echo strtr(PseudoFile::scriptJs(), array(
+                $content = strtr(PseudoFile::scriptJs(), array(
                     '{{ config.base }}' => $config_json,
                     '{{ config.base_path }}' => $base_path,
                     ));
+                $response = new Response($content);
+                $response->send();
                 break;
             case '':
                 // Do something.
