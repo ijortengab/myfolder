@@ -1,11 +1,21 @@
 <?php
 namespace IjorTengab\MyFolder;
-$project_directory=__DIR__;
-$target_directory = '/mnt/c/cygwin64/home/IjorTengab/github.com/ijortengab/rcm';
-$target_directory=__DIR__;
-$target_directory = '/mnt/c/cygwin64/home/IjorTengab/';
-$target_directory = '/mnt/c/Windows/System32/drivers';
-$target_directory = rtrim($target_directory, '/');
+class ConfigFile {
+    /**
+     *
+     */
+    public static function load()
+    {
+        return <<<'EOF'
+password=
+EOF;
+        // return $this;
+    }
+}
+class Config {
+    // public static $target_directory = __DIR__;
+    public static $target_directory = '/mnt/c/Windows/System32/drivers';
+}
 // Based on Symfony ParameterBag version 2.8.18.
 class ParameterBag {
     protected $parameters;
@@ -272,9 +282,62 @@ class Request {
 }
 // https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Response.php
 class Response {
+    public function send()
+    {
+    }
+}
+// Credit:
+//  - https://symfony.com/doc/2.8/components/http_foundation.html#redirecting-the-user
+//  - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/RedirectResponse.php
+class RedirectResponse extends Response {
+    protected $targetUrl;
+    public function __construct($url)
+    {
+        $this->targetUrl = $url;
+    }
+    public function send()
+    {
+        header('Location: ' . $this->targetUrl);
+    }
+}
+// Credit:
+// - https://symfony.com/doc/2.8/components/http_foundation.html#serving-files
+// - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/BinaryFileResponse.php
+class BinaryFileResponse extends Response {
+    protected $file;
+    public function __construct($file)
+    {
+        $this->file = $file;
+    }
+    public function send()
+    {
+        header('Content-Type: ' . mime_content_type($this->file));
+        readfile($this->file);
+    }
+}
+// Credit:
+// - https://symfony.com/doc/2.8/components/http_foundation.html#creating-a-json-response
+// - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/JsonResponse.php
+class JsonResponse extends Response {
+    protected $data;
+    public function __construct($data = null)
+    {
+        $this->data = $data;
+    }
+    public function setData($data = null)
+    {
+        $this->data = $data;
+        return $this;
+    }
+
+    public function send()
+    {
+        header("Content-Type: application/json");
+        echo json_encode($this->data);
+    }
 }
 class Application {
-    protected $register = [];
+    protected $register = array();
     public $request;
     /**
      *
@@ -308,8 +371,17 @@ class Application {
         if (!isset($this->register[$request_method])) {
             throw new Exception('Request Method not found.');
         }
-        $callback = $this->register[$request_method]['/'];
-        call_user_func_array($callback, [$this]);
+        $register = $this->register[$request_method];
+        // @todo, /__pseudo/{path} dibuat dapat diparsing.
+        $options = array();
+        if ($path_info == '/__pseudo/script.js') {
+            $callback = $register['/__pseudo/{path}'];
+            $options['path'] = 'script.js';
+        }
+        else {
+            $callback = $this->register[$request_method]['/'];
+        }
+        call_user_func_array($callback, array($this, $options));
     }
 }
 class Controller {
@@ -324,48 +396,53 @@ class Controller {
      */
     public static function getHandle(Application $app)
     {
+        $target_directory = &Config::$target_directory;
         $request = $app->request;
         $path_info = $request->getPathInfo();
         $base_path = $request->getBasePath();
-        if (is_dir($target_directory.$path_info)) {
+        $fullpath = $target_directory.$path_info;
+        if (is_dir($fullpath)) {
             if (substr($path_info, -1) != '/') {
-                // @todo, ganti ke Redirect response.
-                header('Location: ' . $base_path.$path_info.'/');
-                exit;
+                $url = $base_path.$path_info.'/';
+                $response = new RedirectResponse($url);
+                return $response->send();
             }
         }
-        if (is_file($target_directory.$path_info)) {
-            $file = $target_directory.$path_info;
-            // @todo, ganti ke Binary response.
-            header('Content-Type: ' . mime_content_type($file));
-            readfile($file);
-            exit;
+        if (is_file($fullpath)) {
+            $file = $fullpath;
+            $response = new BinaryFileResponse($file);
+            return $response->send();
         }
-        $config = [
+        $config = array(
             'path_info' => $request->getPathInfo(),
             'base_path' => $request->getBasePath(),
-        ];
+        );
         $config_json = json_encode($config);
-        echo strtr(Template::autoIndex(), ['{{ config.base }}' => $config_json]);
+        echo strtr(TemplateFile::autoIndex(), array(
+            '{{ config.base }}' => $config_json,
+            '{{ config.base_path }}' => $base_path,
+            ));
+        // return $this;
     }
     /**
      *
      */
     public static function postHandle(Application $app)
     {
+        $target_directory = &Config::$target_directory;
         if ($app->request->request->has('action')) {
             // @todo: Jika tidak ada $_POST['directory'], maka throw error.
             $current_directory = $target_directory.$app->request->request->get('directory');
             $action = $app->request->request->get('action');
             $list_directory = scandir($current_directory);
-            $list_directory = array_diff($list_directory, ['.','..']);
+            $list_directory = array_diff($list_directory, array('.','..'));
             switch ($action) {
                 case 'ls':
                     // Direktori diatas
                     $old_pwd = getcwd();
                     chdir($current_directory);
                     $dotdir_only = glob('.*', GLOB_ONLYDIR);
-                    $dotdir_only = array_diff($dotdir_only, ['.','..']);
+                    $dotdir_only = array_diff($dotdir_only, array('.','..'));
                     $dir_only = glob('*', GLOB_ONLYDIR);
                     $dir_only = array_merge($dotdir_only, $dir_only);
                     chdir($old_pwd);
@@ -375,21 +452,20 @@ class Controller {
                     $list_directory = array_merge($dir_only, $file_only);
                     // Sorting Folder like files.
                     // $list_directory = array_values($list_directory);
-                    $list_directory_json = json_encode($list_directory);
-                    header("Content-Type: application/json");
-                    echo $list_directory_json;
-                    exit;
-                    break;
+                    $response = new JsonResponse();
+                    $response->setData($list_directory);
+                    return $response->send();
+
                 case 'ls -la':
                     // Do something.
-                    $ls_la = [];
+                    $ls_la = array();
                     foreach ($list_directory as $each) {
-                        $_ls_la = [
+                        $_ls_la = array(
                             'name' => $each,
                             'mtime' => '',
                             'size' => '',
                             'type' => '.', // dot means directory
-                        ];
+                        );
                         if (is_file($current_directory.$each)) {
                             $file = $current_directory.$each;
                             $_ls_la['mtime'] = filemtime($file);
@@ -398,22 +474,41 @@ class Controller {
                         }
                         $ls_la[] = $_ls_la;
                     }
-                    header("Content-Type: application/json");
-                    $ls_la_json = json_encode($ls_la);
-                    echo $ls_la_json;
-                    exit;
-                    break;
+                    $response = new JsonResponse();
+                    $response->setData($ls_la);
+                    return $response->send();
+
                 default:
                     // Do something.
                     break;
             }
             echo $action;
         }
-        echo 'abc';
-        // return $this;
+    }
+    /**
+     *
+     */
+    public static function pseudoHandle(Application $app, $args = array())
+    {
+        $path = isset($args['path']) ? $args['path']: null;
+        switch ($path) {
+            case 'script.js':
+                header('Content-Type: application/javascript; charset=utf-8');
+                echo strtr(PseudoFile::scriptJs(), array(
+                    '{{ config.base }}' => $config_json,
+                    '{{ config.base_path }}' => $base_path,
+                    ));
+                break;
+            case '':
+                // Do something.
+                break;
+            default:
+                // Do something.
+                break;
+        }
     }
 }
-class Template {
+class TemplateFile {
     public static function autoIndex()
     {
         return <<<'EOF'
@@ -424,9 +519,7 @@ class Template {
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
 <!-- https://icons.getbootstrap.com/#usage -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-<!-- <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css"> -->
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"> -->
-</head >
+</head>
 <body>
 <div class="sticky-top">
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
@@ -441,12 +534,12 @@ class Template {
     </div>
   </nav>
   <div class="container-fluid bg-body-secondary">
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i></a></li>
-  </ol>
-</nav>
-</div>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i></a></li>
+      </ol>
+    </nav>
+  </div>
 </div>
 <table id="table-main" class="table" data-toggle="table" data-search="true">
   <thead>
@@ -461,24 +554,15 @@ class Template {
   <tbody>
     <tr>
       <th scope="row">&nbsp;</th>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
     </tr>
     <tr>
       <th scope="row">&nbsp;</th>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
     </tr>
     <tr>
       <th scope="row">&nbsp;</th>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
-      <td>&nbsp;</td>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
     </tr>
   </tbody>
 </table>
@@ -487,6 +571,21 @@ class Template {
 <script>
 var MyFolder = MyFolder || {config:{}}
 MyFolder.config = JSON.parse('{{ config.base }}')
+</script>
+<script src="{{ config.base_path }}/__pseudo/script.js">
+</script>
+</body>
+</html>
+EOF;
+    }
+}
+class PseudoFile {
+    /**
+     *
+     */
+    public static function scriptJs()
+    {
+        return <<<'EOF'
 console.log(MyFolder);
 url=MyFolder.config.base_path+MyFolder.config.path_info
 function gotoLink(event) {
@@ -629,6 +728,10 @@ function refreshDirectory() {
             .text(info.name).appendTo($li);
         $li.appendTo($ol);
     }
+    // $a.before('<i class="bi bi-house-door-fill"></i> ');
+    //
+    //house-door-fill$a.attr('href', href+'/');
+    //
 }
 $('a.navbar-brand').attr('href',MyFolder.config.base_path);
 refreshDirectory()
@@ -639,14 +742,12 @@ window.onpopstate = (event) => {
     MyFolder.config.path_info = path_info
     refreshDirectory()
 };
-</script>
-</body>
-</html>
 EOF;
     }
 }
 $app = new Application;
-$app->get('/', [Controller::class, 'getHandle']);
-$app->post('/', [Controller::class, 'postHandle']);
+$app->get('/', 'IjorTengab\MyFolder\Controller::getHandle');
+$app->post('/', 'IjorTengab\MyFolder\Controller::postHandle');
+$app->get('/__pseudo/{path}', 'IjorTengab\MyFolder\Controller::pseudoHandle');
 $app->run();
 ?>
