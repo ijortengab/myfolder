@@ -1,21 +1,49 @@
 <?php
+namespace IjorTengab\MyFolder;
 $project_directory=__DIR__;
 $target_directory = '/mnt/c/cygwin64/home/IjorTengab/github.com/ijortengab/rcm';
 $target_directory=__DIR__;
 $target_directory = '/mnt/c/cygwin64/home/IjorTengab/';
 $target_directory = '/mnt/c/Windows/System32/drivers';
-// $target_directory=$_SERVER['HOME'];
 $target_directory = rtrim($target_directory, '/');
+// Based on Symfony ParameterBag version 2.8.18.
+class ParameterBag {
+    protected $parameters;
+    public function __construct($parameters)
+    {
+        $this->parameters = $parameters;
+    }
+    public function set($key, $value)
+    {
+        $this->parameters[$key] = $value;
+    }
+    public function get($key, $default = null, $deep = false)
+    {
+        return $this->parameters[$key];
+    }
+    public function has($key)
+    {
+        return array_key_exists($key, $this->parameters);
+    }
+    public function remove($key)
+    {
+        unset($this->parameters[$key]);
+    }
+}
 // Based on Symfony Request version 2.8.18.
 class Request {
-    protected $server;
+    public $server;
+    public $request;
+    public $query;
     protected $requestUri;
     protected $basePath;
     protected $pathInfo;
     protected $baseUrl;
     public function __construct()
     {
-        $this->server = $_SERVER;
+        $this->server = new ParameterBag($_SERVER);
+        $this->request = new ParameterBag($_POST);
+        $this->query = new ParameterBag($_GET);
     }
     public function getPathInfo()
     {
@@ -44,8 +72,8 @@ class Request {
     }
     public function getPort()
     {
-        if (!$host = isset($this->server['HTTP_HOST']) ? $this->server['HTTP_HOST'] : null) {
-            return $this->server['SERVER_PORT'];
+        if (!$host = $this->server->has('HTTP_HOST') ? $this->server->get('HTTP_HOST') : null) {
+            return $this->server->get('SERVER_PORT');
         }
         if ($host[0] === '[') {
             $pos = strpos($host, ':', strrpos($host, ']'));
@@ -79,14 +107,14 @@ class Request {
     }
     public function isSecure()
     {
-        $https = isset($this->server['HTTPS']) ? $this->server['HTTPS'] : null;
+        $https = $this->server->has('HTTPS') ? $this->server->get('HTTPS') : null;
         return !empty($https) && 'off' !== strtolower($https);
     }
     public function getHost()
     {
-        if (!$host = isset($this->server['HTTP_HOST']) ? $this->server['HTTP_HOST'] : null) {
-            if (!$host = isset($this->server['SERVER_NAME']) ? $this->server['SERVER_NAME'] : null) {
-                $host = isset($this->server['SERVER_ADDR']) ? $this->server['SERVER_ADDR'] : null;
+        if (!$host = $this->server->has('HTTP_HOST') ? $this->server->get('HTTP_HOST') : null) {
+            if (!$host = $this->server->has('SERVER_NAME') ? $this->server->get('SERVER_NAME') : null) {
+                $host = $this->server->has('SERVER_ADDR') ? $this->server->get('SERVER_ADDR') : null;
             }
         }
         // trim and remove port number from host
@@ -103,59 +131,59 @@ class Request {
     protected function prepareRequestUri()
     {
         $requestUri = '';
-        if (isset($this->server['HTTP_X_ORIGINAL_URL'])) {
+        if ($this->server->has('HTTP_X_ORIGINAL_URL')) {
             // IIS with Microsoft Rewrite Module
-            $requestUri = $this->server['HTTP_X_ORIGINAL_URL'];
-            unset($this->server['HTTP_X_ORIGINAL_URL']);
-            unset($this->server['UNENCODED_URL']);
-            unset($this->server['IIS_WasUrlRewritten']);
-        } elseif (isset($this->server['HTTP_X_REWRITE_URL'])) {
+            $requestUri = $this->server->get('HTTP_X_ORIGINAL_URL');
+            $this->server->remove('HTTP_X_ORIGINAL_URL');
+            $this->server->remove('UNENCODED_URL');
+            $this->server->remove('IIS_WasUrlRewritten');
+        } elseif ($this->server->has('HTTP_X_REWRITE_URL')) {
             // IIS with ISAPI_Rewrite
-            $requestUri = $this->server['HTTP_X_REWRITE_URL'];
-            unset($this->server['HTTP_X_REWRITE_URL']);
+            $requestUri = $this->server->get('HTTP_X_REWRITE_URL');
+            $this->server->remove('HTTP_X_REWRITE_URL');
         } elseif (
-            isset($this->server['IIS_WasUrlRewritten']) &&
-            $this->server['IIS_WasUrlRewritten'] == '1' &&
-            isset($this->server['UNENCODED_URL']) &&
-            $this->server['UNENCODED_URL'] != ''
+            $this->server->has('IIS_WasUrlRewritten') &&
+            $this->server->get('IIS_WasUrlRewritten') == '1' &&
+            $this->server->has('UNENCODED_URL') &&
+            $this->server->get('UNENCODED_URL') != ''
         ) {
             // IIS7 with URL Rewrite: make sure we get the unencoded URL (double slash problem)
-            $requestUri = $this->server['UNENCODED_URL'];
-            unset($this->server['UNENCODED_URL']);
-            unset($this->server['IIS_WasUrlRewritten']);
-        } elseif (isset($this->server['REQUEST_URI'])) {
-            $requestUri = $this->server['REQUEST_URI'];
+            $requestUri = $this->server->get('UNENCODED_URL');
+            $this->server->remove('UNENCODED_URL');
+            $this->server->remove('IIS_WasUrlRewritten');
+        } elseif ($this->server->has('REQUEST_URI')) {
+            $requestUri = $this->server->get('REQUEST_URI');
             // HTTP proxy reqs setup request URI with scheme and host [and port] + the URL path, only use URL path
             $schemeAndHttpHost = $this->getSchemeAndHttpHost();
             if (strpos($requestUri, $schemeAndHttpHost) === 0) {
                 $requestUri = substr($requestUri, strlen($schemeAndHttpHost));
             }
-        } elseif (isset($this->server['ORIG_PATH_INFO'])) {
+        } elseif ($this->server->has('ORIG_PATH_INFO')) {
             // IIS 5.0, PHP as CGI
-            $requestUri = $this->server['ORIG_PATH_INFO'];
-            if (isset($this->server['QUERY_STRING']) && '' != $this->server['QUERY_STRING']) {
-                $requestUri .= '?'.$this->server['QUERY_STRING'];
+            $requestUri = $this->server->get('ORIG_PATH_INFO');
+            if ($this->server->has('QUERY_STRING') && '' != $this->server->get('QUERY_STRING')) {
+                $requestUri .= '?'.$this->server->get('QUERY_STRING');
             }
-            unset($this->server['ORIG_PATH_INFO']);
+            $this->server->remove('ORIG_PATH_INFO');
         }
         // normalize the request URI to ease creating sub-requests from this request
-        $this->server['REQUEST_URI'] = $requestUri;
+        $this->server->set('REQUEST_URI', $requestUri);
         return $requestUri;
     }
     protected function prepareBaseUrl()
     {
-        $filename = basename($this->server['SCRIPT_FILENAME']);
-        if (basename($this->server['SCRIPT_NAME']) === $filename) {
-            $baseUrl = $this->server['SCRIPT_NAME'];
-        } elseif (basename($this->server['PHP_SELF']) === $filename) {
-            $baseUrl = $this->server['PHP_SELF'];
-        } elseif (basename($this->server['ORIG_SCRIPT_NAME']) === $filename) {
-            $baseUrl = $this->server['ORIG_SCRIPT_NAME']; // 1and1 shared hosting compatibility
+        $filename = basename($this->server->get('SCRIPT_FILENAME'));
+        if (basename($this->server->get('SCRIPT_NAME')) === $filename) {
+            $baseUrl = $this->server->get('SCRIPT_NAME');
+        } elseif (basename($this->server->get('PHP_SELF')) === $filename) {
+            $baseUrl = $this->server->get('PHP_SELF');
+        } elseif (basename($this->server->get('ORIG_SCRIPT_NAME')) === $filename) {
+            $baseUrl = $this->server->get('ORIG_SCRIPT_NAME'); // 1and1 shared hosting compatibility
         } else {
             // Backtrack up the script_filename to find the portion matching
             // php_self
-            $path = isset($this->server['PHP_SELF']) ? $this->server['PHP_SELF'] : '';
-            $file = isset($this->server['SCRIPT_FILENAME']) ? $this->server['SCRIPT_FILENAME'] : '';
+            $path = $this->server->has('PHP_SELF') ? $this->server->get('PHP_SELF') : '';
+            $file = $this->server->has('SCRIPT_FILENAME') ? $this->server->get('SCRIPT_FILENAME') : '';
             $segs = explode('/', trim($file, '/'));
             $segs = array_reverse($segs);
             $index = 0;
@@ -196,7 +224,7 @@ class Request {
     }
     protected function prepareBasePath()
     {
-        $filename = basename($this->server['SCRIPT_FILENAME']);
+        $filename = basename($this->server->get('SCRIPT_FILENAME'));
         $baseUrl = $this->getBaseUrl();
         if (empty($baseUrl)) {
             return '';
@@ -246,76 +274,150 @@ class Request {
 class Response {
 }
 class Application {
-}
-$request = new \Request;
-$path_info = $request->getPathInfo();
-$base_path = $request->getBasePath();
-if (is_dir($target_directory.$path_info)) {
-    if (substr($path_info, -1) != '/') {
-        header('Location: ' . $base_path.$path_info.'/');
-        exit;
+    protected $register = [];
+    public $request;
+    /**
+     *
+     */
+    public function __construct()
+    {
+        $this->request = new Request;
+        // return $this;
     }
-}
-if (is_file($target_directory.$path_info)) {
-    $file = $target_directory.$path_info;
-    header('Content-Type: ' . mime_content_type($file));
-    readfile($file);
-    exit;
-}
-$config = [
-    'path_info' => $request->getPathInfo(),
-    'base_path' => $request->getBasePath(),
-];
-$config_json = json_encode($config);
-if (isset($_POST['action']) && $_POST['action'] == 'ls -la') {
-    $current_directory=$target_directory.$_POST['directory'];
-    $ls = scandir($current_directory);
-    $ls = array_diff($ls, ['.','..']);
-    $ls_la = [];
-    foreach ($ls as $each) {
-        $_ls_la = [
-            'name' => $each,
-            'mtime' => '',
-            'size' => '',
-            'type' => '.', // dot means directory
-        ];
-        if (is_file($current_directory.$each)) {
-            $file = $current_directory.$each;
-            $_ls_la['mtime'] = filemtime($file);
-            $_ls_la['size'] = filesize($file);
-            $_ls_la['type'] = pathinfo($file, PATHINFO_EXTENSION);
+    /**
+     *
+     */
+    public function post($pathinfo, $callback)
+    {
+        $this->register['post'][$pathinfo] = $callback;
+    }
+    /**
+     *
+     */
+    public function get($pathinfo, $callback)
+    {
+        $this->register['get'][$pathinfo] = $callback;
+    }
+    /**
+     *
+     */
+    public function run()
+    {
+        $request_method = strtolower($this->request->server->get('REQUEST_METHOD'));
+        $path_info = $this->request->getPathInfo();
+        if (!isset($this->register[$request_method])) {
+            throw new Exception('Request Method not found.');
         }
-        $ls_la[] = $_ls_la;
+        $callback = $this->register[$request_method]['/'];
+        call_user_func_array($callback, [$this]);
     }
-    header("Content-Type: application/json");
-    $ls_la_json = json_encode($ls_la);
-    echo $ls_la_json;
-    exit;
 }
-if (isset($_POST['action']) && $_POST['action'] == 'ls') {
-    $current_directory=$target_directory.$_POST['directory'];
-    $list_directory = scandir($current_directory);
-    $list_directory = array_diff($list_directory, ['.','..']);
-    // Direktori diatas
-    $old_pwd = getcwd();
-    chdir($current_directory);
-    $dotdir_only = glob('.*', GLOB_ONLYDIR);
-    $dotdir_only = array_diff($dotdir_only, ['.','..']);
-    $dir_only = glob('*', GLOB_ONLYDIR);
-    $dir_only = array_merge($dotdir_only, $dir_only);
-    chdir($old_pwd);
-    $file_only = array_diff($list_directory, $dir_only);
-    // sort($dir_only);
-    // natcasesort($dir_only);
-    $list_directory = array_merge($dir_only, $file_only);
-    // Sorting Folder like files.
-    // $list_directory = array_values($list_directory);
-    $list_directory_json = json_encode($list_directory);
-    header("Content-Type: application/json");
-    echo $list_directory_json;
-    exit;
+class Controller {
+    /**
+     *
+     */
+    public function __construct()
+    {
+    }
+    /**
+     *
+     */
+    public static function getHandle(Application $app)
+    {
+        $request = $app->request;
+        $path_info = $request->getPathInfo();
+        $base_path = $request->getBasePath();
+        if (is_dir($target_directory.$path_info)) {
+            if (substr($path_info, -1) != '/') {
+                // @todo, ganti ke Redirect response.
+                header('Location: ' . $base_path.$path_info.'/');
+                exit;
+            }
+        }
+        if (is_file($target_directory.$path_info)) {
+            $file = $target_directory.$path_info;
+            // @todo, ganti ke Binary response.
+            header('Content-Type: ' . mime_content_type($file));
+            readfile($file);
+            exit;
+        }
+        $config = [
+            'path_info' => $request->getPathInfo(),
+            'base_path' => $request->getBasePath(),
+        ];
+        $config_json = json_encode($config);
+        echo strtr(Template::autoIndex(), ['{{ config.base }}' => $config_json]);
+    }
+    /**
+     *
+     */
+    public static function postHandle(Application $app)
+    {
+        if ($app->request->request->has('action')) {
+            // @todo: Jika tidak ada $_POST['directory'], maka throw error.
+            $current_directory = $target_directory.$app->request->request->get('directory');
+            $action = $app->request->request->get('action');
+            $list_directory = scandir($current_directory);
+            $list_directory = array_diff($list_directory, ['.','..']);
+            switch ($action) {
+                case 'ls':
+                    // Direktori diatas
+                    $old_pwd = getcwd();
+                    chdir($current_directory);
+                    $dotdir_only = glob('.*', GLOB_ONLYDIR);
+                    $dotdir_only = array_diff($dotdir_only, ['.','..']);
+                    $dir_only = glob('*', GLOB_ONLYDIR);
+                    $dir_only = array_merge($dotdir_only, $dir_only);
+                    chdir($old_pwd);
+                    $file_only = array_diff($list_directory, $dir_only);
+                    // sort($dir_only);
+                    // natcasesort($dir_only);
+                    $list_directory = array_merge($dir_only, $file_only);
+                    // Sorting Folder like files.
+                    // $list_directory = array_values($list_directory);
+                    $list_directory_json = json_encode($list_directory);
+                    header("Content-Type: application/json");
+                    echo $list_directory_json;
+                    exit;
+                    break;
+                case 'ls -la':
+                    // Do something.
+                    $ls_la = [];
+                    foreach ($list_directory as $each) {
+                        $_ls_la = [
+                            'name' => $each,
+                            'mtime' => '',
+                            'size' => '',
+                            'type' => '.', // dot means directory
+                        ];
+                        if (is_file($current_directory.$each)) {
+                            $file = $current_directory.$each;
+                            $_ls_la['mtime'] = filemtime($file);
+                            $_ls_la['size'] = filesize($file);
+                            $_ls_la['type'] = pathinfo($file, PATHINFO_EXTENSION);
+                        }
+                        $ls_la[] = $_ls_la;
+                    }
+                    header("Content-Type: application/json");
+                    $ls_la_json = json_encode($ls_la);
+                    echo $ls_la_json;
+                    exit;
+                    break;
+                default:
+                    // Do something.
+                    break;
+            }
+            echo $action;
+        }
+        echo 'abc';
+        // return $this;
+    }
 }
-?><!DOCTYPE html>
+class Template {
+    public static function autoIndex()
+    {
+        return <<<'EOF'
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -384,7 +486,7 @@ if (isset($_POST['action']) && $_POST['action'] == 'ls') {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 <script>
 var MyFolder = MyFolder || {config:{}}
-MyFolder.config = JSON.parse('<?=$config_json?>')
+MyFolder.config = JSON.parse('{{ config.base }}')
 console.log(MyFolder);
 url=MyFolder.config.base_path+MyFolder.config.path_info
 function gotoLink(event) {
@@ -540,3 +642,11 @@ window.onpopstate = (event) => {
 </script>
 </body>
 </html>
+EOF;
+    }
+}
+$app = new Application;
+$app->get('/', [Controller::class, 'getHandle']);
+$app->post('/', [Controller::class, 'postHandle']);
+$app->run();
+?>
