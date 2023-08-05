@@ -13,8 +13,8 @@ EOF;
     }
 }
 class Config {
-    // public static $target_directory = __DIR__;
-    public static $target_directory = '/mnt/c/Windows/System32/drivers';
+    public static $target_directory = __DIR__;
+    // public static $target_directory = '/mnt/c/Windows/System32/drivers';
 }
 // Based on Symfony ParameterBag version 2.8.18.
 class ParameterBag {
@@ -296,8 +296,15 @@ class Response {
         $this->content = $content;
         return $this;
     }
+    public function setStatusCode($code, $text = null)
+    {
+        $this->statusCode = $code;
+    }
     public function send()
     {
+        if ($this->statusCode == 404) {
+            header('HTTP/1.1 404 Not Found');
+        }
         echo $this->content;
     }
 }
@@ -469,22 +476,27 @@ class Controller {
                 $response = new RedirectResponse($url);
                 return $response->send();
             }
+            else {
+                $config = array(
+                    'path_info' => $request->getPathInfo(),
+                    'base_path' => $request->getBasePath(),
+                );
+                $config_json = json_encode($config);
+                $content = strtr(TemplateFile::indexHtml(), array(
+                    '{{ config.base }}' => $config_json,
+                    '{{ config.base_path }}' => $base_path,
+                    ));
+                $response = new Response($content);
+                return $response->send();
+            }
         }
         if (is_file($fullpath)) {
             $response = new BinaryFileResponse($fullpath);
             return $response->send();
         }
-        $config = array(
-            'path_info' => $request->getPathInfo(),
-            'base_path' => $request->getBasePath(),
-        );
-        $config_json = json_encode($config);
-        $content = strtr(TemplateFile::indexHtml(), array(
-            '{{ config.base }}' => $config_json,
-            '{{ config.base_path }}' => $base_path,
-            ));
-        $response = new Response($content);
-        $response->send();
+        $response = new Response;
+        $response->setStatusCode(404);
+        return $response->send();
     }
     /**
      *
@@ -954,4 +966,3 @@ $app->post('/', 'IjorTengab\MyFolder\Controller::ajax');
 $app->get('/___pseudo/{file}', 'IjorTengab\MyFolder\PseudoController::getFile');
 $app->get('/___pseudo/target_directory/{scheme}', 'IjorTengab\MyFolder\PseudoController::getTargetDirectoryFile');
 $app->run();
-?>
