@@ -10,6 +10,35 @@ This project can be extended into your file manager, even into your personal clo
 
 Under active development.
 
+## Demo
+
+http://myfolder.my.id/
+
+## Installation
+
+Just put file `index.php` in your public directory, then access it via browser.
+
+Sample config if you using Nginx for rewrite rules :
+
+```
+server {
+    listen 80;
+    listen [::]:80;
+    root /var/www/myfolder.my.id/web;
+    index index.php;
+    server_name myfolder.my.id;
+    location / {
+        try_files $uri /index.php$is_args$args;
+    }
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/run/php/php8.2-fpm.sock;
+    }
+}
+```
+
+Put `.htaccess` file in same folder of `index.php` if you using Apache as webserver for rewrite rules.
+
 ## Todo
 - [x] OOP Style.
 - [ ] Password for user hacker.
