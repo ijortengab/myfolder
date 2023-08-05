@@ -1,0 +1,6 @@
+[Sat Aug 05 00:05:32 2023] [error] [client 192.168.24.173] PHP Warning:  array_filter() expects at most 2 parameters, 3 given in /home/ijortengab/public_html/myfolder/subfolder/index.php on line 401
+[Sat Aug 05 00:05:32 2023] [error] [client 192.168.24.173] PHP Warning:  array_filter() expects at most 2 parameters, 3 given in /home/ijortengab/public_html/myfolder/subfolder/index.php on line 416
+[Sat Aug 05 00:05:32 2023] [debug] mod_deflate.c(615): [client 192.168.24.173] Zlib: Compressed 2643 to 1002 : URL /myfolder/subfolder/index.php
+[Sat Aug 05 00:05:32 2023] [error] [client 192.168.24.173] PHP Warning:  array_filter() expects at most 2 parameters, 3 given in /home/ijortengab/public_html/myfolder/subfolder/index.php on line 401, referer: https://example.com/myfolder/subfolder/___pseudo/script.js
+[Sat Aug 05 00:05:32 2023] [error] [client 192.168.24.173] PHP Warning:  array_filter() expects at most 2 parameters, 3 given in /home/ijortengab/public_html/myfolder/subfolder/index.php on line 416, referer: https://example.com/myfolder/subfolder/___pseudo/script.js
+[Sat Aug 05 00:05:32 2023] [debug] mod_deflate.c(615): [client 192.168.24.173] Zlib: Compressed 2643 to 1002 : URL /myfolder/subfolder/index.php, referer: https://example.com/myfolder/subfolder/___pseudo/script.js
