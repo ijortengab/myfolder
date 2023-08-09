@@ -1,21 +1,423 @@
 <?php
 namespace IjorTengab\MyFolder;
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+// Credit: https://github.com/symfony/polyfill-php80/blob/1.x/Php80.php
+if (!function_exists('str_contains')) {
+    function str_contains($haystack, $needle) {
+        return false !== strpos($haystack, $needle);
+    }
+}
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle) {
+        return 0 === strncmp($haystack, $needle, \strlen($needle));
+    }
+}
+if (!function_exists('str_ends_with')) {
+    function str_ends_with($haystack, $needle) {
+        $needleLength = \strlen($needle);
+        return 0 === substr_compare($haystack, $needle, -$needleLength);
+    }
+}
+interface EventSubscriberInterface {
+    public static function getSubscribedEvents();
+}
+class BootEvent {
+    const NAME = 'boot.event';
+    public $sysadmin;
+}
 class ConfigFile {
-    /**
-     *
-     */
+    public static $target_directory = __DIR__;
     public static function load()
     {
         return <<<'EOF'
 password=
 EOF;
-        // return $this;
+    }
+    protected $doc;
+    protected $filename;
+    protected $namespace;
+    protected $class;
+    protected $method;
+    protected $has_final_keyword;
+    protected $what_doc;
+    protected $identifier;
+    public function __construct($filename)
+    {
+        $this->filename = $filename;
+    }
+    public function hasFinalKeyword($bool)
+    {
+        $this->has_final_keyword = $bool;
+    }
+    public function nowDocIdentifier($identifier)
+    {
+        $this->what_doc = 'now';
+        $this->identifier = $identifier;
+    }
+    public function hereDocIdentifier($identifier)
+    {
+        $this->what_doc = 'here';
+        $this->identifier = $identifier;
+    }
+    public function setClassName($class, $namespace = null)
+    {
+        $this->namespace = $namespace;
+        $this->class = $class;
+    }
+    public function setStaticMethod($method)
+    {
+        $this->method = $method;
+    }
+    public function get()
+    {
+        if (null === $this->doc) {
+            $this->populateDoc();
+        }
+        return $this->doc;
+    }
+    protected function populateDoc()
+    {
+        $this->doc = '';
+        $reading = fopen($this->filename,'r');
+        $find = (null === $this->namespace) ? 'class_opening' : 'namespace';
+        while (!feof($reading)) {
+            $line = fgets($reading);
+            switch ($find) {
+                case 'namespace':
+                    $string = 'namespace '.$this->namespace.';';
+                    if (str_starts_with($line, $string)) {
+                        $find = 'class_opening';
+                    }
+                    break;
+                case 'class_opening':
+                    $final = $this->has_final_keyword ? 'final ':'';
+                    if (str_starts_with($line, $final.'class '.$this->class.' {')) {
+                        $find = 'method_opening';
+                    }
+                    break;
+                case 'method_opening':
+                    if (str_contains($line, 'public static function '.$this->method)) {
+                        $find = 'heredoc_opening';
+                    }
+                    break;
+                case 'heredoc_opening':
+                    switch ($this->what_doc) {
+                        case 'now':
+                            $string = "<<<'".$this->identifier."'";
+                            break;
+                        case 'here':
+                            $string = '<<<'.$this->identifier;
+                            break;
+                    }
+                    if (str_contains($line, $string)) {
+                        $find = 'heredoc_closing';
+                    }
+                    break;
+                case 'heredoc_closing':
+                    $string = $this->identifier.';';
+                    if (str_starts_with($line, $string)) {
+                        $find = 'method_closing';
+                    }
+                    else {
+                        $this->doc .= $line;
+                    }
+                    break;
+                case 'method_closing':
+                    if (str_contains($line, '}')) {
+                        $find = 'class_closing';
+                    }
+                    break;
+                case 'class_closing':
+                    if (str_starts_with($line, '}')) {
+                        $find = '';
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        fclose($reading);
+    }
+    public function set($data)
+    {
+        if (!is_writable($this->filename)) {
+            throw new WriteException('File is not writable.');
+        }
+        $reading = fopen($this->filename,'r');
+        $temp_file = tempnam(sys_get_temp_dir(), 'MyFolder');
+        $writing = fopen($temp_file,'w');
+        $find = (null === $this->namespace) ? 'class_opening' : 'namespace';
+        while (!feof($reading)) {
+            $line = fgets($reading);
+            switch ($find) {
+                case 'namespace':
+                    fputs($writing, $line);
+                    $string = 'namespace '.$this->namespace.';';
+                    if (str_starts_with($line, $string)) {
+                        $find = 'class_opening';
+                    }
+                    break;
+                case 'class_opening':
+                    fputs($writing, $line);
+                    $final = $this->has_final_keyword ? 'final ':'';
+                    if (str_starts_with($line, $final.'class '.$this->class.' {')) {
+                        $find = 'method_opening';
+                    }
+                    break;
+                case 'method_opening':
+                    fputs($writing, $line);
+                    if (str_contains($line, 'public static function '.$this->method)) {
+                        $find = 'heredoc_opening';
+                    }
+                    break;
+                case 'heredoc_opening':
+                    fputs($writing, $line);
+                    switch ($this->what_doc) {
+                        case 'now':
+                            $string = "<<<'".$this->identifier."'";
+                            break;
+                        case 'here':
+                            $string = '<<<'.$this->identifier;
+                            break;
+                    }
+                    if (str_contains($line, $string)) {
+                        $find = 'heredoc_closing';
+                    }
+                    break;
+                case 'heredoc_closing':
+                    if (str_starts_with($line, $this->identifier.';')) {
+                        $find = 'class_closing';
+                        fputs($writing, $data.PHP_EOL);
+                        fputs($writing, $line);
+                    }
+                    break;
+                case 'class_closing':
+                    fputs($writing, $line);
+                    if (str_starts_with($line, '}')) {
+                        $find = '';
+                    }
+                    break;
+                default:
+                    fputs($writing, $line);
+                    break;
+            }
+        }
+        fclose($reading);
+        fclose($writing);
+        $oldgroup = filegroup($this->filename);
+        rename($temp_file, $this->filename);
+        // Bring back the group, so we still editable this code.
+        chmod($this->filename, 0664);
+        chgrp($this->filename,$oldgroup);
     }
 }
 class Config {
-    public static $target_directory = __DIR__;
-    //public static $target_directory = '/mnt/c/Windows/System32/drivers';
+    private $clear;
+    protected $shortcut;
+    protected $array_storage = array();
+    protected $current_storage;
+    protected $dump_key_storage = array();
+    protected $dump_lines = array();
+    protected $dump_is_indexed_array = false;
+    protected $dump_is_indexed_array_sorted = false;
+    /**
+     * Port of php.net/str_ends_with.
+     * Based on https://github.com/symfony/polyfill-php80/blob/1.x/Php80.php
+     */
+    public function __construct($shortcut = false)
+    {
+        $this->shortcut = $shortcut;
+    }
+    public function __set($a, $b)
+    {
+        if (null === $this->current_storage) {
+            $this->current_storage = &$this->array_storage;
+        }
+        if ($this->shortcut) {
+            if (str_ends_with($a, '__')) {
+                $a = substr($a, 0, -2).'[]';
+            }
+            elseif (str_ends_with($a, '_')) {
+                if (preg_match('/^(.*)_(\d+)_$/',$a, $m)) {
+                    $a = $m[1];
+                    $i = $m[2];
+                    $replacement = '['.$i.']';
+                    $replacement_length = strlen($replacement);
+                    $a = substr($a, 0, -$replacement_length).$replacement;
+                };
+            }
+        }
+        if (str_ends_with($a, '[]')) {
+            // Berarti append.
+            $a = substr($a, 0, -2);
+            $this->current_storage[$a][] = $b;
+        }
+        elseif (str_ends_with($a, ']')) {
+            // Kemungkinan fill indexed array.
+            if (preg_match('/^(.*)\[(\d+)\]$/',$a, $m)) {
+                $a = $m[1];
+                $i = $m[2];
+                $this->current_storage[$a][$i] = $b;
+            };
+        }
+        else {
+            if (!array_key_exists($a, $this->current_storage)) {
+                $this->current_storage[$a] = array();
+            }
+            $this->current_storage[$a] = $b;
+        }
+        $this->current_storage = &$this->clear;
+    }
+    public function __get($a)
+    {
+        if (null === $this->current_storage) {
+            $this->current_storage = &$this->array_storage;
+        }
+        if ($this->shortcut) {
+            if (str_ends_with($a, '_')) {
+                if (preg_match('/^(.*)_(\d+)_$/',$a, $m)) {
+                    $a = $m[1];
+                    $i = $m[2];
+                    $replacement = '['.$i.']';
+                    $replacement_length = strlen($replacement);
+                    $a = substr($a, 0, -$replacement_length).$replacement;
+                };
+            }
+        }
+        if (str_ends_with($a, ']')) {
+            // Kemungkinan fill indexed array.
+            if (preg_match('/^(.*)\[(\d+)\]$/',$a, $m)) {
+                $a = $m[1];
+                $i = $m[2];
+                if (!array_key_exists($a, $this->current_storage)) {
+                    $this->current_storage[$a] = array();
+                }
+                if (!array_key_exists($i, $this->current_storage[$a])) {
+                    $this->current_storage[$a][$i] = array();
+                }
+                $this->current_storage = &$this->current_storage[$a][$i];
+            };
+        }
+        else {
+            if (!array_key_exists($a, $this->current_storage)) {
+                $this->current_storage[$a] = array();
+            }
+            $this->current_storage = &$this->current_storage[$a];
+        }
+        return $this;
+    }
+    public function __toString()
+    {
+        $current = $this->current_storage;
+        $this->current_storage = &$this->clear;
+        if (is_string($current)) {
+            return $current;
+        }
+        if (null === $current) {
+            $array = $this->array_storage;
+            $this->dumpArray($array);
+            return implode(PHP_EOL, $this->dump_lines);
+        }
+        return '';
+    }
+    public function value()
+    {
+        return (string) $this;
+    }
+    public function parse($string)
+    {
+        $lines = explode("\n", $string);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (str_starts_with($line, '.')) {
+                $line = substr($line, 1);
+                $segment = explode(' ', $line);
+                if (count($segment) == 2) {
+                    $address = $segment[0];
+                    $value = $segment[1];
+                    $keys = explode('.', $address);
+                    $last = array_pop($keys);
+                    foreach ($keys as $key) {
+                        $this->$key;
+                    }
+                    $this->$last = $value;
+                }
+            }
+        }
+    }
+    protected function isIndexedArray($array)
+    {
+        $keys = array_keys($array);
+        $filtered = array_filter($keys, 'is_numeric');
+        $return = array_diff($keys, $filtered);
+        if (empty($return)) {
+            $i = 0;
+            do {
+                $aa = current($keys);
+                $bb = $i;
+                if (current($keys) === $i++) {
+                    next($keys);
+                    if (current($keys) === false) {
+                        break;
+                    }
+                    $this->dump_is_indexed_array_sorted = true;
+                    continue;
+                }
+                else{
+                    $this->dump_is_indexed_array_sorted = false;
+                    break;
+                }
+            }
+            while (true);
+            $this->dump_is_indexed_array = true;
+        }
+        else {
+            $this->dump_is_indexed_array = false;
+        }
+        return $this->dump_is_indexed_array;
+    }
+    protected function dumpArray($array)
+    {
+        foreach ($array as $key => $value) {
+            $this->dump_key_storage[] = $key;
+            if (is_array($value)) {
+                if ($this->isIndexedArray($value)) {
+                    $last = array_pop($this->dump_key_storage);
+                    $new_array = array();
+                    $new_indexed_array_sorted = array();
+                    foreach ($value as $key2 => $value2) {
+                        if ($this->dump_is_indexed_array_sorted) {
+                            $new_indexed_array_sorted[] = $value2;
+                        }
+                        else {
+                            $new_array["$last".'['."$key2".']'] = $value2;
+                        }
+                    }
+                    if ($new_array) {
+                        $this->dumpArray($new_array);
+                    }
+                    if ($new_indexed_array_sorted) {
+                        while ($value3 = array_shift($new_indexed_array_sorted)) {
+                            $new_array = array();
+                            $new_array["$last".'[]'] = $value3;
+                            $this->dumpArray($new_array);
+                        }
+                    }
+                }
+                else {
+                    $this->dumpArray($value);
+                }
+            }
+            else {
+                $this->dump_lines[] = '.'.implode('.', $this->dump_key_storage).' '.$value;
+            }
+            array_pop($this->dump_key_storage);
+        }
+    }
 }
+class WriteException extends \Exception {}
 // Based on Symfony ParameterBag version 2.8.18.
 class ParameterBag {
     protected $parameters;
@@ -280,9 +682,7 @@ class Request {
         return false;
     }
 }
-// Credit:
-// - https://symfony.com/doc/2.8/components/http_foundation.html#sending-the-response
-// - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Response.php
+// Credit: https://symfony.com/doc/2.8/components/http_foundation.html#sending-the-response
 class Response {
     protected $content;
     protected $statusCode;
@@ -308,9 +708,7 @@ class Response {
         echo $this->content;
     }
 }
-// Credit:
-//  - https://symfony.com/doc/2.8/components/http_foundation.html#redirecting-the-user
-//  - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/RedirectResponse.php
+// Credit: https://symfony.com/doc/2.8/components/http_foundation.html#redirecting-the-user
 class RedirectResponse extends Response {
     protected $targetUrl;
     public function __construct($url)
@@ -322,9 +720,7 @@ class RedirectResponse extends Response {
         header('Location: ' . $this->targetUrl);
     }
 }
-// Credit:
-// - https://symfony.com/doc/2.8/components/http_foundation.html#serving-files
-// - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/BinaryFileResponse.php
+// Credit: https://symfony.com/doc/2.8/components/http_foundation.html#serving-files
 class BinaryFileResponse extends Response {
     protected $file;
     public function __construct($file)
@@ -337,9 +733,7 @@ class BinaryFileResponse extends Response {
         readfile($this->file);
     }
 }
-// Credit:
-// - https://symfony.com/doc/2.8/components/http_foundation.html#creating-a-json-response
-// - https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/JsonResponse.php
+// Credit: https://symfony.com/doc/2.8/components/http_foundation.html#creating-a-json-response
 class JsonResponse extends Response {
     protected $data;
     public function __construct($data = null)
@@ -357,19 +751,30 @@ class JsonResponse extends Response {
         echo json_encode($this->data);
     }
 }
+// Credit: https://symfony.com/doc/2.8/components/event_dispatcher.html
+class EventDispatcher {
+    protected $storage;
+    public function addSubscriber(EventSubscriberInterface $subscriber)
+    {
+        foreach ($subscriber->getSubscribedEvents() as $event_name => $method) {
+            $this->storage[$event_name][] = array($subscriber, $method);
+        }
+    }
+    public function dispatch($event, $event_name)
+    {
+        foreach ($this->storage[$event_name] as $each) {
+            call_user_func_array($each, array($event));
+        }
+    }
+}
 class Application {
-    public static $request;
+    protected static $http_request;
+    protected static $event_dispatcher;
     protected $register = array();
-    /**
-     *
-     */
     public function post($pathinfo, $callback)
     {
         $this->register['post'][$pathinfo] = $callback;
     }
-    /**
-     *
-     */
     public function get($pathinfo, $callback)
     {
         // @todo, jika ada yang kayak gini:
@@ -378,28 +783,32 @@ class Application {
         // karena gak valid sebagai placeholder.
         $this->register['get'][$pathinfo] = $callback;
     }
-    /**
-     *
-     */
-    public static function getRequest()
+    public static function getHttpRequest()
     {
-        if (null === self::$request) {
-            self::$request = new Request;
+        if (null === self::$http_request) {
+            self::$http_request = new Request;
         }
-        return self::$request;
+        return self::$http_request;
+    }
+    public static function getEventDispatcher()
+    {
+        if (null === self::$event_dispatcher) {
+            self::$event_dispatcher = new EventDispatcher;
+        }
+        return self::$event_dispatcher;
     }
     /**
      * @todo, bagaimana jika path_info terdapat karakter %20. apakah perlu urldecode?.
      */
     public function run()
     {
-        $request = self::getRequest();
-        $request_method = strtolower($request->server->get('REQUEST_METHOD'));
-        $path_info = $request->getPathInfo();
-        if (!isset($this->register[$request_method])) {
+        $http_request = self::getHttpRequest();
+        $http_request_method = strtolower($http_request->server->get('REQUEST_METHOD'));
+        $path_info = $http_request->getPathInfo();
+        if (!isset($this->register[$http_request_method])) {
             throw new Exception('Request Method not found.');
         }
-        $register = $this->register[$request_method];
+        $register = $this->register[$http_request_method];
         do {
             // Filter berdasarkan fix string.
             $register_filtered = array_filter($register, function ($key) use ($path_info) {
@@ -456,8 +865,8 @@ class Application {
 class Controller {
     public static function index()
     {
-        $target_directory = Config::$target_directory;
-        $request = Application::getRequest();
+        $target_directory = ConfigFile::$target_directory;
+        $request = Application::getHttpRequest();
         $path_info = $request->getPathInfo();
         $base_path = $request->getBasePath();
         $fullpath = $target_directory.$path_info;
@@ -468,10 +877,16 @@ class Controller {
                 return $response->send();
             }
             else {
+                $dispatcher = Application::getEventDispatcher();
+                $event = new BootEvent();
+                $dispatcher->dispatch($event, BootEvent::NAME);
                 $config = array(
                     'path_info' => $request->getPathInfo(),
                     'base_path' => $request->getBasePath(),
                 );
+                if ($event->sysadmin == 'register') {
+                    $config['register'] = true;
+                }
                 $config_json = json_encode($config);
                 $content = strtr(TemplateFile::indexHtml(), array(
                     '{{ config.base }}' => $config_json,
@@ -489,13 +904,10 @@ class Controller {
         $response->setStatusCode(404);
         return $response->send();
     }
-    /**
-     *
-     */
     public static function ajax()
     {
-        $target_directory = Config::$target_directory;
-        $request = Application::getRequest();
+        $target_directory = ConfigFile::$target_directory;
+        $request = Application::getHttpRequest();
         if ($request->request->has('action')) {
             // @todo: Jika tidak ada $_POST['directory'], maka throw error.
             $current_directory = $target_directory.$request->request->get('directory');
@@ -571,8 +983,8 @@ class PseudoController extends Controller {
     {
         switch ($scheme) {
             case 'public':
-                $target_directory = Config::$target_directory;
-                $request = Application::getRequest();
+                $target_directory = ConfigFile::$target_directory;
+                $request = Application::getHttpRequest();
                 $path = $request->query->get('path');
                 $fullpath = $target_directory.$path;
                 if (is_file($fullpath)) {
@@ -611,6 +1023,32 @@ class TemplateFile {
       </button>
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <!-- <li class="nav-item"> -->
+            <!-- <a class="nav-link active" aria-current="page" href="#"><i class="bi bi-box-arrow-in-right"></i> Login</a> -->
+          <!-- </li> -->
+          <li class="nav-item">
+            <a class="nav-link" href="#">Dashboard</a>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              View
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">List</a></li>
+              <li><a class="dropdown-item" href="#">Details</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Custom</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled">Switch</a>
+          </li>
+        </ul>
+        <form class="d-flex" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+        </ul>
       </div>
     </div>
   </nav>
@@ -647,7 +1085,44 @@ class TemplateFile {
     </tr>
   </tbody>
 </table>
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Create Account</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Welcome, SysAdmin.</p>
+        <p>Create account for yourself before continue.</p>
+        <form>
+          <!-- <div class="mb-3"> -->
+            <!-- <label for="recipient-name" class="col-form-label">Username:</label> -->
+            <!-- <input type="text" class="form-control" name="sysadmin.name" id="recipient-name"> -->
+          <!-- </div> -->
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Username</span>
+            <input required name="sysadminName" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          </div>
+          <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
+            <input required name="sysadminPassword" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+          </div>
+          <!-- <div class="mb-3"> -->
+            <!-- <label for="message-text" class="col-form-label">Password:</label> -->
+            <!-- <input type="text" class="form-control" name="sysadmin.password" id="recipient-password"> -->
+          <!-- </div> -->
+        </form>
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+        <button id="create-account-next" type="submit" class="btn btn-primary">Next</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js" integrity="sha384-fbbOQedDUMZZ5KreZpsbe1LCZPVmfTnH7ois6mU1QK+m14rQ1l2bGBq41eYeM/fS" crossorigin="anonymous"></script>
 <script>
 var MyFolder = MyFolder || {config:{}}
@@ -659,9 +1134,6 @@ MyFolder.config = JSON.parse('{{ config.base }}')
 </html>
 EOF;
     }
-    /**
-     *
-     */
     public static function scriptJs()
     {
         return <<<'EOF'
@@ -948,12 +1420,198 @@ window.onpopstate = (event) => {
     MyFolder.config.path_info = path_info
     refreshDirectory()
 };
+var options= {
+    backdrop: 'static',
+    keyboard: false
+};
+const myModal = new bootstrap.Modal(document.getElementById('exampleModal'), options)
+const myModalEl = document.getElementById('exampleModal')
+console.log(myModal);
+if (typeof MyFolder.config.register !== 'undefined') {
+    console.log('mantabkoh');
+    myModal.show();
+    myModalEl.addEventListener('shown.bs.modal', event => {
+      // do something...
+      console.log(this);
+      $('#create-account-next').on('click', function (e) {
+          // console.log(e);
+          // console.log('abc');
+          this.disabled = true
+          this.innerText = 'Waiting'
+          //$.post().
+          let sysadminName = $('#exampleModal').find('[name=sysadminName]')[0].value;
+          let sysadminPassword = $('#exampleModal').find('[name=sysadminPassword]')[0].value;
+          console.log(sysadminName);
+          console.log(sysadminPassword);
+          // myModal.hide();
+          // $('#exampleModal').find('form').submit();
+          senddonk(sysadminName, sysadminPassword);
+          // todo, tidka boleh kosong.
+      })
+    })
+}
+function senddonk(n,p) {
+    url=MyFolder.config.base_path+'/___pseudo/user/create'
+    var sed = $.ajax({
+      type: "POST",
+      url: url,
+      data: {
+        action: 'sed',
+        name: n,
+        pass: p
+      }
+    });
+    sed.done(function (data) {
+        console.log(data);
+        if (data.success) {
+            myModal.hide();
+        }
+    });
+}
 EOF;
     }
 }
+class FileOperations {
+    protected $path;
+    protected $base_name;
+    public function __construct($path = null)
+    {
+        if (null === $path) {
+            $path = __FILE__;
+        }
+        $this->path = $path;
+        return $this;
+    }
+    public function getOwner()
+    {
+        if (!file_exists($this->path)) {
+            $this->autoCreate();
+        }
+        $owner = fileowner($file);
+        $owner_info = posix_getpwuid($fileowner);
+        $owner_name = '';
+        if (is_array($owner_info)) {
+            $owner_name = $owner_info['name'];
+        }
+        return $owner_name;
+    }
+    public function getBaseName()
+    {
+        if (null === $this->base_name) {
+            $this->base_name = basename($this->path);
+        }
+        return $this->base_name;
+    }
+    /**
+     *
+     */
+    public function autoCreate()
+    {
+        // @todo.
+        // mkdir -p dirname(path)
+        // touch path
+    }
+    /**
+     *
+     */
+    public static function createTemporary()
+    {
+        // return $this;
+    }
+}
+class UserController {
+    /**
+     *
+     */
+    public function __construct()
+    {
+        // return $this;
+    }
+    /**
+     *
+     */
+    public static function create()
+    {
+        $http_request = Application::getHttpRequest();
+        $sysadmin_name = $http_request->request->get('name');
+        $sysadmin_pass = $http_request->request->get('pass');
+        $config = new Config;
+        $config->sysadmin->name = $sysadmin_name;
+        $config->sysadmin->pass = $sysadmin_pass;
+        $editor = new ConfigFile(__FILE__);
+        $editor->setClassName('SysAdmin', 'IjorTengab\MyFolder\Module\SysAdmin');
+        $editor->hasFinalKeyword(true);
+        $editor->nowDocIdentifier('EOF');
+        $editor->setStaticMethod('credentials');
+        $editor->set($config);
+        $response = new JsonResponse(array(
+            'success' => true,
+            'log' => 'Success'
+        ));
+        $response->send();
+    }
+}
+namespace IjorTengab\MyFolder\Module\SysAdmin;
+use IjorTengab\MyFolder\Application;
+use IjorTengab\MyFolder\EventSubscriberInterface;
+use IjorTengab\MyFolder\BootEvent;
+use IjorTengab\MyFolder\Config;
+use IjorTengab\MyFolder\WriteException;
+use IjorTengab\MyFolder\ConfigFile;
+final class SysAdmin {
+    public static function credentials()
+    {
+        return <<<'EOF'
+.sysadmin.name
+.sysadmin.pass
+EOF;
+    }
+}
+class BootSubscriber implements EventSubscriberInterface {
+    public static function getSubscribedEvents()
+    {
+        return array(
+            BootEvent::NAME => 'onBootEvent',
+        );
+    }
+    public static function onBootEvent(BootEvent $event)
+    {
+        $editor = new ConfigFile(__FILE__);
+        $editor->setClassName('SysAdmin', 'IjorTengab\MyFolder\Module\SysAdmin');
+        $editor->hasFinalKeyword(true);
+        $editor->nowDocIdentifier('EOF');
+        $editor->setStaticMethod('credentials');
+        $config = new Config;
+        $config->parse($editor->get());
+        $name = $config->sysadmin->name->value();
+        $pass = $config->sysadmin->pass->value();
+        if (empty($pass)) {
+            $event->sysadmin = 'register';
+        }
+    }
+}
+$dispatcher = Application::getEventDispatcher();
+$subscriber = new BootSubscriber();
+$dispatcher->addSubscriber($subscriber);
+namespace IjorTengab\MyFolder;
+// $process_user = posix_getpwuid(posix_geteuid());
+// $process_user_name = $process_user['name'];
+// $file = new FileOperations;
+// echo sprintf('The PHP process run as user %s. This file: %s, owned by %s.', $process_user_name, $file->getBaseName(), $file->getOwner());
+// $temp = FileOperations::createTemporary();
+// phpinfo();
+// @todo, jika user tidak bisa write, dan mau tetap menjadikan sebagai browsing
+// directory listing, maka buat kode di local storage.
+// $file = __FILE__;
+// $basename = basename($file);
+// $fileowner = fileowner($file);
+// $fileownername = posix_getpwuid($fileowner)['name'];
+// $request = Application::getHttpRequest();
+// $user = $request->server->get('USER');
 $app = new Application;
 $app->get('/', 'IjorTengab\MyFolder\Controller::index');
 $app->post('/', 'IjorTengab\MyFolder\Controller::ajax');
 $app->get('/___pseudo/{file}', 'IjorTengab\MyFolder\PseudoController::getFile');
 $app->get('/___pseudo/target_directory/{scheme}', 'IjorTengab\MyFolder\PseudoController::getTargetDirectoryFile');
+$app->post('/___pseudo/user/create', 'IjorTengab\MyFolder\UserController::create');
 $app->run();
