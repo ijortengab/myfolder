@@ -1,14 +1,12 @@
-
-
 Developer Task:
 --------------
 
 - [x] Pastikan user bisa mengakses route `/index.php/___pseudo/user/login`
       karena secara UX, ada saja user yang menge-klik open in new tab.
       File yang perlu dikerjakan adalah `/src/MyFolder/Module/User/UserController.php`.
-- [ ] Pastikan property `lastIndexShown` pada object Modal dapat diisi.
-- [ ] Lorem ipsum.
-- [ ] Lorem ipsum.
+- [x] Pastikan property `lastIndexShown` pada object Modal dapat diisi.
+- [ ] Buat module Dashboard. Pastikan terdaftar pada event.
+- [ ] Tombol logout kita set hanya ada di dashboard.
 
 01-myfolder-as-directory-listing/index.php
 02-myfolder-as-filemanager/index.php
