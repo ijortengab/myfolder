@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>MyFolder</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+{% for url in css %}
+<link href="{{ url }}" rel="stylesheet">
+{% endfor %}
+<link rel="icon" type="image/svg+xml" href="{{ settings.basePath }}/___pseudo/assets/index/favicon.svg">
+</head>
+<body>
+<div class="sticky-top">
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+      <img src="{{ settings.basePath }}/___pseudo/assets/index/favicon.svg" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+      MyFolder
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          {% for item in list %}
+            {{ item }}
+          {% endfor %}
+          <li class="nav-item">
+            <a class="nav-link" data-myfolder-toggle="modal" data-myfolder-modal-name='dashboard' href="/dashboard">Dashboard</a>
+            <!-- <a class="nav-link" data-myfolder-toggle="offcanvas" data-myfolder-offcanvas-name='dashboardAuth' href="/dashboard">Dashboard</a> -->
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              View
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">List</a></li>
+              <li><a class="dropdown-item" href="#">Details</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Custom</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link disabled">Switch</a>
+          </li>
+        </ul>
+
+        <form class="d-flex" role="search">
+          <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
+          <button class="btn btn-outline-success" type="submit">Search</button>
+        </form>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid bg-body-secondary">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#"><i class="bi bi-house-door"></i></a></li>
+      </ol>
+    </nav>
+  </div>
+</div>
+<table id="table-main" class="table" data-toggle="table" data-search="true">
+  <thead>
+    <tr>
+      <th scope="col" data-field="id">#</th>
+      <th scope="col" data-field="name">Name</th>
+      <th scope="col" data-field="date-modified">Date Modified</th>
+      <th scope="col" data-field="date-modified">Type</th>
+      <th scope="col" data-field="date-modified">Size</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row">&nbsp;</th>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th scope="row">&nbsp;</th>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+    </tr>
+    <tr>
+      <th scope="row">&nbsp;</th>
+      <td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<div class="modal fade" id="ModalPrimary" tabindex="-1" aria-labelledby="ModalPrimaryLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="ModalPrimaryLabel"></h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <!-- <button id="create-account-next" type="submit" class="btn btn-primary">...</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="ModalSecondary" aria-hidden="true" aria-labelledby="ModalSecondaryLabel" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="ModalSecondaryLabel">...</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <!-- <button class="btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal">Open second modal</button> -->
+        <button id="w" type="submit" class="btn btn-ligth" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="offcanvas offcanvas-start " tabindex="-1" id="OffcanvasPrimary" aria-labelledby="offcanvasExampleLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasExampleLabel">Offcanvas</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    <div>
+      Some text as placeholder. In real life you can have the elements you have chosen. Like, text, images, lists, etc.
+    </div>
+    <div class="dropdown mt-3">
+      <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+        Dropdown button
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="#">Action</a></li>
+        <li><a class="dropdown-item" href="#">Another action</a></li>
+        <li><a class="dropdown-item" href="#">Something else here</a></li>
+      </ul>
+    </div>
+  </div>
+</div>
+<div class="offcanvas offcanvas-top" tabindex="-1" id="OffcanvasSecondary" aria-labelledby="offcanvasTopLabel">
+  <div class="offcanvas-header">
+    <h5 class="offcanvas-title" id="offcanvasTopLabel">Offcanvas top</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  <div class="offcanvas-body">
+    ...
+  </div>
+</div>
+<script>
+window.settings = JSON.parse('{{ settings.global }}');
+</script>
+{% for url in js %}
+<script src="{{ url }}"></script>
+{% endfor %}
+<script>
+//const abc = new bootstrap.Offcanvas('#offcanvasTop')
+//abc.toggle()
+</script>
+</body>
+</html>

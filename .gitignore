@@ -1,6 +1,2 @@
-src/var/www/project/myfolder.my.id/.htpasswd
-src/var/www/project/myfolder.my.id/scripts/InstaGallery/index.php
-src/var/www/project/myfolder.my.id/scripts/tinyfilemanager/config.admin.php
-src/var/www/project/myfolder.my.id/scripts/tinyfilemanager/tinyfilemanager.php
-src/var/www/project/myfolder.my.id/scripts/tinyfilemanager/translation.json
-src/var/www/project/myfolder.my.id/scripts/config.local.php
+/assets/npm/
+/vendor/

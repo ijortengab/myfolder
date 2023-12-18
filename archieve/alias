@@ -1,3 +1,0 @@
-# how to use:
-# . alias
-alias php53="git diff --no-index index.php php5.3/index.php"

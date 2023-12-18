@@ -1,0 +1,24 @@
+{
+    "name": "ijortengab/myfolder",
+    "description": "MyFolder is Single file PHP for directory listing. This project aims to be elegant version of directory listing by apache or nginx. This project can be extended into your file manager, even into your personal cloud storage.",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "IjorTengab",
+            "email": "ijortengab@gmail.com",
+            "homepage": "http://github.com/ijortengab"
+        }
+    ],
+    "require": {
+    },
+    "autoload": {
+        "psr-4": {"IjorTengab\\MyFolder\\": "src/MyFolder/"}
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ijortengab/myfolder"
+        }
+    ]
+}
