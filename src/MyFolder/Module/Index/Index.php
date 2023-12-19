@@ -21,5 +21,6 @@ class Index implements ModuleInterface
 
         // Register route.
         $app->post('/index', 'IjorTengab\MyFolder\Module\Index\IndexController::index');
+        $app->get('/dashboard', 'IjorTengab\MyFolder\Module\Index\IndexController::dashboard');
     }
 }

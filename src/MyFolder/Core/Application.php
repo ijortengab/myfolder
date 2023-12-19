@@ -74,9 +74,14 @@ class Application
     }
     public function run()
     {
-        $this->handle();
-        $this->scanModule();
-        $this->route();
+        try {
+            $this->handle();
+            $this->scanModule();
+            $this->route();
+        }
+        catch (\Exception $e) {
+            die($e->getMessage());
+        }
     }
     protected function handle()
     {
@@ -93,7 +98,6 @@ class Application
         $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/target_directory/{scheme}', 'IjorTengab\MyFolder\Core\PseudoController::getTargetDirectoryFile');
-        $this->get('/dashboard', 'IjorTengab\MyFolder\Core\DashboardController::index');
     }
 
     protected function scanModule()
@@ -125,7 +129,7 @@ class Application
         $method = strtolower($http_request->server->get('REQUEST_METHOD'));
         $path_info = $http_request->getPathInfo();
         if (!isset($this->register[$method])) {
-            throw new Exception('Request Method not found.');
+            throw new RouteException('Request Method not found.');
         }
         $register = $this->register[$method];
         if (str_starts_with($path_info, '/___pseudo')) {
@@ -192,6 +196,11 @@ class Application
         if (!empty($args)) {
             $args = array_values($args);
         }
+        if (!is_callable($callback)) {
+            throw new RouteException('Callback is not exists.');
+        }
+        // $debugname = 'callback'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
+        
         call_user_func_array($callback, $args);
     }
     protected function loadSession(Request $http_request)

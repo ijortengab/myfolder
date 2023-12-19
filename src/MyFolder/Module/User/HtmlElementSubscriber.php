@@ -16,7 +16,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
     public static function onHtmlElementEvent(HtmlElementEvent $event)
     {
         $user = new UserSession;
-        if (!$user->isAuthenticated()) {
+        if ($user->isAnonymous()) {
             $event->addList('user.login', new Template\NavbarListLogin, array(
                 'label' => 'Log in',
             ));

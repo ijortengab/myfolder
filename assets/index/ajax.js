@@ -65,6 +65,9 @@ MyFolder.ajax.command = function (context, options) {
         case 'append':
             $(options.selector, context).append(options.html);
             break;
+        case 'addClass':
+            $(options.selector, context).addClass(options.value);
+            break;
         case 'script':
             options.ajax.dataType = 'script'
             if ('url' in options.ajax) {

@@ -14,6 +14,12 @@ class HtmlElementSubscriber implements EventSubscriberInterface
     }
     public static function onHtmlElementEvent(HtmlElementEvent $event)
     {
+        $event->addList('index.dashboard', new Template\NavbarListDashboard, array(
+            'label' => 'Dashboard',
+            'url' => '/dashboard',
+            'modal' => array('name' => 'dashboard'),
+        ));
+
         // External.
         $event->addJs('jquery', 'https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js');
         $event->addJs('jquery.once', 'https://cdn.jsdelivr.net/npm/jquery-once@2.2.3/jquery.once.min.js');

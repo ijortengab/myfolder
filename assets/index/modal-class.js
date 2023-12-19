@@ -25,8 +25,6 @@ MyFolder.modal.prototype.toggle = function (name) {
         this.isLastModal = true;
     }
     const self = this;
-    console.log('name:'+name);
-    debug(name);
     if (typeof name !== 'undefined') {
         console.log('>this.reset();');
         this.reset();
@@ -72,13 +70,16 @@ MyFolder.modal.prototype.toggle = function (name) {
             .setTitle(title)
             .setBody(body)
             .setFooter(footer);
+        // @todo, gabung aja nih.
         if ('fetch' in ref.layout) {
             MyFolder.fetch(ref.layout.fetch);
         }
         else {
             MyFolder.attachBehaviors(this.currentModal._element);
         }
-
+        if ('ajax' in ref.layout) {
+            MyFolder.ajax.command(this.currentModal._element, ref.layout.ajax)
+        }
         // if ('ajax' in ref.layout) {
             // if ('url' in ref.layout.ajax) {
                 // if (!('isPseudo' in ref.layout.ajax)) {

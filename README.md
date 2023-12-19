@@ -5,7 +5,7 @@ Developer Task:
       karena secara UX, ada saja user yang menge-klik open in new tab.
       File yang perlu dikerjakan adalah `/src/MyFolder/Module/User/UserController.php`.
 - [x] Pastikan property `lastIndexShown` pada object Modal dapat diisi.
-- [ ] Buat module Dashboard. Pastikan terdaftar pada event.
+- [x] Buat fitur Dashboard. 
 - [ ] Tombol logout kita set hanya ada di dashboard.
 
 01-myfolder-as-directory-listing/index.php

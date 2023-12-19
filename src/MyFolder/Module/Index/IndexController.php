@@ -134,4 +134,61 @@ class IndexController
         $response = new Response($content);
         return $response->send();
     }
+
+    /**
+     *
+     */
+    public static function dashboard()
+    {
+        $http_request = Application::getHttpRequest();
+        $is_ajax = null === $http_request->query->get('is_ajax') ? false : true ;
+        $is_ajax ? self::routeDashboardGetAjax() : self::routeDashboardGet();
+    }
+
+    protected static function routeDashboardGet()
+    {
+        return IndexController::index();
+    }
+
+    protected static function routeDashboardGetAjax()
+    {
+        $commands = array();
+        $title = 'Dashboard';
+        $body = '';//(string) (new Template\UserLoginFormBody);
+        $footer = '';//(string) (new Template\UserLoginFormFooter);
+        $commands[] = array(
+            'command' => 'modal',
+            'options' => array(
+                'name' => 'dashboard',
+                'bootstrapOptions' => array(
+                    'backdrop' => 'static',
+                    'keyboard' => true
+                ),
+                'layout' => array(
+                    'title' => $title,
+                    'body' => array(
+                        'html' => $body,
+                    ),
+                    'footer' => array(
+                        'html' => $footer,
+                    ),
+                    'ajax' => array(
+                        'method' => 'addClass',
+                        'selector' => '.modal-dialog',
+                        'value' => 'modal-fullscreen',
+                    ),
+                ),
+            ),
+        );
+        // $commands[] = array(
+            // 'command' => 'ajax',
+            // 'options' => array(
+            // ),
+        // );
+
+        $response = new JsonResponse(array(
+            'commands' => $commands,
+        ));
+        return $response->send();
+    }
 }
