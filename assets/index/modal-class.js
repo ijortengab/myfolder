@@ -80,44 +80,22 @@ MyFolder.modal.prototype.toggle = function (name) {
         if ('ajax' in ref.layout) {
             MyFolder.ajax.command(this.currentModal._element, ref.layout.ajax)
         }
-        // if ('ajax' in ref.layout) {
-            // if ('url' in ref.layout.ajax) {
-                // if (!('isPseudo' in ref.layout.ajax)) {
-                    // ref.layout.ajax.isPseudo = false;
-                // }
-                // if (!ref.layout.ajax.isPseudo) {
-                    // let url = MyFolder.pseudoLink(ref.layout.ajax.url);
-                    // ref.layout.ajax.url = url;
-                    // ref.layout.ajax.isPseudo = true;
-                // }
-            // }
-            // MyFolder.ajax(this.currentModal._element, ref.layout.ajax);
-        // }
-        // else {
-            // MyFolder.attachBehaviors(this.currentModal._element);
-        // }
     }
     const myModalEl = this.currentModal._element
     myModalEl.addEventListener('shown.bs.modal', event => {
-        console.log('Event listened shown.bs.modal.');
         let object = MyFolder.modal.load();
         MyFolder.modal.registry.lastIndexShown = object.currentIndex
-        debug(object);
     })
     myModalEl.addEventListener('hidden.bs.modal', event => {
-        console.log('Event listened hidden.bs.modal.');
-        let object = MyFolder.modal.load();
-        debug(object);
-        if (object.isLastModal) {
-            object.reset();
+        let that = MyFolder.modal.load();
+        // Delete all accesories.
+        $(that.currentModal._dialog).removeClass('modal-fullscreen modal-sm modal-lg modal-xl');
+        if (that.isLastModal) {
+            that.reset();
         }
-        debug(object);
     })
-
-    console.log('> this.currentModal.toggle();');
     this.currentModal.toggle();
     if (typeof this.otherModal !== 'undefined') {
-        console.log('> this.otherModal.toggle();');
         this.otherModal.toggle();
     }
 }
@@ -138,9 +116,12 @@ MyFolder.modal.prototype.setSize = function (size) {
         case 'Extra large':
             var classAdded = 'modal-xl';
             break;
+        case 'Fullscreen':
+            var classAdded = 'modal-fullscreen';
+            break;
     }
     if (classAdded !== '') {
-        $(this.currentModal._dialog).removeClass('modal-sm modal-lg modal-xl').addClass(classAdded);
+        $(this.currentModal._dialog).addClass(classAdded);
     }
     return this;
 }
