@@ -27,7 +27,7 @@ class HtmlElementEvent extends Event
      */
     public function addCss($id, $url)
     {
-        if (!array_key_exists($id, $this->js)) {
+        if (!array_key_exists($id, $this->css)) {
             $this->css[$id] = $url;
         }
         return $this;
