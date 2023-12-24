@@ -3,12 +3,9 @@
  */
 MyFolder.behaviors.modal = {
     attach: function (context, settings) {
-        console.log('|-MyFolder.behaviors.modal.attach(context, settings)');
+        // console.log('|-MyFolder.behaviors.modal.attach(context, settings)');
         let init = false;
         let next = false;
-        let name = undefined;
-        let datasetModal = false;
-        let datasetHasModalName = false;
         const registry = MyFolder.modal.registry
         if (registry.byQueue.length == 0) {
             init = true;
@@ -32,12 +29,15 @@ MyFolder.behaviors.modal = {
             }
         }
         if (init && registry.byQueue.length > 0) {
-            console.log('|- > MyFolder.modal.load().toggle();');
+            // console.log('|- > MyFolder.modal.load().toggle();');
             MyFolder.modal.load().toggle();
         }
         else if (next) {
-            console.log('|- > MyFolder.modal.load().next();');
-            MyFolder.modal.load().next();
+            // console.log('|- > MyFolder.modal.load().next();');
+            const self = MyFolder.modal.load();
+            // Sembunyikan agar trigger event hide untuk menjalankan
+            // method ::next();
+            self.currentModal.hide();
         }
     }
 }
@@ -49,8 +49,7 @@ MyFolder.modal.registry = {
     byName: {},
     // Isi dari array byQueue adalah object info dari modal,
     // atau string name yang merujuk ke infomasi yang ada di byName.
-    byQueue: [],
-    lastIndexShown: -1
+    byQueue: []
 };
 
 /**
@@ -62,7 +61,7 @@ MyFolder.modal.registry = {
  */
 MyFolder.modal.register = function (info) {
     const registry = MyFolder.modal.registry
-    if ("name" in info) {
+    if (typeof info === 'object' && "name" in info) {
         let name = info.name;
         if (!(name in registry.byName)) {
             registry.byName[name] = info;
@@ -81,15 +80,15 @@ MyFolder.modal.register = function (info) {
     else {
         registry.byQueue.push(info);
     }
-
 }
 
 /**
- * Static function `MyFolder\modal::register()`.
+ * Static function `MyFolder\modal::load()`.
  *
  * @param info
  *
- * Menambahkan informasi modal kedalam registry.
+ * Menciptakan static property `MyFolder\modal::$instance`, kemudian
+ * mengisinya dengan object dari class `MyFolder\modal`.
  */
 MyFolder.modal.load = function () {
     if (!("instance" in MyFolder.modal)) {
