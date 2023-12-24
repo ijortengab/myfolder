@@ -7,4 +7,3 @@ namespace IjorTengab\MyFolder\Module\User;
  * .sysadmin.pass aa
  */
 final class Config {}
-        

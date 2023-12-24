@@ -7,7 +7,6 @@ MyFolder.modal = function () {
     this.currentIndex = 0;
     this.currentName;
     this.currentModal;
-    this.otherModal;
     this.primary;
     this.secondary;
     this.isLastModal = false;
@@ -51,7 +50,6 @@ MyFolder.modal.prototype.reset = function () {
     this.currentName = undefined;
     this.registry.byQueue = [];
     this.currentModal = undefined;
-    this.otherModal = undefined;
     this.primary = undefined;
     this.secondary = undefined;
     this.isLastModal = false;
@@ -80,15 +78,12 @@ MyFolder.modal.prototype.toggle = function (name) {
     else if (typeof this.secondary === 'undefined') {
         this.secondary = new bootstrap.Modal('#ModalSecondary', modalOptions);
         this.currentModal = this.secondary;
-        this.otherModal = this.primary;
     }
     else if (this.currentModal._element.id == 'ModalSecondary') {
         this.currentModal = this.primary;
-        this.otherModal = this.secondary;
     }
     else {
         this.currentModal = this.secondary;
-        this.otherModal = this.primary;
     }
     if ('layout' in ref) {
         let size = ('size' in ref.layout) ? ref.layout.size : '';

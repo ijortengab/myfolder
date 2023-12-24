@@ -17,7 +17,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         $event->addList('index.dashboard', new Template\NavbarListDashboard, array(
             'label' => 'Dashboard',
             'url' => '/dashboard',
-            'modal' => array('name' => 'dashboard'),
+            'offcanvas' => array('name' => 'dashboard'),
         ));
 
         // External.
@@ -34,5 +34,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         $event->addJs('local.ajax', '{{ settings.basePath }}/___pseudo/assets/index/ajax.js');
         $event->addJs('local.modal-class', '{{ settings.basePath }}/___pseudo/assets/index/modal-class.js');
         $event->addJs('local.modal', '{{ settings.basePath }}/___pseudo/assets/index/modal.js');
+        $event->addJs('local.offcanvas-class', '{{ settings.basePath }}/___pseudo/assets/index/offcanvas-class.js');
+        $event->addJs('local.offcanvas', '{{ settings.basePath }}/___pseudo/assets/index/offcanvas.js');
     }
 }

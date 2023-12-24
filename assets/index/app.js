@@ -97,9 +97,9 @@ MyFolder.behaviors.pseudoLink = {
  *
  * Menambahkan informasi modal kedalam registry.
  */
-MyFolder.behaviors.toggleModal = {
+MyFolder.behaviors.toggleBootstrapComponent = {
     attach: function (context, settings) {
-        console.log('|-MyFolder.behaviors.toggleModal.attach(context, settings)');
+        console.log('|-MyFolder.behaviors.toggleBootstrapComponent.attach(context, settings)');
         $('[data-myfolder-toggle=modal]').once('myfolder-modal').on('click', function () {
             event.preventDefault();
             let datasetModal = false;
@@ -119,6 +119,39 @@ MyFolder.behaviors.toggleModal = {
                 if (name in MyFolder.modal.load().registry.byName) {
                     console.log('> MyFolder.modal.load().toggle(name);');
                     MyFolder.modal.load().toggle(name);
+                }
+                else {
+                    // Cari tahu link nya.
+                    url = $(this).attr('href');
+                    // MyFolder.ajax(this, url);
+                    let info = {
+                        url: url,
+                        _pseudoLink: true
+                    }
+                    console.log('> MyFolder.fetch(info);');
+                    MyFolder.fetch(info);
+                }
+            }
+        });
+        $('[data-myfolder-toggle=offcanvas]').once('myfolder-offcanvas').on('click', function () {
+            event.preventDefault();
+            let datasetOffcanvas = false;
+            let datasetHasOffcanvasName = false;
+            if ("dataset" in this) {
+                if ("myfolderToggle" in this.dataset) {
+                    if (this.dataset.myfolderToggle == 'offcanvas') {
+                        datasetOffcanvas = true;
+                    }
+                }
+                if ("myfolderOffcanvasName" in this.dataset) {
+                    datasetHasOffcanvasName = true;
+                    name = this.dataset.myfolderOffcanvasName
+                }
+            }
+            if (datasetOffcanvas && datasetHasOffcanvasName) {
+                if (name in MyFolder.offcanvas.load().registry.byName) {
+                    console.log('> MyFolder.offcanvas.load().toggle(name);');
+                    MyFolder.offcanvas.load().toggle(name);
                 }
                 else {
                     // Cari tahu link nya.

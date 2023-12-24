@@ -147,17 +147,26 @@ class IndexController
 
     protected static function routeDashboardGet()
     {
+
+        $event = IndexEvent::load();
+        $event->setCommand(array(
+            'command' => 'fetch',
+            'options' => array(
+                'url' => '/dashboard',
+            ),
+        ));
         return IndexController::index();
+
     }
 
     protected static function routeDashboardGetAjax()
     {
         $commands = array();
         $title = 'Dashboard';
-        $body = '';//(string) (new Template\UserLoginFormBody);
+        $body = (string) (new Template\DashboardBody);
         $footer = '';//(string) (new Template\UserLoginFormFooter);
         $commands[] = array(
-            'command' => 'modal',
+            'command' => 'offcanvas',
             'options' => array(
                 'name' => 'dashboard',
                 'bootstrapOptions' => array(
@@ -165,18 +174,19 @@ class IndexController
                     'keyboard' => true
                 ),
                 'layout' => array(
-                    'title' => $title,
-                    'body' => array(
-                        'html' => $body,
-                    ),
-                    'footer' => array(
-                        'html' => $footer,
-                    ),
-                    'ajax' => array(
-                        'method' => 'addClass',
-                        'selector' => '.modal-dialog',
-                        'value' => 'modal-fullscreen',
-                    ),
+                    // 'size' => 'Fullscreen',
+                    // 'title' => $title,
+                    // 'body' => array(
+                        // 'html' => $body,
+                    // ),
+                    // 'footer' => array(
+                        // 'html' => $footer,
+                    // ),
+                    // 'ajax' => array(
+                        // 'method' => 'addClass',
+                        // 'selector' => '.modal-dialog',
+                        // 'value' => 'modal-fullscreen',
+                    // ),
                 ),
             ),
         );
