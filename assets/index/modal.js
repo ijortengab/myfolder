@@ -3,30 +3,28 @@
  */
 MyFolder.behaviors.modal = {
     attach: function (context, settings) {
-        // console.log('|-MyFolder.behaviors.modal.attach(context, settings)');
+        console.log('|-MyFolder.behaviors.modal.attach(context, settings)');
         let init = false;
         let next = false;
         const registry = MyFolder.modal.registry
         if (registry.byQueue.length == 0) {
             init = true;
         }
-        if (typeof settings == 'object') {
-            if ('commands' in settings) {
-                settings.commands.forEach(function (value, key, array) {
-                    switch (value.command) {
-                        case 'modal':
-                            if (!('_processed' in value)) {
-                                value._processed = false;
-                            }
-                            if (!value._processed) {
-                                value._processed = true;
-                                MyFolder.modal.register(value.options);
-                                next = true;
-                            }
-                            break;
-                    }
-                })
-            }
+        if (typeof settings == 'object' && 'commands' in settings) {
+            settings.commands.forEach(function (value, key, array) {
+                switch (value.command) {
+                    case 'modal':
+                        if (!('_processed' in value)) {
+                            value._processed = false;
+                        }
+                        if (!value._processed) {
+                            value._processed = true;
+                            MyFolder.modal.register(value.options);
+                            next = true;
+                        }
+                        break;
+                }
+            })
         }
         if (init && registry.byQueue.length > 0) {
             // console.log('|- > MyFolder.modal.load().toggle();');

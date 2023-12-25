@@ -174,6 +174,12 @@ class IndexController
                     'keyboard' => true
                 ),
                 'layout' => array(
+                    'fetch' => '/dashboard/body',
+                    'title' => 'Dashboard',
+                    'body' => 'Loading...',
+                    'footer' => '',
+                ),
+                // 'layout' => array(
                     // 'size' => 'Fullscreen',
                     // 'title' => $title,
                     // 'body' => array(
@@ -187,7 +193,82 @@ class IndexController
                         // 'selector' => '.modal-dialog',
                         // 'value' => 'modal-fullscreen',
                     // ),
+                // ),
+            ),
+        );
+        // $commands[] = array(
+            // 'command' => 'ajax',
+            // 'options' => array(
+            // ),
+        // );
+
+        $response = new JsonResponse(array(
+            'commands' => $commands,
+        ));
+        return $response->send();
+    }
+
+    /**
+     *
+     */
+    public static function dashboardBody()
+    {
+        $http_request = Application::getHttpRequest();
+        $is_ajax = null === $http_request->query->get('is_ajax') ? false : true ;
+        $is_ajax ? self::routeDashboardBodyGetAjax() : self::routeDashboardBodyGet();
+    }
+
+    protected static function routeDashboardBodyGet()
+    {
+        die(__FUNCTION__);
+        
+        // $event = IndexEvent::load();
+        // $event->setCommand(array(
+            // 'command' => 'fetch',
+            // 'options' => array(
+                // 'url' => '/dashboard',
+            // ),
+        // ));
+        // return IndexController::index();
+
+    }
+
+    protected static function routeDashboardBodyGetAjax()
+    {
+        die(__FUNCTION__);
+        $commands = array();
+        $title = 'Dashboard';
+        $body = (string) (new Template\DashboardBody);
+        $footer = '';//(string) (new Template\UserLoginFormFooter);
+        $commands[] = array(
+            'command' => 'offcanvas',
+            'options' => array(
+                'name' => 'dashboard',
+                'bootstrapOptions' => array(
+                    'backdrop' => 'static',
+                    'keyboard' => true
                 ),
+                'layout' => array(
+                    'fetch' => '/dashboard?part[]=body',
+                    'title' => 'Dashboard',
+                    'body' => 'Loading...',
+                    'footer' => '',
+                ),
+                // 'layout' => array(
+                    // 'size' => 'Fullscreen',
+                    // 'title' => $title,
+                    // 'body' => array(
+                        // 'html' => $body,
+                    // ),
+                    // 'footer' => array(
+                        // 'html' => $footer,
+                    // ),
+                    // 'ajax' => array(
+                        // 'method' => 'addClass',
+                        // 'selector' => '.modal-dialog',
+                        // 'value' => 'modal-fullscreen',
+                    // ),
+                // ),
             ),
         );
         // $commands[] = array(

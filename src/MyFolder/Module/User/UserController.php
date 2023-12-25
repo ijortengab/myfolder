@@ -111,13 +111,9 @@ class UserController
             }
             if (count($query_part)) {
                 $commands[] = array(
-                    'command' => 'ajax',
+                    'command' => 'fetchScript',
                     'options' => array(
-                        'method' => 'script',
-                        'ajax' => array(
-                            'method' => 'get',
-                            'url' => '/assets/user/modal-create-user.js',
-                        ),
+                        'url' => '/assets/user/modal-create-user.js',
                     ),
                 );
             }
@@ -136,10 +132,6 @@ class UserController
                     'keyboard' => false
                 ),
                 'layout' => array(
-                    // 'ajax' => array(
-                        // 'method' => 'get',
-                        // 'url' => '/user/create',
-                    // ),
                     'title' => 'Create Account',
                     'body' => 'Loading...',
                     'footer' => '...',

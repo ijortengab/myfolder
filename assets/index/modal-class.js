@@ -90,19 +90,16 @@ MyFolder.modal.prototype.toggle = function (name) {
         let title = ('title' in ref.layout) ? ref.layout.title : '';
         let body = ('body' in ref.layout) ? ref.layout.body : '';
         let footer = ('footer' in ref.layout) ? ref.layout.footer : '';
-        this.setSize(size)
-            .setTitle(title)
+        this.setTitle(title)
             .setBody(body)
-            .setFooter(footer);
-        // @todo, gabung aja nih.
+            .setFooter(footer)
+            .setSize(size);
         if ('fetch' in ref.layout) {
-            MyFolder.fetch(ref.layout.fetch);
+            let info = {url: ref.layout.fetch, context: this.currentModal._element}
+            MyFolder.fetch(info);
         }
         else {
             MyFolder.attachBehaviors(this.currentModal._element);
-        }
-        if ('ajax' in ref.layout) {
-            MyFolder.ajax.command(this.currentModal._element, ref.layout.ajax)
         }
     }
     this.currentModal.toggle();

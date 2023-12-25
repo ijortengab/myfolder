@@ -38,6 +38,7 @@ window.MyFolder = {
  * dispatcher. Cara ini terinspirasi dari Javascript di Drupal 7.
  */
 MyFolder.attachBehaviors = function (context, settings) {
+    console.error('MyFolder.attachBehaviors(context, settings)');
     context = context || document;
     settings = settings || MyFolder.settings;
     let hook = MyFolder.behaviors;
@@ -184,6 +185,16 @@ MyFolder.behaviors.fetch = {
                                 MyFolder.fetch(value.options);
                             }
                             break;
+                        case 'fetchScript':
+                            if (!('_processed' in value)) {
+                                value._processed = false;
+                            }
+                            if (!value._processed) {
+                                value._processed = true;
+                                value.options.url = MyFolder.pseudoLink(value.options.url)
+                                $.getScript(value.options);
+                            }
+                            break;
                     }
                 })
             }
@@ -218,10 +229,17 @@ MyFolder.fetch = function (info) {
                     settings.commands = $.merge(settings.commands,result.commands)
                 }
             }
-            MyFolder.attachBehaviors()
+            if ('context' in info) {
+                console.log('> MyFolder.attachBehaviors(info.context)');
+                MyFolder.attachBehaviors(info.context);
+            }
+            else {
+                console.log('> MyFolder.attachBehaviors()');
+                MyFolder.attachBehaviors()
+            }
         })
         .catch(function(error){
-            console.log(error)
+            console.error(error)
         });
 }
 

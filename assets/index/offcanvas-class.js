@@ -170,7 +170,23 @@ MyFolder.offcanvas.prototype.toggle = function (name) {
         default:
             console.error('Placement unknown:'+placement);
             break;
+    }    
+    if ('layout' in ref) {
+        // let size = ('size' in ref.layout) ? ref.layout.size : '';
+        let title = ('title' in ref.layout) ? ref.layout.title : '';
+        let body = ('body' in ref.layout) ? ref.layout.body : '';
+        // let footer = ('footer' in ref.layout) ? ref.layout.footer : '';
+        this.setTitle(title)
+            .setBody(body);
+        if ('fetch' in ref.layout) {
+            let info = {url: ref.layout.fetch, context: this.currentOffcanvas._element}
+            MyFolder.fetch(info);
+        }
+        else {
+            MyFolder.attachBehaviors(this.currentOffcanvas._element);
+        }
     }
+    
     if (typeof this.otherOffcanvas === 'object') {
         let _elementID = this.otherOffcanvas._element.id;
         if (_elementID == 'offcanvas' && placement == 'start') {
@@ -195,27 +211,6 @@ MyFolder.offcanvas.prototype.toggle = function (name) {
         }
     }
     this.currentOffcanvas.toggle();
-    return;
-    if ('layout' in ref) {
-        let size = ('size' in ref.layout) ? ref.layout.size : '';
-        let title = ('title' in ref.layout) ? ref.layout.title : '';
-        let body = ('body' in ref.layout) ? ref.layout.body : '';
-        let footer = ('footer' in ref.layout) ? ref.layout.footer : '';
-        this.setSize(size)
-            .setTitle(title)
-            .setBody(body)
-            .setFooter(footer);
-        // @todo, gabung aja nih.
-        if ('fetch' in ref.layout) {
-            MyFolder.fetch(ref.layout.fetch);
-        }
-        else {
-            MyFolder.attachBehaviors(this.currentOffcanvas._element);
-        }
-        if ('ajax' in ref.layout) {
-            MyFolder.ajax.command(this.currentOffcanvas._element, ref.layout.ajax)
-        }
-    }
 }
 MyFolder.offcanvas.prototype.next = function () {
     if (this.currentIndex <= (this.registry.byQueue.length - 1)) {
@@ -227,26 +222,6 @@ MyFolder.offcanvas.prototype.next = function () {
     if (!(this.isLastOffcanvas)) {
         this.toggle();
     }
-}
-MyFolder.offcanvas.prototype.setSize = function (size) {
-    switch (size) {
-        case 'Small':
-            var classAdded = 'offcanvas-sm';
-            break;
-        case 'Large':
-            var classAdded = 'offcanvas-lg';
-            break;
-        case 'Extra large':
-            var classAdded = 'offcanvas-xl';
-            break;
-        case 'Fullscreen':
-            var classAdded = 'offcanvas-fullscreen';
-            break;
-    }
-    if (classAdded !== '') {
-        $(this.currentOffcanvas._dialog).addClass(classAdded);
-    }
-    return this;
 }
 MyFolder.offcanvas.prototype.setTitle = function (title) {
     if (typeof title === 'string') {
@@ -263,15 +238,6 @@ MyFolder.offcanvas.prototype.setBody = function (body) {
     }
     else if (typeof body === 'object' && 'html' in body) {
         $(this.currentOffcanvas._element).find('.offcanvas-body').html(body.html);
-    }
-    return this;
-}
-MyFolder.offcanvas.prototype.setFooter = function (footer) {
-    if (typeof footer === 'string') {
-        $(this.currentOffcanvas._element).find('.offcanvas-footer').empty().text(footer);
-    }
-    else if (typeof footer === 'object' && 'html' in footer) {
-        $(this.currentOffcanvas._element).find('.offcanvas-footer').html(footer.html);
     }
     return this;
 }

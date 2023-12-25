@@ -7,43 +7,7 @@
  * Melakukan panggilan ajax.
  *
  */
-MyFolder.ajax = function (context, options) {
-    console.error('DEPRACATED');
-    return;
-    let xhr;
-    if (typeof options == 'string') {
-        options = {
-            type: 'GET',
-            url: options
-        }
-    }
-    if ('url' in options) {
-        // Tambahkan $_GET[ajax] agar dikenali oleh Controller.
-        let ajaxify = new URL(window.location.origin+options.url);
-        ajaxify.searchParams.append('_ajax','1');
-        options.url = ajaxify.href
-    }
-    xhr = $.ajax(options);
-    xhr.done(function (data) {
-        // Invoke akan dilakukan oleh instance object MyFolder.ajax.command.
-        let invoke = true;
-        if (typeof data == 'object') {
-            if ('commands' in data) {
-                data.commands.forEach(function (value, key, array) {
-                    switch (value.command) {
-                        case 'ajax':
-                            new MyFolder.ajax.command(context, value.options);
-                            invoke = false;
-                            break;
-                    }
-                })
-            }
-        }
-        if (invoke) {
-            MyFolder.attachBehaviors(context, data);
-        }
-    })
-}
+MyFolder.ajax = {}
 
 /**
  * Static function MyFolder\ajax::command().
@@ -68,14 +32,7 @@ MyFolder.ajax.command = function (context, options) {
         case 'addClass':
             $(options.selector, context).addClass(options.value);
             break;
-        case 'script':
-            options.ajax.dataType = 'script'
-            if ('url' in options.ajax) {
-                options.ajax.url = MyFolder.settings.basePath+'/___pseudo'+options.ajax.url
-            }
-            return MyFolder.ajax(context, options.ajax);
     }
-    MyFolder.attachBehaviors(context);
 }
 
 /**
@@ -84,6 +41,27 @@ MyFolder.ajax.command = function (context, options) {
 MyFolder.behaviors.ajax = {
     attach: function (context, settings) {
         console.log('|-MyFolder.behaviors.ajax.attach(context, settings)');
+        let attachBehaviors = false;
+        if (typeof settings == 'object' && 'commands' in settings) {
+            settings.commands.forEach(function (value, key, array) {
+                switch (value.command) {
+                    case 'ajax':
+                        if (!('_processed' in value)) {
+                            value._processed = false;
+                        }
+                        if (!value._processed) {
+                            value._processed = true;
+                            attachBehaviors = true;
+                            MyFolder.ajax.command(context, value.options);
+                        }
+                        break;
+                }
+            })
+        }
+        if (attachBehaviors) {
+            console.log('|-->MyFolder.attachBehaviors(context)');
+            MyFolder.attachBehaviors(context);
+        }
         $('a.ajax').once('ajax').click(function () {
             event.preventDefault();
             let $element = $(this);
@@ -119,22 +97,5 @@ MyFolder.behaviors.ajax = {
             MyFolder.fetch(info);
             return false;
         })
-        if (typeof settings == 'object') {
-            if ('commands' in settings) {
-                settings.commands.forEach(function (value, key, array) {
-                    switch (value.command) {
-                        case 'ajax':
-                            if (!('_isExecuted' in value.options)) {
-                                value.options._isExecuted = false;
-                            }
-                            if (!value.options._isExecuted) {
-                                value.options._isExecuted = true;
-                                MyFolder.ajax.command(context, value.options);
-                            }
-                            break;
-                    }
-                })
-            }
-        }
     }
 }

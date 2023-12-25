@@ -33,9 +33,7 @@ class IndexSubscriber implements EventSubscriberInterface
                         'keyboard' => false
                     ),
                     'layout' => array(
-                        'fetch' => array(
-                            'url' => '/user/create?part[]=body&part[]=footer'
-                        ),
+                        'fetch' => '/user/create?part[]=body&part[]=footer',
                         'title' => 'Create Account',
                         'body' => 'Loading...',
                         'footer' => '',
