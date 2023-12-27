@@ -216,18 +216,16 @@ MyFolder.index.drawColumnOther = function(data) {
 MyFolder.behaviors.index = {
     attach: function (context, settings) {
         // console.log('|-MyFolder.behaviors.index.attach(context, settings)');
-        if (typeof settings == 'object') {
-            if ('commands' in settings) {
-                settings.commands.forEach(function (value, key, array) {
-                    switch (value.command) {
-                        case 'index':
-                            if (!('isIndexed' in value.options)) {
-                                value.options.isIndexed = false;
-                            }
-                            if (!value.options.isIndexed) {
-                                value.options.isIndexed = true;
-                                MyFolder.index();
-                            }
+        if (typeof settings == 'object' && 'commands' in settings) {
+            settings.commands.forEach(function (value, key, array) {
+                switch (value.command) {
+                    case 'index':
+                        if (!('_processed' in value)) {
+                            value._processed = false;
+                        }
+                        if (!value._processed) {
+                            value._processed = true;
+                            MyFolder.index();
                             // Reset javascript history here.
                             window.history.replaceState({pathInfo: MyFolder.settings.pathInfo}, "", "");
                             // Pulihkan informasi settings karena history di-back atau forward.
@@ -236,10 +234,10 @@ MyFolder.behaviors.index = {
                                 MyFolder.settings.pathInfo = pathInfo
                                 MyFolder.index()
                             };
-                            break;
-                    }
-                })
-            }
+                        }
+                        break;
+                }
+            })
         }
     }
 }

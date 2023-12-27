@@ -31,9 +31,9 @@ MyFolder.offcanvas = function () {
         // Delete all accesories.
         // $(self.primary._dialog).removeClass('offcanvas-fullscreen offcanvas-sm offcanvas-lg offcanvas-xl');
         // Reset.
-        // if (self.isLastOffcanvas) {
-            // self.reset();
-        // }
+        if (self.isLastOffcanvas) {
+            self.reset();
+        }
     })
     let offcanvasTop = document.getElementById('offcanvasTop');
     offcanvasTop.addEventListener('hide.bs.offcanvas', event => {
@@ -52,9 +52,9 @@ MyFolder.offcanvas = function () {
         // Delete all accesories.
         // $(self.primary._dialog).removeClass('offcanvas-fullscreen offcanvas-sm offcanvas-lg offcanvas-xl');
         // Reset.
-        // if (self.isLastOffcanvas) {
-            // self.reset();
-        // }
+        if (self.isLastOffcanvas) {
+            self.reset();
+        }
     })
     let offcanvasRight = document.getElementById('offcanvasRight');
     offcanvasRight.addEventListener('hide.bs.offcanvas', event => {
@@ -73,9 +73,9 @@ MyFolder.offcanvas = function () {
         // Delete all accesories.
         // $(self.primary._dialog).removeClass('offcanvas-fullscreen offcanvas-sm offcanvas-lg offcanvas-xl');
         // Reset.
-        // if (self.isLastOffcanvas) {
-            // self.reset();
-        // }
+        if (self.isLastOffcanvas) {
+            self.reset();
+        }
     })
     let offcanvasBottom = document.getElementById('offcanvasBottom');
     offcanvasBottom.addEventListener('hide.bs.offcanvas', event => {
@@ -94,9 +94,9 @@ MyFolder.offcanvas = function () {
         // Delete all accesories.
         // $(self.primary._dialog).removeClass('offcanvas-fullscreen offcanvas-sm offcanvas-lg offcanvas-xl');
         // Reset.
-        // if (self.isLastOffcanvas) {
-            // self.reset();
-        // }
+        if (self.isLastOffcanvas) {
+            self.reset();
+        }
     })
 }
 MyFolder.offcanvas.prototype.reset = function () {
@@ -170,7 +170,7 @@ MyFolder.offcanvas.prototype.toggle = function (name) {
         default:
             console.error('Placement unknown:'+placement);
             break;
-    }    
+    }
     if ('layout' in ref) {
         // let size = ('size' in ref.layout) ? ref.layout.size : '';
         let title = ('title' in ref.layout) ? ref.layout.title : '';
@@ -186,7 +186,7 @@ MyFolder.offcanvas.prototype.toggle = function (name) {
             MyFolder.attachBehaviors(this.currentOffcanvas._element);
         }
     }
-    
+
     if (typeof this.otherOffcanvas === 'object') {
         let _elementID = this.otherOffcanvas._element.id;
         if (_elementID == 'offcanvas' && placement == 'start') {

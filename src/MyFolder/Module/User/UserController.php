@@ -156,6 +156,57 @@ class UserController
         );
     }
 
+    /**
+     *
+     */
+    public static function logout()
+    {
+        // Hanya method post disini.
+        $session = Session::load();
+        $session->destroy();
+        $title = 'Logout successful.';
+        $body = 'Logout successful.';
+        $footer = 'Logout successful.';
+        $commands[] = array(
+            'command' => 'modal',
+            'options' => array(
+                'name' => 'logoutSuccess',
+                'bootstrapOptions' => array(
+                    'backdrop' => 'static',
+                    'keyboard' => false
+                ),
+                'layout' => array(
+                    'title' => $title,
+                    'body' => array(
+                        'html' => $body,
+                    ),
+                    'footer' => array(
+                        'html' => $footer,
+                    ),
+                ),
+            ),
+        );
+        $commands[] = array(
+            'command' => 'offcanvasHide',
+        );
+
+        $list = (string) TwigFile::process(new Template\NavbarListLogin, array(
+            'label' => 'Log in',
+        ));
+        $commands[] = array(
+            'command' => 'ajax',
+            'options' => array(
+                'method' => 'prepend',
+                'selector' => 'ul.navbar-nav',
+                'html' => $list,
+            ),
+        );
+        $response = new JsonResponse(array(
+            'commands' => $commands,
+        ));
+        return $response->send();
+    }
+
     public static function login()
     {
         $http_request = Application::getHttpRequest();

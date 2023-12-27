@@ -8,6 +8,7 @@ use IjorTengab\MyFolder\Core\ConfigEditor;
 use IjorTengab\MyFolder\Core\Config;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
+use IjorTengab\MyFolder\Core\RedirectResponse;
 
 class IndexController
 {
@@ -147,7 +148,6 @@ class IndexController
 
     protected static function routeDashboardGet()
     {
-
         $event = IndexEvent::load();
         $event->setCommand(array(
             'command' => 'fetch',
@@ -156,7 +156,6 @@ class IndexController
             ),
         ));
         return IndexController::index();
-
     }
 
     protected static function routeDashboardGetAjax()
@@ -220,63 +219,35 @@ class IndexController
 
     protected static function routeDashboardBodyGet()
     {
-        die(__FUNCTION__);
-        
-        // $event = IndexEvent::load();
-        // $event->setCommand(array(
-            // 'command' => 'fetch',
-            // 'options' => array(
-                // 'url' => '/dashboard',
-            // ),
-        // ));
-        // return IndexController::index();
-
+        // Harusnya user tidak perlu ada disini karena tidak ada link
+        // visible untuk di-click, jadi redirect saja ke home.
+        list($base_path,,) = Application::extractUrlInfo();
+        $path_info = '/';
+        $url = $base_path.$path_info;
+        $response = new RedirectResponse($url);
+        return $response->send();
     }
 
     protected static function routeDashboardBodyGetAjax()
     {
-        die(__FUNCTION__);
+        $dispatcher = Application::getEventDispatcher();
+        $event = DashboardBodyEvent::load();
+        $dispatcher->dispatch($event, DashboardBodyEvent::NAME);
+        $cards = $event->getCards();
+        $placeholders = array_map(function ($each) {
+            return (string) $each->getPlaceholders();
+        }, $cards);
+        $routes = array_map(function ($each) {
+            return (string) $each->getRoute();
+        }, $cards);
         $commands = array();
-        $title = 'Dashboard';
-        $body = (string) (new Template\DashboardBody);
-        $footer = '';//(string) (new Template\UserLoginFormFooter);
         $commands[] = array(
-            'command' => 'offcanvas',
+            'command' => 'cards',
             'options' => array(
-                'name' => 'dashboard',
-                'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => true
-                ),
-                'layout' => array(
-                    'fetch' => '/dashboard?part[]=body',
-                    'title' => 'Dashboard',
-                    'body' => 'Loading...',
-                    'footer' => '',
-                ),
-                // 'layout' => array(
-                    // 'size' => 'Fullscreen',
-                    // 'title' => $title,
-                    // 'body' => array(
-                        // 'html' => $body,
-                    // ),
-                    // 'footer' => array(
-                        // 'html' => $footer,
-                    // ),
-                    // 'ajax' => array(
-                        // 'method' => 'addClass',
-                        // 'selector' => '.modal-dialog',
-                        // 'value' => 'modal-fullscreen',
-                    // ),
-                // ),
+                'placeholders' => $placeholders,
+                'routes' => $routes,
             ),
         );
-        // $commands[] = array(
-            // 'command' => 'ajax',
-            // 'options' => array(
-            // ),
-        // );
-
         $response = new JsonResponse(array(
             'commands' => $commands,
         ));

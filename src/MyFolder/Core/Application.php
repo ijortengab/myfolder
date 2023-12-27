@@ -6,6 +6,7 @@ namespace IjorTengab\MyFolder\Core;
  * .module[] index
  * .module[] user
  * .module[] offline_mode
+ * .module[] terminal
  * .targetDirectory.public /var/www
  */
 class Application

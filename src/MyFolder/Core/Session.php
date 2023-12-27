@@ -30,11 +30,12 @@ class Session extends ParameterBag
     }
     public function start()
     {
-
-        $this->is_start = true;
-        session_cache_limiter('');
-        session_name(Application::SESSION_NAME);
-        session_start();
+        if (!$this->is_start) {
+            $this->is_start = true;
+            session_cache_limiter('');
+            session_name(Application::SESSION_NAME);
+            session_start();
+        }
         if (!array_key_exists($this->prefix, $_SESSION)) {
             $_SESSION[$this->prefix] = array();
         }
@@ -42,15 +43,34 @@ class Session extends ParameterBag
             $this->parameters = array_replace_recursive($this->parameters, $_SESSION[$this->prefix]);
         }
     }
+
     public function set($key, $value)
     {
         parent::set($key, $value);
         $this->sync();
+    }
+
+    public function remove($key)
+    {
+        parent::remove($key);
+        unset($_SESSION[$this->prefix][$key]);
     }
     protected function sync()
     {
         if ($this->is_start) {
             $_SESSION[$this->prefix] = array_replace_recursive($_SESSION[$this->prefix], $this->parameters);
         }
+    }
+    /**
+     * https://stackoverflow.com/a/2241793
+     */
+    public function destroy()
+    {
+        // @todo, gunakan object Cookie.
+        setcookie (session_name(), "", array(
+            'path' => '/',
+        ));
+        session_destroy();
+        session_write_close();
     }
 }

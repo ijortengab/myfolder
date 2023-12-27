@@ -9,15 +9,12 @@ class Index implements ModuleInterface
 {
     public static function handle($app)
     {
-        $dispatcher = Application::getEventDispatcher();
-
         // Register event.
-        $subscriber = new BootSubscriber();
-        $dispatcher->addSubscriber($subscriber);
-        $subscriber = new IndexSubscriber();
-        $dispatcher->addSubscriber($subscriber);
-        $subscriber = new HtmlElementSubscriber();
-        $dispatcher->addSubscriber($subscriber);
+        $dispatcher = Application::getEventDispatcher();
+        $dispatcher->addSubscriber(new BootSubscriber());
+        $dispatcher->addSubscriber(new IndexSubscriber());
+        $dispatcher->addSubscriber(new HtmlElementSubscriber());
+        $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.
         $app->post('/index', 'IjorTengab\MyFolder\Module\Index\IndexController::index');

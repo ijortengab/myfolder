@@ -224,6 +224,8 @@ MyFolder.fetch = function (info) {
             return response.json()
         })
         .then(function(result){
+            console.log('result');
+            console.log(result);
             if ('commands' in settings) {
                 if ('commands' in result) {
                     settings.commands = $.merge(settings.commands,result.commands)

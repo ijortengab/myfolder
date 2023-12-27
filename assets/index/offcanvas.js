@@ -24,6 +24,15 @@ MyFolder.behaviors.offcanvas = {
                                 next = true;
                             }
                             break;
+                        case 'offcanvasHide':
+                            if (!('_processed' in value)) {
+                                value._processed = false;
+                            }
+                            if (!value._processed) {
+                                value._processed = true;
+                                MyFolder.offcanvas.load().currentOffcanvas.hide();
+                            }
+                            break;
                     }
                 })
             }

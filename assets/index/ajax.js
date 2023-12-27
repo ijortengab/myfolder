@@ -24,10 +24,13 @@ MyFolder.ajax.command = function (context, options) {
             $(options.selector, context).remove();
             break;
         case 'replace':
-            $(options.selector, context).html(options.html);
+            $(options.selector, context).replaceWith(options.html);
             break;
         case 'append':
             $(options.selector, context).append(options.html);
+            break;
+        case 'prepend':
+            $(options.selector, context).prepend(options.html);
             break;
         case 'addClass':
             $(options.selector, context).addClass(options.value);
@@ -78,14 +81,20 @@ MyFolder.behaviors.ajax = {
             $form.find('input[type=submit]').click();
         })
         $('form.ajax', context).once('ajax').submit(function () {
+            console.log('woy');
             event.preventDefault();
             let $form = $(this);
             let url = $form.attr('action');
             let form = $form[0];
             const formData = new FormData(form);
             let trigger = $form.data('trigger');
-            trigger.disabled = true;
-            trigger.innerText = 'Waiting';
+            if (typeof trigger === 'undefined') {
+                let trigger = $form.find('input[type=submitt]').get(0)
+            }
+            if (typeof trigger !== 'undefined') {
+                trigger.disabled = true;
+                trigger.innerText = 'Waiting';
+            }
             let info = {
                 url: url,
                 _pseudoLink: true,

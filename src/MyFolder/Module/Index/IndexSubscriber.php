@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 
-class IndexSubscriber implements EventSubscriberInterface 
+class IndexSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
@@ -19,5 +19,24 @@ class IndexSubscriber implements EventSubscriberInterface
             'options' => array(
             ),
         ));
+
+        // for development only.
+        // @todo hapus ini.
+        // $event->setCommand(array(
+            // 'command' => 'offcanvas',
+            // 'options' => array(
+                // 'name' => 'dashboard',
+                // 'bootstrapOptions' => array(
+                    // 'backdrop' => 'static',
+                    // 'keyboard' => true
+                // ),
+                // 'layout' => array(
+                    // 'fetch' => '/dashboard/body',
+                    // 'title' => 'Dashboard',
+                    // 'body' => 'Loading...',
+                    // 'footer' => '',
+                // ),
+            // ),
+        // ));
     }
 }

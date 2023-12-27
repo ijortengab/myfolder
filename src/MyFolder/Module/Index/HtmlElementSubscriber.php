@@ -36,5 +36,6 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         $event->addJs('local.modal', '{{ settings.basePath }}/___pseudo/assets/index/modal.js');
         $event->addJs('local.offcanvas-class', '{{ settings.basePath }}/___pseudo/assets/index/offcanvas-class.js');
         $event->addJs('local.offcanvas', '{{ settings.basePath }}/___pseudo/assets/index/offcanvas.js');
+        $event->addJs('local.card', '{{ settings.basePath }}/___pseudo/assets/index/card.js');
     }
 }
