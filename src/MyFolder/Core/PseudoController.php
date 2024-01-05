@@ -30,7 +30,6 @@ class PseudoController extends Controller
             return $response->send();
         }
     }
-
     public static function getRootFile($a, $b = null, $c = null, $d = null, $e = null, $f = null, $g = null)
     {
         $target_directory = getcwd();
@@ -65,37 +64,5 @@ class PseudoController extends Controller
         $response = new Response('Not Found.');
         $response->setStatusCode(404);
         return $response->send();
-    }
-
-    public static function getTargetDirectoryFile($scheme)
-    {
-        $editor = new ConfigEditor;
-        $editor->setClassName('Application', 'IjorTengab\MyFolder\Core');
-        $config = new Config;
-        $config->parse($editor->get());
-        $target_directory = $config->targetDirectory->public->value();
-        if (empty($target_directory)) {
-            $target_directory = getcwd();
-        }
-
-        switch ($scheme) {
-            case 'public':
-                $request = Application::getHttpRequest();
-                $path = $request->query->get('path');
-                $fullpath = $target_directory.$path;
-                if (is_file($fullpath)) {
-                    $response = new BinaryFileResponse($fullpath);
-                    return $response->send();
-                }
-                break;
-            case '':
-                // Do something.
-                break;
-            default:
-                $response = new Response('Not Found.');
-                $response->setStatusCode(404);
-                return $response->send();
-                break;
-        }
     }
 }

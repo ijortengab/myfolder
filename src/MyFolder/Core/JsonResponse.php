@@ -2,7 +2,10 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-// Credit: https://symfony.com/doc/2.8/components/http_foundation.html#creating-a-json-response
+/**
+ * Based on Symfony Response version 2.8.18.
+ * https://symfony.com/doc/2.8/components/http_foundation.html#creating-a-json-response
+ */
 class JsonResponse extends Response
 {
     protected $data;

@@ -1,53 +1,27 @@
 /**
- * Implements of MyFolder.attachBehaviors().
+ * Implements hook `MyFolder.commandExecution()`.
  */
-MyFolder.behaviors.offcanvas = {
-    attach: function (context, settings) {
-        console.log('|-MyFolder.behaviors.offcanvas.attach(context, settings)');
-        let init = false;
-        let next = false;
-        const registry = MyFolder.offcanvas.registry
-        if (registry.byQueue.length == 0) {
-            init = true;
-        }
-        if (typeof settings == 'object') {
-            if ('commands' in settings) {
-                settings.commands.forEach(function (value, key, array) {
-                    switch (value.command) {
-                        case 'offcanvas':
-                            if (!('_processed' in value)) {
-                                value._processed = false;
-                            }
-                            if (!value._processed) {
-                                value._processed = true;
-                                MyFolder.offcanvas.register(value.options);
-                                next = true;
-                            }
-                            break;
-                        case 'offcanvasHide':
-                            if (!('_processed' in value)) {
-                                value._processed = false;
-                            }
-                            if (!value._processed) {
-                                value._processed = true;
-                                MyFolder.offcanvas.load().currentOffcanvas.hide();
-                            }
-                            break;
-                    }
-                })
-            }
-        }
-        if (init && registry.byQueue.length > 0) {
-            // console.log('|- > MyFolder.offcanvas.load().toggle();');
-            MyFolder.offcanvas.load().toggle();
-        }
-        else if (next) {
-            // console.log('|- > MyFolder.offcanvas.load().next();');
-            const self = MyFolder.offcanvas.load();
-            // Sembunyikan agar trigger event hide untuk menjalankan
-            // method ::next();
-            self.currentOffcanvas.hide();
-        }
+MyFolder.command.offcanvas = {
+    execute: function (options) {
+        MyFolder.offcanvas.process(options, ['register', 'show']);
+    }
+}
+
+/**
+ * Implements hook `MyFolder.commandExecution()`.
+ */
+MyFolder.command.offcanvasRegister = {
+    execute: function (options) {
+        MyFolder.offcanvas.process(options, ['register']);
+    }
+}
+
+/**
+ * Implements hook `MyFolder.commandExecution()`.
+ */
+MyFolder.command.offcanvasHide = {
+    execute: function (options) {
+        MyFolder.offcanvas.process(options, ['hide']);
     }
 }
 
@@ -62,7 +36,41 @@ MyFolder.offcanvas.registry = {
 };
 
 /**
- * Static function `MyFolder\offcanvas::register()`.
+ * Static function.
+ */
+MyFolder.offcanvas.process = function (info, tasks) {
+    // Get tasks.
+    let init = false;
+    const registry = MyFolder.offcanvas.registry
+    if (registry.byQueue.length == 0) {
+        init = true;
+    }
+
+    if (tasks.includes('register')) {
+        MyFolder.offcanvas.register(info);
+        if (!(tasks.includes('show'))) {
+            // MyFolder.offcanvas.register() mengisi queue, sehingga
+            // perlu di reset.
+            MyFolder.offcanvas.load().reset();
+        }
+    }
+    if (tasks.includes('show')) {
+        if (init) {
+            MyFolder.offcanvas.load().toggle();
+        }
+        else {
+            // Sembunyikan agar trigger event hide untuk menjalankan
+            // method ::next();
+            MyFolder.offcanvas.load().currentOffcanvas.hide();
+        }
+    }
+    if (tasks.includes('hide')) {
+        MyFolder.offcanvas.load().currentOffcanvas.hide();
+    }
+}
+
+/**
+ * Static function `MyFolder.offcanvas.register()`.
  *
  * @param info
  *
@@ -92,12 +100,10 @@ MyFolder.offcanvas.register = function (info) {
 }
 
 /**
- * Static function `MyFolder\offcanvas::load()`.
+ * Static function `MyFolder.offcanvas.load()`.
  *
- * @param info
- *
- * Menciptakan static property `MyFolder\offcanvas::$instance`, kemudian
- * mengisinya dengan object dari class `MyFolder\offcanvas`.
+ * Menciptakan static property `MyFolder.offcanvas.instance`, kemudian
+ * mengisinya dengan object dari class `MyFolder.offcanvas`.
  */
 MyFolder.offcanvas.load = function () {
     if (!("instance" in MyFolder.offcanvas)) {

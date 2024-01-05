@@ -2,7 +2,10 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-// Credit: https://symfony.com/doc/2.8/components/event_dispatcher.html
+/**
+ * Based on Symfony Event Dispatcher version 2.8.18.
+ * https://symfony.com/doc/2.8/components/event_dispatcher.html
+ */
 class EventDispatcher
 {
     protected $storage = array();

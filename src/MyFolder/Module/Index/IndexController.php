@@ -4,42 +4,52 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\ConfigEditor;
 use IjorTengab\MyFolder\Core\Config;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
-use IjorTengab\MyFolder\Core\RedirectResponse;
 
 class IndexController
 {
-    public static function index()
+    public static function route()
     {
         $http_request = Application::getHttpRequest();
-        $http_request_method = strtolower($http_request->server->get('REQUEST_METHOD'));
-        switch ($http_request_method) {
+        $method = strtolower($http_request->server->get('REQUEST_METHOD'));
+        $is_ajax = !(null === $http_request->query->get('is_ajax'));
+        $has_query_part = !(null === $http_request->query->get('part'));
+        switch ($method) {
             case 'post':
-                self::routeIndexPost();
+                self::routePost();
                 break;
             case 'get':
-                self::routeIndexGet();
+                if (!$is_ajax) {
+                    self::routeGet();
+                }
+                elseif ($has_query_part) {
+                    // self::routeGetAjaxPart();
+                }
+                else {
+                    // self::routeGetAjax();
+                }
                 break;
         }
     }
-
-    protected static function routeIndexPost()
+    protected static function routePost()
     {
-        $editor = new ConfigEditor;
-        $editor->setClassName('Application', 'IjorTengab\MyFolder\Core');
-        $config = new Config;
-        $config->parse($editor->get());
-        $target_directory = $config->targetDirectory->public->value();
-        if (empty($target_directory)) {
-            $target_directory = getcwd();
-        }
+        $config = Config::load('index');
+        $root = $config->root->value();
+        null !== $root or $root = getcwd();
+
+        // @todo.
+        // jika user adalah sysadmin, maka boleh menggunakan argument root_request.
+        // selebihnya kita ignore.
         $http_request = Application::getHttpRequest();
+        $root_request = $http_request->request->get('root');
+        if (!empty($root_request)) {
+            $root = $root_request;
+        }
         if ($http_request->request->has('action')) {
             // @todo: Jika tidak ada $_POST['directory'], maka throw error.
-            $current_directory = $target_directory.$http_request->request->get('directory');
+            $current_directory = $root.$http_request->request->get('directory');
             if (!is_dir($current_directory)) {
                 $response = new JsonResponse();
                 $response->setData(array());
@@ -94,8 +104,7 @@ class IndexController
             }
         }
     }
-
-    protected static function routeIndexGet()
+    protected static function routeGet()
     {
         $dispatcher = Application::getEventDispatcher();
         $event = IndexEvent::load();
@@ -107,6 +116,7 @@ class IndexController
             'basePath' => $base_path,
             'rewriteUrl' => $rewrite_url,
             'commands' => $event->getCommands(),
+            'commandsExecuted' => [],
         );
         // Pada kasus terdapat `___pseudo`, maka hapus.
         if (strpos($settings['pathInfo'], '/___pseudo/') !== false) {
@@ -133,124 +143,6 @@ class IndexController
         ));
 
         $response = new Response($content);
-        return $response->send();
-    }
-
-    /**
-     *
-     */
-    public static function dashboard()
-    {
-        $http_request = Application::getHttpRequest();
-        $is_ajax = null === $http_request->query->get('is_ajax') ? false : true ;
-        $is_ajax ? self::routeDashboardGetAjax() : self::routeDashboardGet();
-    }
-
-    protected static function routeDashboardGet()
-    {
-        $event = IndexEvent::load();
-        $event->setCommand(array(
-            'command' => 'fetch',
-            'options' => array(
-                'url' => '/dashboard',
-            ),
-        ));
-        return IndexController::index();
-    }
-
-    protected static function routeDashboardGetAjax()
-    {
-        $commands = array();
-        $title = 'Dashboard';
-        $body = (string) (new Template\DashboardBody);
-        $footer = '';//(string) (new Template\UserLoginFormFooter);
-        $commands[] = array(
-            'command' => 'offcanvas',
-            'options' => array(
-                'name' => 'dashboard',
-                'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => true
-                ),
-                'layout' => array(
-                    'fetch' => '/dashboard/body',
-                    'title' => 'Dashboard',
-                    'body' => 'Loading...',
-                    'footer' => '',
-                ),
-                // 'layout' => array(
-                    // 'size' => 'Fullscreen',
-                    // 'title' => $title,
-                    // 'body' => array(
-                        // 'html' => $body,
-                    // ),
-                    // 'footer' => array(
-                        // 'html' => $footer,
-                    // ),
-                    // 'ajax' => array(
-                        // 'method' => 'addClass',
-                        // 'selector' => '.modal-dialog',
-                        // 'value' => 'modal-fullscreen',
-                    // ),
-                // ),
-            ),
-        );
-        // $commands[] = array(
-            // 'command' => 'ajax',
-            // 'options' => array(
-            // ),
-        // );
-
-        $response = new JsonResponse(array(
-            'commands' => $commands,
-        ));
-        return $response->send();
-    }
-
-    /**
-     *
-     */
-    public static function dashboardBody()
-    {
-        $http_request = Application::getHttpRequest();
-        $is_ajax = null === $http_request->query->get('is_ajax') ? false : true ;
-        $is_ajax ? self::routeDashboardBodyGetAjax() : self::routeDashboardBodyGet();
-    }
-
-    protected static function routeDashboardBodyGet()
-    {
-        // Harusnya user tidak perlu ada disini karena tidak ada link
-        // visible untuk di-click, jadi redirect saja ke home.
-        list($base_path,,) = Application::extractUrlInfo();
-        $path_info = '/';
-        $url = $base_path.$path_info;
-        $response = new RedirectResponse($url);
-        return $response->send();
-    }
-
-    protected static function routeDashboardBodyGetAjax()
-    {
-        $dispatcher = Application::getEventDispatcher();
-        $event = DashboardBodyEvent::load();
-        $dispatcher->dispatch($event, DashboardBodyEvent::NAME);
-        $cards = $event->getCards();
-        $placeholders = array_map(function ($each) {
-            return (string) $each->getPlaceholders();
-        }, $cards);
-        $routes = array_map(function ($each) {
-            return (string) $each->getRoute();
-        }, $cards);
-        $commands = array();
-        $commands[] = array(
-            'command' => 'cards',
-            'options' => array(
-                'placeholders' => $placeholders,
-                'routes' => $routes,
-            ),
-        );
-        $response = new JsonResponse(array(
-            'commands' => $commands,
-        ));
         return $response->send();
     }
 }

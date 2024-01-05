@@ -10,6 +10,16 @@ class ConfigEditor
     protected $object;
     protected $class;
     protected $namespace;
+
+    public static function toDocComment($string)
+    {
+        $string = preg_replace('/^/m',' * ', $string);
+        return <<<EOF
+/**
+$string
+ */
+EOF;
+    }
     public function __construct($object = null)
     {
         if ($object !== null) {
@@ -27,33 +37,6 @@ class ConfigEditor
             $this->serialize();
         }
         return $this->serialized_string;
-    }
-    protected function serialize()
-    {
-        $this->serialized_string = '';
-        if (isset($this->object)) {
-            $reflective_class = new \ReflectionClass($this->object); //construct the Reflective class.
-        }
-        else {
-            if (null === $this->namespace) {
-                $class_name = $this->class;
-            }
-            else {
-                $class_name = "{$this->namespace}\\{$this->class}";
-            }
-            if (!class_exists($class_name)) {
-                throw new WriteException('Class to get the configuration is not exists.');
-            }
-            $reflective_class = new \ReflectionClass($class_name); //construct the Reflective class.
-        }
-        // Turn false return into empty string.
-        $this->doc_comment = (string) $reflective_class->getDocComment();
-        $this->file_name = $reflective_class->getFileName();
-        $this->serialized_string = trim(preg_replace(array(
-            '/^\/\*\*$/m',
-            '/^\s\*\s/m',
-            '/^\s\*\/$/m',
-        ), '', $this->doc_comment));
     }
     public function set($data)
     {
@@ -79,18 +62,33 @@ class ConfigEditor
         chmod($this->file_name, 0664);
         chgrp($this->file_name, $oldgroup);
     }
-
-    /**
-     *
-     */
-    public static function toDocComment($string)
+    protected function serialize()
     {
-        $string = preg_replace('/^/m',' * ', $string);
-        return <<<EOF
-/**
-$string
- */
-EOF;
+        $this->serialized_string = '';
+        if (isset($this->object)) {
+            //construct the Reflective class.
+            $reflective_class = new \ReflectionClass($this->object);
+        }
+        else {
+            if (null === $this->namespace) {
+                $class_name = $this->class;
+            }
+            else {
+                $class_name = "{$this->namespace}\\{$this->class}";
+            }
+            if (!class_exists($class_name)) {
+                throw new WriteException('Class to get the configuration is not exists.');
+            }
+            //construct the Reflective class.
+            $reflective_class = new \ReflectionClass($class_name);
+        }
+        // Turn false return into empty string.
+        $this->doc_comment = (string) $reflective_class->getDocComment();
+        $this->file_name = $reflective_class->getFileName();
+        $this->serialized_string = trim(preg_replace(array(
+            '/^\/\*\*$/m',
+            '/^\s\*\s/m',
+            '/^\s\*\/$/m',
+        ), '', $this->doc_comment));
     }
-
 }

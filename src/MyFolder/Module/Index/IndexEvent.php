@@ -17,5 +17,4 @@ class IndexEvent extends Event
         }
         return self::$instance;
     }
-
 }

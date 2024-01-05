@@ -1,7 +1,14 @@
-// Object wrapper untuk menghandle multiple modal.
-// Reference: https://getbootstrap.com/docs/5.3/components/modal/#toggle-between-modals
-// Untuk mendapatkan object dari class ini, gunakan method `MyFolder.modal.load()`
-// yang akan me-return property `MyFolder.modal.instance`.
+/**
+ * Modal object.
+ *
+ * Object wrapper untuk menghandle multiple modal.
+ * Untuk mendapatkan object dari class ini, gunakan static function
+ * `MyFolder.modal.load()` yang akan me-return property
+ * `MyFolder.modal.instance`.
+ *
+ * @reference
+ *   https://getbootstrap.com/docs/5.3/components/modal/#toggle-between-modals
+ */
 MyFolder.modal = function () {
     this.registry = MyFolder.modal.registry;
     this.currentIndex = 0;
@@ -60,13 +67,16 @@ MyFolder.modal.prototype.toggle = function (name) {
         this.reset();
         this.registry.byQueue.push(name);
     }
+    if (this.registry.byQueue.length === 0) {
+        return;
+    }
     let i = this.currentIndex;
     this.currentName = this.registry.byQueue[i];
     let n = this.currentName;
     if (n in this.registry.byName) {
         ref = this.registry.byName[n];
     }
-    if (typeof ref !== 'object') {
+    if (typeof ref === 'undefined') {
         console.error('Reference of modal is not object.');
         return;
     }
@@ -95,8 +105,9 @@ MyFolder.modal.prototype.toggle = function (name) {
             .setFooter(footer)
             .setSize(size);
         if ('fetch' in ref.layout) {
-            let info = {url: ref.layout.fetch, context: this.currentModal._element}
-            MyFolder.fetch(info);
+            let base = this.currentModal._element.id || 'blank';
+            let url = MyFolder.pseudoLink(ref.layout.fetch);
+            MyFolder.ajax[base] = new MyFolder.ajax(base, this.currentModal._element, {url: url});
         }
         else {
             MyFolder.attachBehaviors(this.currentModal._element);

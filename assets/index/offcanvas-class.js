@@ -1,7 +1,14 @@
-// Object wrapper untuk menghandle multiple offcanvas.
-// Reference: https://getbootstrap.com/docs/5.3/components/offcanvas/#placement
-// Untuk mendapatkan object dari class ini, gunakan method `MyFolder.offcanvas.load()`
-// yang akan me-return property `MyFolder.offcanvas.instance`.
+/**
+ * Offcanvas object.
+ *
+ * Object wrapper untuk menghandle keempat penjuru mata angin offcanvas.
+ * Untuk mendapatkan object dari class ini, gunakan static function
+ * `MyFolder.offcanvas.load()` yang akan me-return property
+ * `MyFolder.offcanvas.instance`.
+ *
+ * @reference
+ *   https://getbootstrap.com/docs/5.3/components/offcanvas/#placement
+ */
 MyFolder.offcanvas = function () {
     this.registry = MyFolder.offcanvas.registry;
     this.currentIndex = 0;
@@ -17,12 +24,12 @@ MyFolder.offcanvas = function () {
     // event listener.
     let offcanvas = document.getElementById('offcanvas');
     offcanvas.addEventListener('hide.bs.offcanvas', event => {
-        console.log('hide.bs.offcanvas offcanvas');
+        // console.log('hide.bs.offcanvas offcanvas');
         const self = MyFolder.offcanvas.load();
         self.next();
     })
     offcanvas.addEventListener('hidden.bs.offcanvas', event => {
-        console.log('hidden.bs.offcanvas offcanvas');
+        // console.log('hidden.bs.offcanvas offcanvas');
         const self = MyFolder.offcanvas.load();
         if (self.pauseToggle) {
             self.pauseToggle = false;
@@ -42,7 +49,7 @@ MyFolder.offcanvas = function () {
         self.next();
     })
     offcanvasTop.addEventListener('hidden.bs.offcanvas', event => {
-        console.log('hidden.bs.offcanvas offcanvasTop');
+        // console.log('hidden.bs.offcanvas offcanvasTop');
         const self = MyFolder.offcanvas.load();
         if (self.pauseToggle) {
             self.pauseToggle = false;
@@ -58,12 +65,12 @@ MyFolder.offcanvas = function () {
     })
     let offcanvasRight = document.getElementById('offcanvasRight');
     offcanvasRight.addEventListener('hide.bs.offcanvas', event => {
-        console.log('hide.bs.offcanvas offcanvasRight');
+        // console.log('hide.bs.offcanvas offcanvasRight');
         const self = MyFolder.offcanvas.load();
         self.next();
     })
     offcanvasRight.addEventListener('hidden.bs.offcanvas', event => {
-        console.log('hidden.bs.offcanvas offcanvasRight');
+        // console.log('hidden.bs.offcanvas offcanvasRight');
         const self = MyFolder.offcanvas.load();
         if (self.pauseToggle) {
             self.pauseToggle = false;
@@ -79,12 +86,12 @@ MyFolder.offcanvas = function () {
     })
     let offcanvasBottom = document.getElementById('offcanvasBottom');
     offcanvasBottom.addEventListener('hide.bs.offcanvas', event => {
-        console.log('hide.bs.offcanvas offcanvasBottom');
+        // console.log('hide.bs.offcanvas offcanvasBottom');
         const self = MyFolder.offcanvas.load();
         self.next();
     })
     offcanvasBottom.addEventListener('hidden.bs.offcanvas', event => {
-        console.log('hidden.bs.offcanvas offcanvasBottom');
+        // console.log('hidden.bs.offcanvas offcanvasBottom');
         const self = MyFolder.offcanvas.load();
         if (self.pauseToggle) {
             self.pauseToggle = false;
@@ -114,10 +121,13 @@ MyFolder.offcanvas.prototype.reset = function () {
     this.isLastOffcanvas = false;
 }
 MyFolder.offcanvas.prototype.toggle = function (name) {
-    console.info('::toggle() on fire.');
+    // console.info('::toggle() on fire.');
     if (typeof name === 'string') {
         this.reset();
         this.registry.byQueue.push(name);
+    }
+    if (this.registry.byQueue.length === 0) {
+        return;
     }
     let i = this.currentIndex;
     this.currentName = this.registry.byQueue[i];
@@ -130,14 +140,11 @@ MyFolder.offcanvas.prototype.toggle = function (name) {
         return;
     }
     let offcanvasOptions = ('bootstrapOptions' in ref) ? ref.bootstrapOptions : {};
-    // console.log('this');
-    // debug(this);
-    // console.log(this);
     let placement = 'start';
     if ('layout' in ref) {
         placement = ('placement' in ref.layout) ? ref.layout.placement : 'start';
     }
-    console.log('placement:'+placement);
+    // console.log('placement: '+placement);
     if (typeof this.currentOffcanvas === 'object') {
         this.otherOffcanvas = this.currentOffcanvas;
         this.currentOffcanvas = undefined;
@@ -179,8 +186,9 @@ MyFolder.offcanvas.prototype.toggle = function (name) {
         this.setTitle(title)
             .setBody(body);
         if ('fetch' in ref.layout) {
-            let info = {url: ref.layout.fetch, context: this.currentOffcanvas._element}
-            MyFolder.fetch(info);
+            let base = this.currentOffcanvas._element.id || 'blank';
+            let url = MyFolder.pseudoLink(ref.layout.fetch);
+            MyFolder.ajax[base] = new MyFolder.ajax(base, this.currentOffcanvas._element, {url: url});
         }
         else {
             MyFolder.attachBehaviors(this.currentOffcanvas._element);

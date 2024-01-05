@@ -15,7 +15,7 @@ class DashboardBodySubscriber implements EventSubscriberInterface
     }
     public static function onDashboardBodyEvent(DashboardBodyEvent $event)
     {
-        
+
         // $event->registerCard();
     }
 }

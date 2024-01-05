@@ -1,42 +1,27 @@
 /**
- * Implements of MyFolder.attachBehaviors().
+ * Implements hook `MyFolder.commandExecution()`.
  */
-MyFolder.behaviors.modal = {
-    attach: function (context, settings) {
-        console.log('|-MyFolder.behaviors.modal.attach(context, settings)');
-        let init = false;
-        let next = false;
-        const registry = MyFolder.modal.registry
-        if (registry.byQueue.length == 0) {
-            init = true;
-        }
-        if (typeof settings == 'object' && 'commands' in settings) {
-            settings.commands.forEach(function (value, key, array) {
-                switch (value.command) {
-                    case 'modal':
-                        if (!('_processed' in value)) {
-                            value._processed = false;
-                        }
-                        if (!value._processed) {
-                            value._processed = true;
-                            MyFolder.modal.register(value.options);
-                            next = true;
-                        }
-                        break;
-                }
-            })
-        }
-        if (init && registry.byQueue.length > 0) {
-            // console.log('|- > MyFolder.modal.load().toggle();');
-            MyFolder.modal.load().toggle();
-        }
-        else if (next) {
-            // console.log('|- > MyFolder.modal.load().next();');
-            const self = MyFolder.modal.load();
-            // Sembunyikan agar trigger event hide untuk menjalankan
-            // method ::next();
-            self.currentModal.hide();
-        }
+MyFolder.command.modal = {
+    execute: function (options) {
+        MyFolder.modal.process(options, ['register', 'show']);
+    }
+}
+
+/**
+ * Implements hook `MyFolder.commandExecution()`.
+ */
+MyFolder.command.modalRegister = {
+    execute: function (options) {
+        MyFolder.modal.process(options, ['register']);
+    }
+}
+
+/**
+ * Implements hook `MyFolder.commandExecution()`.
+ */
+MyFolder.command.modalHide = {
+    execute: function (options) {
+        MyFolder.modal.process(options, ['hide']);
     }
 }
 
@@ -51,7 +36,41 @@ MyFolder.modal.registry = {
 };
 
 /**
- * Static function `MyFolder\modal::register()`.
+ * Static function.
+ */
+MyFolder.modal.process = function (info, tasks) {
+    // Get tasks.
+    let init = false;
+    const registry = MyFolder.modal.registry
+    if (registry.byQueue.length == 0) {
+        init = true;
+    }
+
+    if (tasks.includes('register')) {
+        MyFolder.modal.register(info);
+        if (!(tasks.includes('show'))) {
+            // MyFolder.modal.register() mengisi queue, sehingga
+            // perlu di reset.
+            MyFolder.modal.load().reset();
+        }
+    }
+    if (tasks.includes('show')) {
+        if (init) {
+            MyFolder.modal.load().toggle();
+        }
+        else {
+            // Sembunyikan agar trigger event hide untuk menjalankan
+            // method ::next();
+            MyFolder.modal.load().currentModal.hide();
+        }
+    }
+    if (tasks.includes('hide')) {
+        MyFolder.modal.load().currentModal.hide();
+    }
+}
+
+/**
+ * Static function `MyFolder.modal.register()`.
  *
  * @param info
  *
@@ -81,12 +100,10 @@ MyFolder.modal.register = function (info) {
 }
 
 /**
- * Static function `MyFolder\modal::load()`.
+ * Static function `MyFolder.modal.load()`.
  *
- * @param info
- *
- * Menciptakan static property `MyFolder\modal::$instance`, kemudian
- * mengisinya dengan object dari class `MyFolder\modal`.
+ * Menciptakan static property `MyFolder.modal.instance`, kemudian
+ * mengisinya dengan object dari class `MyFolder.modal`.
  */
 MyFolder.modal.load = function () {
     if (!("instance" in MyFolder.modal)) {

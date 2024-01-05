@@ -30,12 +30,13 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         // Internal
         $event->addJs('local.date-format', '{{ settings.basePath }}/___pseudo/assets/index/date-format.js');
         $event->addJs('local.app', '{{ settings.basePath }}/___pseudo/assets/index/app.js');
+        $event->addJs('local.index-class', '{{ settings.basePath }}/___pseudo/assets/index/index-class.js');
         $event->addJs('local.index', '{{ settings.basePath }}/___pseudo/assets/index/index.js');
+        $event->addJs('local.ajax-class', '{{ settings.basePath }}/___pseudo/assets/index/ajax-class.js');
         $event->addJs('local.ajax', '{{ settings.basePath }}/___pseudo/assets/index/ajax.js');
         $event->addJs('local.modal-class', '{{ settings.basePath }}/___pseudo/assets/index/modal-class.js');
         $event->addJs('local.modal', '{{ settings.basePath }}/___pseudo/assets/index/modal.js');
         $event->addJs('local.offcanvas-class', '{{ settings.basePath }}/___pseudo/assets/index/offcanvas-class.js');
         $event->addJs('local.offcanvas', '{{ settings.basePath }}/___pseudo/assets/index/offcanvas.js');
-        $event->addJs('local.card', '{{ settings.basePath }}/___pseudo/assets/index/card.js');
     }
 }

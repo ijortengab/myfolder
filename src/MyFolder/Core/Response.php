@@ -2,11 +2,15 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-// Credit: https://symfony.com/doc/2.8/components/http_foundation.html#sending-the-response
+/**
+ * Based on Symfony Response version 2.8.18.
+ * https://symfony.com/doc/2.8/components/http_foundation.html#sending-the-response
+ */
 class Response
 {
     protected $content;
     protected $statusCode;
+
     public function __construct($content = '', $status = 200, $headers = array())
     {
         $this->content = $content;

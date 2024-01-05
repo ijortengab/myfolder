@@ -14,10 +14,11 @@ class DashboardBodySubscriber implements EventSubscriberInterface
         );
     }
     public static function onDashboardBodyEvent(DashboardBodyEvent $event)
-    {        
+    {
         $user = new UserSession;
         if ($user->isAuthenticated()) {
             $event->registerCard(new CardUserSession);
         }
+
     }
 }

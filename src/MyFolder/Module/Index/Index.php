@@ -17,8 +17,11 @@ class Index implements ModuleInterface
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.
-        $app->post('/index', 'IjorTengab\MyFolder\Module\Index\IndexController::index');
-        $app->get('/dashboard', 'IjorTengab\MyFolder\Module\Index\IndexController::dashboard');
-        $app->get('/dashboard/body', 'IjorTengab\MyFolder\Module\Index\IndexController::dashboardBody');
+        $app->post('/index', 'IjorTengab\MyFolder\Module\Index\IndexController::route');
+        $app->get('/dashboard', 'IjorTengab\MyFolder\Module\Index\DashboardController::route');
+        $app->get('/dashboard/body', 'IjorTengab\MyFolder\Module\Index\DashboardBodyController::route');
+        $app->get('/index/dashboard/root', 'IjorTengab\MyFolder\Module\Index\IndexDashboardRootController::route');
+        $app->post('/index/dashboard/root', 'IjorTengab\MyFolder\Module\Index\IndexDashboardRootController::route');
+        $app->get('/raw', 'IjorTengab\MyFolder\Module\Index\RawController::route');
     }
 }

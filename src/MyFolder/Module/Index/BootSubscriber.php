@@ -5,11 +5,9 @@ namespace IjorTengab\MyFolder\Module\Index;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\BootEvent;
-use IjorTengab\MyFolder\Core\WriteException;
 use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\RedirectResponse;
 use IjorTengab\MyFolder\Core\BinaryFileResponse;
-use IjorTengab\MyFolder\Core\ConfigEditor;
 use IjorTengab\MyFolder\Core\Config;
 
 class BootSubscriber implements EventSubscriberInterface
@@ -22,16 +20,12 @@ class BootSubscriber implements EventSubscriberInterface
     }
     public static function onBootEvent(BootEvent $event)
     {
-        $editor = new ConfigEditor;
-        $editor->setClassName('Application', 'IjorTengab\MyFolder\Core');
-        $config = new Config;
-        $config->parse($editor->get());
-        $target_directory = $config->targetDirectory->public->value();
-        if (empty($target_directory)) {
-            $target_directory = getcwd();
-        }
+        $config = Config::load('index');
+        $root = $config->root->value();
+        null !== $root or $root = getcwd();
+
         list($base_path, $path_info,) = Application::extractUrlInfo();
-        $fullpath = $target_directory.$path_info;
+        $fullpath = $root.$path_info;
         if (is_dir($fullpath)) {
             if (substr($path_info, -1) != '/') {
                 $url = $base_path.$path_info.'/';
@@ -39,7 +33,7 @@ class BootSubscriber implements EventSubscriberInterface
                 return $response->send();
             }
             else {
-                return IndexController::index();
+                return IndexController::route();
             }
         }
         if (is_file($fullpath)) {

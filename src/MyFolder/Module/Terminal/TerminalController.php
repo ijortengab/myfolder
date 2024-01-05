@@ -4,14 +4,6 @@ namespace IjorTengab\MyFolder\Module\Terminal;
 
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\Config;
-use IjorTengab\MyFolder\Core\WriteException;
-use IjorTengab\MyFolder\Core\ConfigEditor;
-use IjorTengab\MyFolder\Core\TwigFile;
-use IjorTengab\MyFolder\Core\RedirectResponse;
-use IjorTengab\MyFolder\Core\Session;
-use IjorTengab\MyFolder\Module\Index\IndexController;
-use IjorTengab\MyFolder\Module\Index\IndexEvent;
 
 class TerminalController
 {
@@ -29,22 +21,18 @@ class TerminalController
                 break;
         }
     }
-
     protected static function routeTerminalPost()
     {
     }
-
     protected static function routeTerminalGet()
     {
         echo __FUNCTION__;
     }
-
     protected static function routeTerminalGetAjax()
     {
-        
+
         $commands = array();
         $title = 'Dashboard';
-        // $body = (string) (new Template\DashboardBody);
         $footer = '';//(string) (new Template\UserLoginFormFooter);
         $commands[] = array(
             'command' => 'offcanvas',

@@ -14,6 +14,10 @@ class FileOperations
         $this->path = $path;
         return $this;
     }
+    public static function createTemporary()
+    {
+        // return $this;
+    }
     public function getOwner()
     {
         if (!file_exists($this->path)) {
@@ -34,20 +38,10 @@ class FileOperations
         }
         return $this->base_name;
     }
-    /**
-     *
-     */
     public function autoCreate()
     {
         // @todo.
         // mkdir -p dirname(path)
         // touch path
-    }
-    /**
-     *
-     */
-    public static function createTemporary()
-    {
-        // return $this;
     }
 }

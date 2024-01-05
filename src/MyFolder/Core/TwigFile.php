@@ -1,5 +1,7 @@
 <?php
+
 namespace IjorTengab\MyFolder\Core;
+
 class TwigFile
 {
     protected $template;
@@ -13,10 +15,6 @@ class TwigFile
         $twig = new self($object, $array);
         return $twig;
     }
-
-    /**
-     *
-     */
     public function __construct($object, $array)
     {
         $this->string_storage = array();
@@ -31,9 +29,13 @@ class TwigFile
             }
         }
     }
-    /**
-     *
-     */
+    public function __toString()
+    {
+        $this->html = (string) $this->template;
+        $this->resolveForTag();
+        $this->resolveParameter();
+        return $this->html;
+    }
     public function resolveForTag()
     {
         $storage = $this->scanForTag();
@@ -71,6 +73,13 @@ class TwigFile
         }
         while (count($storage));
     }
+    protected static function ltrim($html)
+    {
+        if (isset($html[0]) && $html[0] === "\n") {
+            $html = substr($html, 1);
+        }
+        return $html;
+    }
     /**
      * @return array
      */
@@ -94,9 +103,6 @@ class TwigFile
         }
         return $storage;
     }
-    /**
-     *
-     */
     protected function renderForTag($html)
     {
         $database = $this->array_storage;
@@ -129,15 +135,10 @@ class TwigFile
         while (false);
         return $rendered;
     }
-
-    /**
-     *
-     */
     protected function resolveParameter()
     {
         $this->html = $this->renderParameters();
     }
-
     protected function renderParameters($additional = array(), $contents = null)
     {
         if (null === $contents) {
@@ -157,10 +158,6 @@ class TwigFile
         });
         return strtr($contents, $new_database);
     }
-
-    /**
-     *
-     */
     protected function stringifyArrayStorage()
     {
         if (null !== $this->stringify_array_storage) {
@@ -175,24 +172,5 @@ class TwigFile
         }
         $this->stringify_array_storage = $new_database;
         return $new_database;
-    }
-
-    /**
-     *
-     */
-    public function __toString()
-    {
-        $this->html = (string) $this->template;
-        $this->resolveForTag();
-        $this->resolveParameter();
-        return $this->html;
-    }
-
-    protected static function ltrim($html)
-    {
-        if (isset($html[0]) && $html[0] === "\n") {
-            $html = substr($html, 1);
-        }
-        return $html;
     }
 }

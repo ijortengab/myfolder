@@ -4,10 +4,9 @@ namespace IjorTengab\MyFolder\Core;
 
 class Session extends ParameterBag
 {
-
+    protected static $instance;
     protected $prefix;
     protected $is_start = false;
-    protected static $instance;
 
     public static function load()
     {
@@ -16,7 +15,6 @@ class Session extends ParameterBag
         }
         return self::$instance;
     }
-
     public function __construct()
     {
         $prefix = Application::SESSION_NAME;
@@ -43,26 +41,19 @@ class Session extends ParameterBag
             $this->parameters = array_replace_recursive($this->parameters, $_SESSION[$this->prefix]);
         }
     }
-
     public function set($key, $value)
     {
         parent::set($key, $value);
         $this->sync();
     }
-
     public function remove($key)
     {
         parent::remove($key);
         unset($_SESSION[$this->prefix][$key]);
     }
-    protected function sync()
-    {
-        if ($this->is_start) {
-            $_SESSION[$this->prefix] = array_replace_recursive($_SESSION[$this->prefix], $this->parameters);
-        }
-    }
     /**
      * https://stackoverflow.com/a/2241793
+     * https://stackoverflow.com/questions/2241769/how-to-destroy-the-session-cookie-correctly-with-php/2241793#2241793
      */
     public function destroy()
     {
@@ -72,5 +63,11 @@ class Session extends ParameterBag
         ));
         session_destroy();
         session_write_close();
+    }
+    protected function sync()
+    {
+        if ($this->is_start) {
+            $_SESSION[$this->prefix] = array_replace_recursive($_SESSION[$this->prefix], $this->parameters);
+        }
     }
 }

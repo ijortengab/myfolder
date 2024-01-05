@@ -16,11 +16,11 @@ class User implements ModuleInterface
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.
-        $app->get('/user/create', 'IjorTengab\MyFolder\Module\User\UserController::create');
-        $app->post('/user/create', 'IjorTengab\MyFolder\Module\User\UserController::create');
-        $app->get('/user/login', 'IjorTengab\MyFolder\Module\User\UserController::login');
-        $app->post('/user/login', 'IjorTengab\MyFolder\Module\User\UserController::login');
-        $app->get('/user/dashboard/session', 'IjorTengab\MyFolder\Module\User\UserDashboardController::session');
-        $app->post('/user/logout', 'IjorTengab\MyFolder\Module\User\UserController::logout');
+        $app->get('/user/create', 'IjorTengab\MyFolder\Module\User\UserCreateController::route');
+        $app->post('/user/create', 'IjorTengab\MyFolder\Module\User\UserCreateController::route');
+        $app->get('/user/login', 'IjorTengab\MyFolder\Module\User\UserLoginController::route');
+        $app->post('/user/login', 'IjorTengab\MyFolder\Module\User\UserLoginController::route');
+        $app->get('/user/dashboard/session', 'IjorTengab\MyFolder\Module\User\UserDashboardSessionController::route');
+        $app->post('/user/logout', 'IjorTengab\MyFolder\Module\User\UserLogoutController::route');
     }
 }

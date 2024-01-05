@@ -24,10 +24,6 @@
           {% for item in list %}
             {{ item }}
           {% endfor %}
-          <!-- <li class="nav-item"> -->
-            <!-- <a class="nav-link" data-myfolder-toggle="modal" data-myfolder-modal-name='dashboard' href="/dashboard">Dashboard</a> -->
-            <!-- <a class="nav-link" data-myfolder-toggle="offcanvas" data-myfolder-offcanvas-name='dashboardAuth' href="/dashboard">Dashboard</a> -->
-          <!-- </li> -->
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               View
@@ -155,7 +151,6 @@
   </div>
 </div>
 
-
 <script>
 window.settings = JSON.parse('{{ settings.global }}');
 </script>
@@ -163,26 +158,6 @@ window.settings = JSON.parse('{{ settings.global }}');
 <script src="{{ url }}"></script>
 {% endfor %}
 <script>
-//const abc = new bootstrap.Offcanvas('#OffcanvasSecondary')
-//abc.toggle()
-// const currentOffCanvas = new bootstrap.Offcanvas('#offcanvasTop')
-// currentOffCanvas.toggle()
-
-// console.log(abc);
-
-// const myModalEl = currentOffCanvas._element
-
-// myModalEl.addEventListener('hidden.bs.offcanvas', event => {
-    // console.log('Event listened hidden.bs.offcanvas.');
-    // let object = MyFolder.modal.load();
-    // MyFolder.modal.registry.lastIndexShown = object.currentIndex
-    // debug(object);
-    // let anu = $(currentOffCanvas._element)
-    // anu.removeClass('offcanvas-top').addClass('offcanvas-start');
-    // console.log(anu);
-    // currentOffCanvas.toggle();
-// })
-
 </script>
 </body>
 </html>

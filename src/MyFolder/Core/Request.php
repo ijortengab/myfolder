@@ -1,7 +1,11 @@
 <?php
 
 namespace IjorTengab\MyFolder\Core;
-// Based on Symfony Request version 2.8.18.
+
+/**
+ * Based on Symfony Request version 2.8.18.
+ * https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Request.php
+ */
 class Request
 {
     public $server;
@@ -12,6 +16,7 @@ class Request
     protected $basePath;
     protected $pathInfo;
     protected $baseUrl;
+
     public function __construct()
     {
         $this->server = new ParameterBag($_SERVER);

@@ -24,6 +24,5 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         // @todo: beri info kalo mendownload css bootstrap-icons, maka juga perlu mendownload fonts nya.
         // @todo: beri info kalo mendownload file `bootstrap.min.css`, maka juga perlu mendownload file `bootstrap.min.css.map`.
         // begitu juga dengan asset lainnya.
-        
     }
 }

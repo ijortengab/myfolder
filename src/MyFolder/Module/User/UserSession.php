@@ -6,11 +6,9 @@ use IjorTengab\MyFolder\Core\Session;
 
 class UserSession
 {
-
+    protected static $instance;
     protected $is_authenticated;
     protected $is_anonymous;
-    protected static $instance;
-
 
     public static function load()
     {
@@ -19,15 +17,10 @@ class UserSession
         }
         return self::$instance;
     }
-
     public function __construct()
     {
         return $this;
     }
-
-    /**
-     *
-     */
     public function isAuthenticated()
     {
         if (null === $this->is_authenticated) {
@@ -35,9 +28,6 @@ class UserSession
         }
         return $this->is_authenticated;
     }
-    /**
-     *
-     */
     public function isAnonymous()
     {
         if (null === $this->is_anonymous) {

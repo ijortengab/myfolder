@@ -2,32 +2,15 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-/**
- * .module[] index
- * .module[] user
- * .module[] offline_mode
- * .module[] terminal
- * .targetDirectory.public /var/www
- */
 class Application
 {
     const SESSION_NAME = 'IjorTengabWasHere';
+
     protected static $user_session;
     protected static $http_request;
     protected static $event_dispatcher;
     protected $register = array();
-    public function post($pathinfo, $callback)
-    {
-        $this->register['post'][$pathinfo] = $callback;
-    }
-    public function get($pathinfo, $callback)
-    {
-        // @todo, jika ada yang kayak gini:
-        // $app->get('/___pseudo/target_directory/{sch|eme}', 'IjorTengab\MyFolder\Controller::pseudoHandle');
-        // maka sejak awal sudah dikasih throw exception aja.
-        // karena gak valid sebagai placeholder.
-        $this->register['get'][$pathinfo] = $callback;
-    }
+
     public static function extractUrlInfo()
     {
         if (null === self::$http_request) {
@@ -73,6 +56,18 @@ class Application
         }
         return self::$event_dispatcher;
     }
+    public function post($pathinfo, $callback)
+    {
+        $this->register['post'][$pathinfo] = $callback;
+    }
+    public function get($pathinfo, $callback)
+    {
+        // @todo, jika ada yang kayak gini:
+        // $app->get('/target_directory/{sch|eme}', 'IjorTengab\MyFolder\Controller::pseudoHandle');
+        // maka sejak awal sudah dikasih throw exception aja.
+        // karena gak valid sebagai placeholder.
+        $this->register['get'][$pathinfo] = $callback;
+    }
     public function run()
     {
         try {
@@ -87,7 +82,8 @@ class Application
     protected function handle()
     {
         // Register route.
-        $this->get('/', 'IjorTengab\MyFolder\Core\Controller::index');
+        $this->get('/', 'IjorTengab\MyFolder\Core\Controller::get');
+        $this->post('/', 'IjorTengab\MyFolder\Core\Controller::post');
 
         // Route dibawah ini secara real, maka diawali oleh `/___pseudo`.
         $this->get('/assets/{module}/{file}', 'IjorTengab\MyFolder\Core\PseudoController::getAssetFile');
@@ -98,14 +94,10 @@ class Application
         $this->get('/root/{a}/{b}/{c}/{d}/{e}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/target_directory/{scheme}', 'IjorTengab\MyFolder\Core\PseudoController::getTargetDirectoryFile');
     }
-
     protected function scanModule()
     {
-        $editor = new ConfigEditor(self::class);
-        $config = new Config;
-        $config->parse($editor->get());
+        $config = Config::load();
         $modules = $config->module->list();
         foreach ($modules as $module) {
             $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
@@ -191,17 +183,13 @@ class Application
             $callback = $register['/'];
             $args = array();
         }
-        // $debugname = 'callback'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-        // die('op');
 
         if (!empty($args)) {
             $args = array_values($args);
         }
         if (!is_callable($callback)) {
-            throw new RouteException('Callback is not exists.');
+            throw new RouteException('Callback is not exists: '.$callback.'.');
         }
-        // $debugname = 'callback'; $debugvariable = '|||wakwaw|||'; if (array_key_exists($debugname, get_defined_vars())) { $debugvariable = $$debugname; } elseif (isset($this) && property_exists($this, $debugname)){ $debugvariable = $this->{$debugname}; $debugname = '$this->' . $debugname; } if ($debugvariable !== '|||wakwaw|||') {        echo "\r\n<pre>" . basename(__FILE__ ). ":" . __LINE__ . " (Time: " . date('c') . ", Direktori: " . dirname(__FILE__) . ")\r\n". 'var_dump(' . $debugname . '): '; var_dump($debugvariable); echo "</pre>\r\n"; }
-        
         call_user_func_array($callback, $args);
     }
     protected function loadSession(Request $http_request)

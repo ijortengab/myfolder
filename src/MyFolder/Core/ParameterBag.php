@@ -2,7 +2,9 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-// Based on Symfony ParameterBag version 2.8.18.
+/**
+ * Based on Symfony ParameterBag version 2.8.18.
+ */
 class ParameterBag
 {
     protected $parameters;

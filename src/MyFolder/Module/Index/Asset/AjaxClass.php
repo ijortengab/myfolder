@@ -2,9 +2,10 @@
 
 namespace IjorTengab\MyFolder\Module\Index\Asset;
 
-class Card {
+class AjaxClass
+{
     public function __toString()
     {
-        return file_get_contents(getcwd().'/assets/index/card.js');
+        return file_get_contents(getcwd().'/assets/index/ajax-class.js');
     }
 }

@@ -1,9 +1,8 @@
 <?php
 
-namespace IjorTengab\MyFolder\Module\User;
+namespace IjorTengab\MyFolder\Module\Index;
 
 /**
- * .sysadmin.name 
- * .sysadmin.pass 
+ * .root /var/www
  */
 final class Config {}
