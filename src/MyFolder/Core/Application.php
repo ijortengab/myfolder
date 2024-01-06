@@ -76,7 +76,26 @@ class Application
             $this->route();
         }
         catch (\Exception $e) {
-            die($e->getMessage());
+            // @todo, gunakan toasts.
+            $commands = array();
+            $commands[] = array(
+                'command' => 'modal',
+                'options' => array(
+                    'name' => 'exception',
+                    'bootstrapOptions' => array(
+                        'backdrop' => 'static',
+                        'keyboard' => true
+                    ),
+                    'layout' => array(
+                        'title' => 'Exception',
+                        'body' => $e->getMessage(),
+                    ),
+                ),
+            );
+            $response = new JsonResponse(array(
+                'commands' => $commands,
+            ));
+            return $response->send();
         }
     }
     protected function handle()

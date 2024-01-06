@@ -15,6 +15,7 @@ class Terminal implements ModuleInterface
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.
-        $app->get('/terminal', 'IjorTengab\MyFolder\Module\Terminal\TerminalController::terminal');
+        $app->get('/terminal', 'IjorTengab\MyFolder\Module\Terminal\TerminalController::route');
+        $app->get('/terminal/dashboard/position', 'IjorTengab\MyFolder\Module\Terminal\TerminalDashboardPositionController::route');
     }
 }

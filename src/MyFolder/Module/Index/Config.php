@@ -3,6 +3,6 @@
 namespace IjorTengab\MyFolder\Module\Index;
 
 /**
- * .root /var/www
+ * .root /home/ijortengab
  */
 final class Config {}

@@ -1,0 +1,20 @@
+<div id="card-terminal-position" class="card mb-2" aria-hidden="true">
+  <div class="card-body">
+    <h5 class="card-title">{{ title }}</h5>
+    <div class="btn-group me-2" role="group" aria-label="Basic radio toggle button group">
+      <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off" {{ value.top ? checked }}>
+      <label class="btn btn-outline-primary" for="btnradio1">{{ label.top }}</label>
+      <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" {{ value.bottom ? checked }}>
+      <label class="btn btn-outline-primary" for="btnradio2">{{ label.bottom }}</label>
+    </div>
+    <div class="btn-group me-2" role="group" aria-label="Basic radio toggle button group">
+      <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off" {{ value.full ? checked }}>
+      <label class="btn btn-outline-primary" for="btnradio3">{{ label.full }}</label>
+    </div>
+  </div>
+  <div class="card-footer">
+     <div class="btn-group btn-group-sm" role="group" aria-label="Third group">
+      <button type="button" class="btn btn-secondary"><i class="bi bi-terminal"></i> {{ open }}</button>
+    </div>
+  </div>
+</div>

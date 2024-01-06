@@ -7,30 +7,31 @@ use IjorTengab\MyFolder\Core\JsonResponse;
 
 class TerminalController
 {
-    public static function terminal()
+    public static function route()
     {
         $http_request = Application::getHttpRequest();
         $method = strtolower($http_request->server->get('REQUEST_METHOD'));
-        $is_ajax = null === $http_request->query->get('is_ajax') ? false : true ;
+        $is_ajax = !(null === $http_request->query->get('is_ajax'));
+        $has_query_part = !(null === $http_request->query->get('part'));
         switch ($method) {
             case 'post':
-                self::routeTerminalPost();
+                // self::routePost();
                 break;
             case 'get':
-                $is_ajax ? self::routeTerminalGetAjax() : self::routeTerminalGet();
+                if (!$is_ajax) {
+                    // self::routeGet();
+                }
+                elseif ($has_query_part) {
+                    // self::routeGetAjaxPart();
+                }
+                else {
+                    self::routeGetAjax();
+                }
                 break;
         }
     }
-    protected static function routeTerminalPost()
+    protected static function routeGetAjax()
     {
-    }
-    protected static function routeTerminalGet()
-    {
-        echo __FUNCTION__;
-    }
-    protected static function routeTerminalGetAjax()
-    {
-
         $commands = array();
         $title = 'Dashboard';
         $footer = '';//(string) (new Template\UserLoginFormFooter);
