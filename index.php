@@ -1,7 +1,5 @@
 <?php
 
-namespace IjorTengab\MyFolder;
-
 require 'vendor/autoload.php';
 
 use IjorTengab\MyFolder\Core\Application;
@@ -27,5 +25,5 @@ if (!function_exists('str_ends_with')) {
         return 0 === substr_compare($haystack, $needle, -$needleLength);
     }
 }
-$app = new Application;
+$app = new Application(__DIR__);
 $app->run();

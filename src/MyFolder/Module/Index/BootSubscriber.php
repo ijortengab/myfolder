@@ -22,7 +22,7 @@ class BootSubscriber implements EventSubscriberInterface
     {
         $config = Config::load('index');
         $root = $config->root->value();
-        null !== $root or $root = getcwd();
+        null !== $root or $root = Application::$cwd;
 
         list($base_path, $path_info,) = Application::extractUrlInfo();
         $fullpath = $root.$path_info;

@@ -123,7 +123,7 @@ class IndexDashboardRootController
     {
         $config = Config::load('index');
         $root = $config->root->value();
-        null !== $root or $root = getcwd();
+        null !== $root or $root = Application::$cwd;
 
         $commands = array();
         $body = (string) TwigFile::process(new Template\CardRootDirectory, array(

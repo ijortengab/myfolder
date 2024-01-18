@@ -32,7 +32,7 @@ class PseudoController extends Controller
     }
     public static function getRootFile($a, $b = null, $c = null, $d = null, $e = null, $f = null, $g = null)
     {
-        $target_directory = getcwd();
+        $target_directory = Application::$cwd;
         $fullpath = $target_directory.'/'.$a;
         $b === null or $fullpath .= '/'.$b;
         $c === null or $fullpath .= '/'.$c;

@@ -37,7 +37,7 @@ class IndexController
     {
         $config = Config::load('index');
         $root = $config->root->value();
-        null !== $root or $root = getcwd();
+        null !== $root or $root = Application::$cwd;
 
         // @todo.
         // jika user adalah sysadmin, maka boleh menggunakan argument root_request.
@@ -61,7 +61,7 @@ class IndexController
             switch ($action) {
                 case 'ls':
                     // Direktori diatas
-                    $old_pwd = getcwd();
+                    $old_pwd = Application::$cwd;
                     chdir($current_directory);
                     $dotdir_only = glob('.*', GLOB_ONLYDIR);
                     $dotdir_only = array_diff($dotdir_only, array('.','..'));

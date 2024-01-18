@@ -6,6 +6,7 @@ class Application
 {
     const SESSION_NAME = 'IjorTengabWasHere';
 
+    public static $cwd;
     protected static $user_session;
     protected static $http_request;
     protected static $event_dispatcher;
@@ -56,6 +57,12 @@ class Application
         }
         return self::$event_dispatcher;
     }
+
+    public function __construct($directory)
+    {
+        self::$cwd = $directory;
+    }
+
     public function post($pathinfo, $callback)
     {
         $this->register['post'][$pathinfo] = $callback;

@@ -123,7 +123,7 @@ class TerminalDashboardPositionController
     {
         $config = Config::load('terminal');
         $position =  $config->position->value();
-        null !== $position or $position = getcwd();
+        null !== $position or $position = 'bottom';
 
         $commands = array();
         $body = (string) TwigFile::process(new Template\CardTerminalPosition, array(

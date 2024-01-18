@@ -35,7 +35,7 @@ class RawController
     {
         $config = Config::load('index');
         $root = $config->root->value();
-        null !== $root or $root = getcwd();
+        null !== $root or $root = Application::$cwd;
 
         $request = Application::getHttpRequest();
         $path = $request->query->get('path');
