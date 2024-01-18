@@ -158,6 +158,25 @@ window.settings = JSON.parse('{{ settings.global }}');
 <script src="{{ url }}"></script>
 {% endfor %}
 <script>
+function ready(fn) {
+  if (
+    document.attachEvent
+      ? document.readyState === 'complete'
+      : document.readyState !== 'loading'
+  ) {
+    fn();
+  } else {
+    document.addEventListener('DOMContentLoaded', fn);
+  }
+}
+ready(function () {
+    if (typeof $ === 'undefined') {
+        alert('jQuery is not found.');
+    }
+    if (typeof bootstrap === 'undefined') {
+        alert('Bootstrap is not found.');
+    }
+})
 </script>
 </body>
 </html>
