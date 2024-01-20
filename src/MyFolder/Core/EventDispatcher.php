@@ -11,15 +11,33 @@ class EventDispatcher
     protected $storage = array();
     public function addSubscriber(EventSubscriberInterface $subscriber)
     {
-        foreach ($subscriber->getSubscribedEvents() as $event_name => $method) {
-            $this->storage[$event_name][] = array($subscriber, $method);
+        foreach ($subscriber->getSubscribedEvents() as $event_name => $info) {
+            // @todo, ganti semua ke array.
+            if (is_string($info)) {
+                $info = array($info);
+            }
+            if (!is_array($info)) {
+                throw new ModuleException('Event subscriber is not valid.');
+            }
+            $method = array_shift($info);
+            $priority = array_shift($info);
+            // Default value is 10.
+            $priority = $priority ? $priority : 10;
+            $this->storage[$event_name][] = array(
+                'handler' => $subscriber,
+                'method' => $method,
+                'priority' => $priority,
+            );
         }
     }
     public function dispatch($event, $event_name)
     {
         if (array_key_exists($event_name, $this->storage)) {
+            // @todo, array_column tidak support di php 5.3
+            $sorts = array_column($this->storage[$event_name], 'priority');
+            array_multisort($this->storage[$event_name], $sorts, SORT_DESC);
             foreach ($this->storage[$event_name] as $each) {
-                call_user_func_array($each, array($event));
+                call_user_func_array(array($each['handler'], $each['method']), array($event));
             }
         }
     }
