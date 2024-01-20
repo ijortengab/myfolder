@@ -25,5 +25,5 @@ if (!function_exists('str_ends_with')) {
         return 0 === substr_compare($haystack, $needle, -$needleLength);
     }
 }
-$app = new Application(__DIR__);
+$app = new Application(__DIR__, __FILE__);
 $app->run();

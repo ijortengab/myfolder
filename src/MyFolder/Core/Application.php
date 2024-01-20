@@ -7,6 +7,7 @@ class Application
     const SESSION_NAME = 'IjorTengabWasHere';
 
     public static $cwd;
+    public static $script_filename;
     protected static $user_session;
     protected static $http_request;
     protected static $event_dispatcher;
@@ -23,18 +24,53 @@ class Application
         $rewrite_url = true;
 
         // Beri dukungan terhadap PHP built-in web server.
-        // Contoh: sebelumnya $base_path = /subfolder
-        // menjadi $base_path = /subfolder/index.php
-        // sehingga PHP built-in web server dapat menerima request sbb:
+        //
+        // Contoh 1:
+        // ```
+        // php -S 127.0.0.1:9090
+        // ```
+        // dengan request sbb:
+        // ```
+        // curl http://127.0.0.1:9090/index.php
+        // curl http://127.0.0.1:9090/subfolder/index.php
+        // ```
+        // Nilai variable `$base_path` adalah '' atau
+        // '/subfolder'. Kita perlu mengubahnya menjadi '/index.php' atau
+        // '/subfolder/index.php' sehingga PHP built-in web server dapat
+        // menerima request sbb:
+        // /index.php/directory/subdirectory/file.ext
+        // atau
         // /subfolder/index.php/directory/subdirectory/file.ext
+        //
+        // Contoh 2:
+        // ```
+        // php -S 127.0.0.1:9090 /path/to/index.php
+        // ```
+        // dengan request sbb:
+        // ```
+        // curl http://127.0.0.1:9090/favicon.ico
+        // ```
+        // menghasilkan nilai $_SERVER['SCRIPT_FILENAME']
+        // adalah '/home/ijortengab/repositories/ijortengab/myfolder/favicon.ico'.
+        // Kita perlu mengubahnya kembali menjadi
+        // '/home/ijortengab/repositories/ahmadkemal/myfolder/index.php'
+        // Solusi untuk hal ini adalah mengecek dengan nilai Application::$script_filename
         $filename = basename($http_request->server->get('SCRIPT_FILENAME'));
+        if ($http_request->server->get('SCRIPT_FILENAME') !== Application::$script_filename) {
+            // Koreksi.
+            $filename = basename(Application::$script_filename);
+            // Nilai dari $path_info seharusnya bukan '/', melainkan
+            // '/favicon.ico'.
+            if ($path_info == '/') {
+                $path_info .= basename($http_request->server->get('SCRIPT_FILENAME'));
+            }
+        }
         $base_url = $http_request->getBaseUrl();
         if (str_ends_with($base_url, $filename)) {
             $base_path = $base_url;
             $rewrite_url = false;
         }
         return array($base_path, $path_info, $rewrite_url);
-
     }
     public static function currentUser()
     {
@@ -58,9 +94,10 @@ class Application
         return self::$event_dispatcher;
     }
 
-    public function __construct($directory)
+    public function __construct($directory, $file)
     {
         self::$cwd = $directory;
+        self::$script_filename = $file;
     }
 
     public function post($pathinfo, $callback)
