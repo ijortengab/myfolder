@@ -8,12 +8,15 @@ class Session extends ParameterBag
     protected $prefix;
     protected $is_start = false;
 
+    /**
+     * Reference: http://php.net/manual/en/language.oop5.late-static-bindings.php
+     */
     public static function load()
     {
-        if (null === self::$instance) {
-            self::$instance = new self;
+        if (null === static::$instance) {
+            static::$instance = new static;
         }
-        return self::$instance;
+        return static::$instance;
     }
     public function __construct()
     {
