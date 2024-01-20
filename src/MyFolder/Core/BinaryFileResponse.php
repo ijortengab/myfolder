@@ -25,6 +25,9 @@ class BinaryFileResponse extends Response
             case 'js':
                 header('Content-Type: text/javascript');
                 break;
+            case 'html':
+                header('Content-Type: text/html');
+                break;
             default:
                 header('Content-Type: ' . mime_content_type($this->file));
                 break;
