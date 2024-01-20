@@ -107,8 +107,8 @@ class IndexController
     protected static function routeGet()
     {
         $dispatcher = Application::getEventDispatcher();
-        $event = IndexEvent::load();
-        $dispatcher->dispatch($event, IndexEvent::NAME);
+        $event = IndexPreRenderEvent::load();
+        $dispatcher->dispatch($event, IndexPreRenderEvent::NAME);
         list($base_path, $path_info, $rewrite_url) = Application::extractUrlInfo();
 
         $settings = array(

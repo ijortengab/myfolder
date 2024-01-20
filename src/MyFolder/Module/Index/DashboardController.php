@@ -32,7 +32,7 @@ class DashboardController
     }
     protected static function routeGet()
     {
-        $event = IndexEvent::load();
+        $event = IndexPreRenderEvent::load();
         $event->setCommand(array(
             'command' => 'fetch',
             'options' => array(

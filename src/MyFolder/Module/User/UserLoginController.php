@@ -7,7 +7,7 @@ use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\Config;
 use IjorTengab\MyFolder\Core\Session;
 use IjorTengab\MyFolder\Module\Index\IndexController;
-use IjorTengab\MyFolder\Module\Index\IndexEvent;
+use IjorTengab\MyFolder\Module\Index\IndexPreRenderEvent;
 
 
 class UserLoginController
@@ -100,7 +100,7 @@ class UserLoginController
     }
     protected static function routeGet()
     {
-        $event = IndexEvent::load();
+        $event = IndexPreRenderEvent::load();
         $event->setCommand(array(
             'command' => 'fetch',
             'options' => array(
