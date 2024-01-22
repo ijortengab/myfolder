@@ -8,6 +8,8 @@ class IndexInvokeCommandEvent extends Event
 {
     const NAME = 'index.invoke_command.event';
 
+    protected static $instance;
+
     protected $commands = array();
 
     public function setCommand($array)

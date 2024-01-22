@@ -6,6 +6,8 @@ class FilePreRenderEvent extends Event
 {
     const NAME = 'core.file_pre_render.event';
 
+    protected static $instance;
+
     protected $info;
 
     public function getInfo()

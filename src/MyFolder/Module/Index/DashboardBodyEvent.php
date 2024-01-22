@@ -8,6 +8,8 @@ class DashboardBodyEvent extends Event
 {
     const NAME = 'dashboard_body.event';
 
+    protected static $instance;
+
     protected $cards = array();
 
     public function registerCard(CardInterface $card)

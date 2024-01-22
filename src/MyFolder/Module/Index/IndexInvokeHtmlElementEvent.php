@@ -8,6 +8,8 @@ class IndexInvokeHtmlElementEvent extends Event
 {
     const NAME = 'index.invoke_html_element.event';
 
+    protected static $instance;
+
     protected $js = array();
     protected $css = array();
     protected $list = array();

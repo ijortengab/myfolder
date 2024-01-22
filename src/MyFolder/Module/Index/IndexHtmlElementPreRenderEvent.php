@@ -8,6 +8,8 @@ class IndexHtmlElementPreRenderEvent extends Event
 {
     const NAME = 'index.html_element_pre_render.event';
 
+    protected static $instance;
+
     protected $js = array();
     protected $css = array();
     protected $list = array();
