@@ -11,7 +11,7 @@ class Index implements ModuleInterface
     {
         // Register event.
         $dispatcher = Application::getEventDispatcher();
-        $dispatcher->addSubscriber(new BootSubscriber());
+        $dispatcher->addSubscriber(new DirectoryPreRenderSubscriber());
         $dispatcher->addSubscriber(new IndexInvokeCommandSubscriber());
         $dispatcher->addSubscriber(new IndexInvokeHtmlElementSubscriber());
         $dispatcher->addSubscriber(new DashboardBodySubscriber());

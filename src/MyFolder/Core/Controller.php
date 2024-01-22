@@ -6,7 +6,6 @@ class Controller
 {
     /**
      * Default controller for `index.php`.
-     * We don't do anything here, just run the boot event.
      */
     public static function get()
     {
@@ -14,6 +13,30 @@ class Controller
         $dispatcher = Application::getEventDispatcher();
         $event = new BootEvent();
         $dispatcher->dispatch($event, BootEvent::NAME);
+
+        $config = Config::load();
+        $root = $config->root->value();
+        null !== $root or $root = Application::$cwd;
+
+        list($base_path, $path_info,) = Application::extractUrlInfo();
+        $fullpath = $root.$path_info;
+        if (is_file($fullpath)) {
+            $dispatcher = Application::getEventDispatcher();
+            $event = new FilePreRenderEvent;
+            $event->setInfo(new \SplFileInfo($fullpath));
+            $dispatcher->dispatch($event, FilePreRenderEvent::NAME);
+        }
+        elseif (is_dir($fullpath)) {
+            $dispatcher = Application::getEventDispatcher();
+            $event = new DirectoryPreRenderEvent;
+            $event->setInfo(new \SplFileInfo($fullpath));
+            $dispatcher->dispatch($event, DirectoryPreRenderEvent::NAME);
+        }
+        else {
+            $response = new Response('Not Found.');
+            $response->setStatusCode(404);
+            return $response->send();
+        }
     }
     public static function post()
     {

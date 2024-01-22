@@ -144,6 +144,10 @@ class Application
     }
     protected function handle()
     {
+        // Register event.
+        $dispatcher = Application::getEventDispatcher();
+        $dispatcher->addSubscriber(new FilePreRenderSubscriber());
+
         // Register route.
         $this->get('/', 'IjorTengab\MyFolder\Core\Controller::get');
         $this->post('/', 'IjorTengab\MyFolder\Core\Controller::post');
