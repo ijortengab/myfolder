@@ -4,15 +4,15 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 
-class IndexPreRenderSubscriber implements EventSubscriberInterface
+class IndexInvokeCommandSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return array(
-            IndexPreRenderEvent::NAME => 'onIndexPreRenderEvent',
+            IndexInvokeCommandEvent::NAME => 'onIndexInvokeCommandEvent',
         );
     }
-    public static function onIndexPreRenderEvent(IndexPreRenderEvent $event)
+    public static function onIndexInvokeCommandEvent(IndexInvokeCommandEvent $event)
     {
         $event->setCommand(array(
             'command' => 'index'

@@ -11,7 +11,7 @@ class User implements ModuleInterface
     {
         // Register event.
         $dispatcher = Application::getEventDispatcher();
-        $dispatcher->addSubscriber(new IndexPreRenderSubscriber());
+        $dispatcher->addSubscriber(new IndexInvokeCommandSubscriber());
         $dispatcher->addSubscriber(new HtmlElementSubscriber());
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 

@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\Event;
 
-class IndexPreRenderEvent extends Event
+class IndexInvokeCommandEvent extends Event
 {
     const NAME = 'index_pre_render.event';
 

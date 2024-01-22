@@ -4,17 +4,17 @@ namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\Config;
-use IjorTengab\MyFolder\Module\Index\IndexPreRenderEvent;
+use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
 
-class IndexPreRenderSubscriber implements EventSubscriberInterface
+class IndexInvokeCommandSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return array(
-            IndexPreRenderEvent::NAME => 'onIndexPreRenderEvent',
+            IndexInvokeCommandEvent::NAME => 'onIndexInvokeCommandEvent',
         );
     }
-    public static function onIndexPreRenderEvent(IndexPreRenderEvent $event)
+    public static function onIndexInvokeCommandEvent(IndexInvokeCommandEvent $event)
     {
         $config = Config::load('user');
         $name = $config->sysadmin->name->value();

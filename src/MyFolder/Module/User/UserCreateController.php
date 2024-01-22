@@ -8,7 +8,7 @@ use IjorTengab\MyFolder\Core\Config;
 use IjorTengab\MyFolder\Core\WriteException;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Module\Index\IndexController;
-use IjorTengab\MyFolder\Module\Index\IndexPreRenderEvent;
+use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
 
 /**
  * * Route for `/user/create`.
@@ -100,7 +100,7 @@ class UserCreateController
     }
     protected static function routeGet()
     {
-        $event = IndexPreRenderEvent::load();
+        $event = IndexInvokeCommandEvent::load();
         $event->setCommand(array(
             'command' => 'fetch',
             'options' => array(
