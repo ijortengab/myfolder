@@ -22,13 +22,13 @@ class Controller
         $fullpath = $root.$path_info;
         if (is_file($fullpath)) {
             $dispatcher = Application::getEventDispatcher();
-            $event = new FilePreRenderEvent;
+            $event = FilePreRenderEvent::load();
             $event->setInfo(new \SplFileInfo($fullpath));
             $dispatcher->dispatch($event, FilePreRenderEvent::NAME);
         }
         elseif (is_dir($fullpath)) {
             $dispatcher = Application::getEventDispatcher();
-            $event = new DirectoryPreRenderEvent;
+            $event = DirectoryPreRenderEvent::load();
             $event->setInfo(new \SplFileInfo($fullpath));
             $dispatcher->dispatch($event, DirectoryPreRenderEvent::NAME);
         }
