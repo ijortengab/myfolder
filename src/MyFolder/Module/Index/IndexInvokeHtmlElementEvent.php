@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\Event;
 
-class HtmlElementEvent extends Event
+class IndexInvokeHtmlElementEvent extends Event
 {
     const NAME = 'html_element.event';
 

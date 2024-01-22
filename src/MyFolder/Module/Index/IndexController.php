@@ -123,8 +123,8 @@ class IndexController
             $settings['pathInfo'] = preg_replace('/___pseudo.*/','',$settings['pathInfo']);
         }
 
-        $event = new HtmlElementEvent();
-        $dispatcher->dispatch($event, HtmlElementEvent::NAME);
+        $event = new IndexInvokeHtmlElementEvent();
+        $dispatcher->dispatch($event, IndexInvokeHtmlElementEvent::NAME);
         $js = $event->getAllJavascript();
         $css = $event->getAllCascadingStyleSheets();
         $rendered_list = array();

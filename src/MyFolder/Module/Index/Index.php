@@ -13,7 +13,7 @@ class Index implements ModuleInterface
         $dispatcher = Application::getEventDispatcher();
         $dispatcher->addSubscriber(new BootSubscriber());
         $dispatcher->addSubscriber(new IndexInvokeCommandSubscriber());
-        $dispatcher->addSubscriber(new HtmlElementSubscriber());
+        $dispatcher->addSubscriber(new IndexInvokeHtmlElementSubscriber());
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.

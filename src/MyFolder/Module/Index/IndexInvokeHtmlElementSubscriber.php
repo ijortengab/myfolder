@@ -4,15 +4,15 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 
-class HtmlElementSubscriber implements EventSubscriberInterface
+class IndexInvokeHtmlElementSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return array(
-            HtmlElementEvent::NAME => 'onHtmlElementEvent',
+            IndexInvokeHtmlElementEvent::NAME => 'onIndexInvokeHtmlElementEvent',
         );
     }
-    public static function onHtmlElementEvent(HtmlElementEvent $event)
+    public static function onIndexInvokeHtmlElementEvent(IndexInvokeHtmlElementEvent $event)
     {
         $event->addList('index.dashboard', new Template\NavbarListDashboard, array(
             'label' => 'Dashboard',

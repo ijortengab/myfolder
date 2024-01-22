@@ -3,17 +3,17 @@
 namespace IjorTengab\MyFolder\Module\Terminal;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
-use IjorTengab\MyFolder\Module\Index\HtmlElementEvent;
+use IjorTengab\MyFolder\Module\Index\IndexInvokeHtmlElementEvent;
 
-class HtmlElementSubscriber implements EventSubscriberInterface
+class IndexInvokeHtmlElementSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return array(
-            HtmlElementEvent::NAME => 'onHtmlElementEvent',
+            IndexInvokeHtmlElementEvent::NAME => 'onIndexInvokeHtmlElementEvent',
         );
     }
-    public static function onHtmlElementEvent(HtmlElementEvent $event)
+    public static function onIndexInvokeHtmlElementEvent(IndexInvokeHtmlElementEvent $event)
     {
         $event->addList('index.terminal', new Template\NavbarListTerminal, array(
             'label' => 'Terminal',
