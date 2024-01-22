@@ -33,7 +33,7 @@ class RawController
     }
     protected static function routeGet()
     {
-        $config = Config::load('index');
+        $config = Config::load();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 

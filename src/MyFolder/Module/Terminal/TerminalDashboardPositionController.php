@@ -43,7 +43,7 @@ class TerminalDashboardPositionController
         // verifikasi is_dir.
         // cannot write. dll.
         // Load.
-        $config = Config::load('index');
+        $config = Config::load();
         // Set.
         $config->root = $root;
 
@@ -175,7 +175,7 @@ class TerminalDashboardPositionController
     protected static function routeGetAjaxPart()
     {
 
-        /* $config = Config::load('index');
+        /* $config = Config::load();
         $root = $config->root->value();
         // Jadikan empty string agar user ngeh bahwa belum di set.
         null !== $root or $root = '';

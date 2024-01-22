@@ -43,7 +43,7 @@ class IndexDashboardRootController
         // verifikasi is_dir.
         // cannot write. dll.
         // Load.
-        $config = Config::load('index');
+        $config = Config::load();
         // Set.
         $config->root = $root;
 
@@ -121,7 +121,7 @@ class IndexDashboardRootController
     }
     protected static function routeGetAjax()
     {
-        $config = Config::load('index');
+        $config = Config::load();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 
@@ -165,7 +165,7 @@ class IndexDashboardRootController
     protected static function routeGetAjaxPart()
     {
 
-        $config = Config::load('index');
+        $config = Config::load();
         $root = $config->root->value();
         // Jadikan empty string agar user ngeh bahwa belum di set.
         null !== $root or $root = '';
