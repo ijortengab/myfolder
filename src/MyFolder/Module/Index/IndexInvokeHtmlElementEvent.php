@@ -6,7 +6,7 @@ use IjorTengab\MyFolder\Core\Event;
 
 class IndexInvokeHtmlElementEvent extends Event
 {
-    const NAME = 'html_element.event';
+    const NAME = 'index.invoke_html_element.event';
 
     protected $js = array();
     protected $css = array();

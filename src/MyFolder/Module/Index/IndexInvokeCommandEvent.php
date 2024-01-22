@@ -6,7 +6,7 @@ use IjorTengab\MyFolder\Core\Event;
 
 class IndexInvokeCommandEvent extends Event
 {
-    const NAME = 'index_pre_render.event';
+    const NAME = 'index.invoke_command.event';
 
     protected $commands = array();
 
