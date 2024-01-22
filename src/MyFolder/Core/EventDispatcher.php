@@ -8,6 +8,7 @@ namespace IjorTengab\MyFolder\Core;
  */
 class EventDispatcher
 {
+    public static $stop = false;
     protected $storage = array();
     public function addSubscriber(EventSubscriberInterface $subscriber)
     {
@@ -37,6 +38,9 @@ class EventDispatcher
             $sorts = array_column($this->storage[$event_name], 'priority');
             array_multisort($this->storage[$event_name], $sorts, SORT_DESC);
             foreach ($this->storage[$event_name] as $each) {
+                if (static::$stop) {
+                    break;
+                }
                 call_user_func_array(array($each['handler'], $each['method']), array($event));
             }
         }
