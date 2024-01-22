@@ -40,3 +40,21 @@ Contoh User Storage
 +{user}
 
 https://icon-icons.com/id/download/113445/ICO/32/
+
+Command mengubah massal class name
+----------------------------------
+
+```
+grep -r -l HtmlElementEvent
+grep -r -l HtmlElementEvent | while IFS= read line; do sed s,HtmlElementEvent,IndexInvokeHtmlElementEvent,g -i "$line"; done
+mv MyFolder/Module/Index/HtmlElementEvent.php MyFolder/Module/Index/IndexInvokeHtmlElementEvent.php
+git add MyFolder/Module/Index/IndexInvokeHtmlElementEvent.php
+
+grep -r -l HtmlElementSubscriber
+grep -r -l HtmlElementSubscriber | while IFS= read line; do sed s,HtmlElementSubscriber,IndexInvokeHtmlElementSubscriber,g -i "$line"; done
+find -type f -iname HtmlElementSubscriber\.php
+find * -type f -iname HtmlElementSubscriber\.php | while IFS= read line; do dirname=$(dirname "$line"); mv "$line" "$dirname"/IndexInvokeHtmlElementSubscriber.php; done
+
+git commit -m 'Mengubah class name dari HtmlElementEvent menjadi IndexInvokeHtmlElementEvent. Mengubah class name dari HtmlElementSubscriber menjadi IndexInvokeHtmlElementSubscriber.'
+
+```

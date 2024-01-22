@@ -125,10 +125,15 @@ class IndexController
 
         $event = new IndexInvokeHtmlElementEvent();
         $dispatcher->dispatch($event, IndexInvokeHtmlElementEvent::NAME);
-        $js = $event->getAllJavascript();
-        $css = $event->getAllCascadingStyleSheets();
+        $html_element = $event->dump();
+        $event = new IndexHtmlElementPreRenderEvent();
+        $event->restore($html_element);
+        $dispatcher->dispatch($event, IndexHtmlElementPreRenderEvent::NAME);
+        $html_element = $event->dump();
+        $js = $html_element['js'];
+        $css = $html_element['css'];
         $rendered_list = array();
-        foreach ($event->getAllList() as $each) {
+        foreach ($html_element['list'] as $each) {
             list($template, $array) = $each;
             $rendered_list[] = TwigFile::process($template, $array);
         }

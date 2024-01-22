@@ -3,17 +3,17 @@
 namespace IjorTengab\MyFolder\Module\OfflineMode;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
-use IjorTengab\MyFolder\Module\Index\IndexInvokeHtmlElementEvent;
+use IjorTengab\MyFolder\Module\Index\IndexHtmlElementPreRenderEvent;
 
-class IndexInvokeHtmlElementSubscriber implements EventSubscriberInterface
+class IndexHtmlElementPreRenderSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
     {
         return array(
-            IndexInvokeHtmlElementEvent::NAME => 'onIndexInvokeHtmlElementEvent',
+            IndexHtmlElementPreRenderEvent::NAME => 'onIndexHtmlElementPreRenderEvent',
         );
     }
-    public static function onIndexInvokeHtmlElementEvent(IndexInvokeHtmlElementEvent $event)
+    public static function onIndexHtmlElementPreRenderEvent(IndexHtmlElementPreRenderEvent $event)
     {
         $event->overrideJs('jquery', '{{ settings.basePath }}/___pseudo/root/assets/npm/jquery@3.7.0/dist/jquery.min.js');
         $event->overrideJs('jquery.once', '{{ settings.basePath }}/___pseudo/root/assets/npm/jquery-once@2.2.3/jquery.once.min.js');

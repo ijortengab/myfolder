@@ -17,12 +17,18 @@ class IndexInvokeHtmlElementEvent extends Event
         if (!array_key_exists($id, $this->js)) {
             $this->js[$id] = $url;
         }
+        else {
+            trigger_error("Cannot add javascript with key $id because it already exists.", E_USER_ERROR);
+        }
         return $this;
     }
     public function addCss($id, $url)
     {
         if (!array_key_exists($id, $this->css)) {
             $this->css[$id] = $url;
+        }
+        else {
+            trigger_error("Cannot add css with key $id because it already exists.", E_USER_ERROR);
         }
         return $this;
     }
@@ -31,33 +37,17 @@ class IndexInvokeHtmlElementEvent extends Event
         if (!array_key_exists($id, $this->list)) {
             $this->list[$id] = array($template, $array);
         }
+        else {
+            trigger_error("Cannot add list with key $id because it already exists.", E_USER_ERROR);
+        }
         return $this;
     }
-    public function overrideJs($id, $url)
+    public function dump()
     {
-        $this->js[$id] = $url;
-        return $this;
-    }
-    public function overrideCss($id, $url)
-    {
-        $this->css[$id] = $url;
-        return $this;
-    }
-    public function overrideList($id, $template, $array)
-    {
-        $this->list[$id] = array($template, $array);
-        return $this;
-    }
-    public function getAllJavascript()
-    {
-        return array_values($this->js);
-    }
-    public function getAllCascadingStyleSheets()
-    {
-        return array_values($this->css);
-    }
-    public function getAllList()
-    {
-        return array_values($this->list);
+        return array(
+            'css' => $this->css,
+            'js' => $this->js,
+            'list' => $this->list,
+        );
     }
 }

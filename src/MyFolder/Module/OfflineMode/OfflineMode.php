@@ -12,7 +12,7 @@ class OfflineMode implements ModuleInterface
         $dispatcher = Application::getEventDispatcher();
 
         // Register event.
-        $subscriber = new IndexInvokeHtmlElementSubscriber();
+        $subscriber = new IndexHtmlElementPreRenderSubscriber();
         $dispatcher->addSubscriber($subscriber);
     }
 }
