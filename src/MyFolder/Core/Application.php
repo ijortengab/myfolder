@@ -164,8 +164,8 @@ class Application
     }
     protected function scanModule()
     {
-        $config = Config::load();
-        $modules = $config->module->list();
+        $config = ConfigHelper::load();
+        $modules = $config->module->value();
         foreach ($modules as $module) {
             $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
             if (!class_exists("\\IjorTengab\\MyFolder\\Module\\$class\\$class")) {

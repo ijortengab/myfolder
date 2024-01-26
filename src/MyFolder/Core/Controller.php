@@ -14,12 +14,16 @@ class Controller
         $event = new BootEvent();
         $dispatcher->dispatch($event, BootEvent::NAME);
 
-        $config = Config::load();
+        $config = ConfigHelper::load();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 
         list($base_path, $path_info,) = Application::extractUrlInfo();
+
+        // Decode karena dijadikan sebagai path file system.
+        $path_info = urldecode($path_info);
         $fullpath = $root.$path_info;
+
         if (is_file($fullpath)) {
             $dispatcher = Application::getEventDispatcher();
             $event = FilePreRenderEvent::load();

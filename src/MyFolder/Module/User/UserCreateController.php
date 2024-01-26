@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\Config;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\WriteException;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Module\Index\IndexController;
@@ -63,7 +63,7 @@ class UserCreateController
         $name = $http_request->request->get('name');
         $pass = $http_request->request->get('pass');
 
-        $config = Config::load('user');
+        $config = ConfigHelper::load('user');
         $config->sysadmin->name = $name;
         $config->sysadmin->pass = $pass;
 
@@ -73,7 +73,7 @@ class UserCreateController
         $body = 'You can login now.';
         $modal_name = 'SuccessCreate';
         try {
-            Config::save($config);
+            ConfigHelper::save($config);
         }
         catch (WriteException $e) {
             $title = 'Attention.';

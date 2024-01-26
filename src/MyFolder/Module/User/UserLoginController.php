@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\Config;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\Session;
 use IjorTengab\MyFolder\Module\Index\IndexController;
 use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
@@ -52,7 +52,7 @@ class UserLoginController
             $input_pass = $http_request->request->get('pass');
 
             // Database.
-            $config = Config::load('user');
+            $config = ConfigHelper::load('user');
             $name = $config->sysadmin->name->value();
             $pass = $config->sysadmin->pass->value();
             // Verify.

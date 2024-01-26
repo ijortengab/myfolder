@@ -22,7 +22,7 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           {% for item in list %}
-            {{ item }}
+            {{ item|raw }}
           {% endfor %}
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -152,7 +152,7 @@
 </div>
 
 <script>
-window.settings = JSON.parse('{{ settings.global }}');
+window.settings = JSON.parse('{{ settings.global | raw }}');
 </script>
 {% for url in js %}
 <script src="{{ url }}"></script>

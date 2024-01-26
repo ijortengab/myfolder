@@ -5,7 +5,7 @@ namespace IjorTengab\MyFolder\Core;
 class ConfigEditor
 {
     protected $doc_comment;
-    protected $serialized_string;
+    protected $config_contents;
     protected $file_name;
     protected $object;
     protected $class;
@@ -33,15 +33,15 @@ EOF;
     }
     public function get()
     {
-        if (null === $this->serialized_string) {
-            $this->serialize();
+        if (null === $this->config_contents) {
+            $this->populateConfigContents();
         }
-        return $this->serialized_string;
+        return $this->config_contents;
     }
     public function set($data)
     {
-        if (null === $this->serialized_string) {
-            $this->serialize();
+        if (null === $this->config_contents) {
+            $this->populateConfigContents();
         }
         if (!is_writable(dirname($this->file_name))) {
             throw new WriteException('Directory of file is not writable.');
@@ -62,9 +62,9 @@ EOF;
         chmod($this->file_name, 0664);
         chgrp($this->file_name, $oldgroup);
     }
-    protected function serialize()
+    protected function populateConfigContents()
     {
-        $this->serialized_string = '';
+        $this->config_contents = '';
         if (isset($this->object)) {
             //construct the Reflective class.
             $reflective_class = new \ReflectionClass($this->object);
@@ -85,7 +85,7 @@ EOF;
         // Turn false return into empty string.
         $this->doc_comment = (string) $reflective_class->getDocComment();
         $this->file_name = $reflective_class->getFileName();
-        $this->serialized_string = trim(preg_replace(array(
+        $this->config_contents = trim(preg_replace(array(
             '/^\/\*\*$/m',
             '/^\s\*\s/m',
             '/^\s\*\/$/m',

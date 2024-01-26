@@ -3,7 +3,7 @@
 namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\Application;
-use IjorTengab\MyFolder\Core\Config;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\Response;
 
 class RawController
@@ -33,7 +33,7 @@ class RawController
     }
     protected static function routeGet()
     {
-        $config = Config::load();
+        $config = ConfigHelper::load();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 

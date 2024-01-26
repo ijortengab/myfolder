@@ -5,7 +5,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\RedirectResponse;
-use IjorTengab\MyFolder\Core\Config;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\TwigFile;
 
 class IndexDashboardRootController
@@ -43,7 +43,7 @@ class IndexDashboardRootController
         // verifikasi is_dir.
         // cannot write. dll.
         // Load.
-        $config = Config::load();
+        $config = ConfigHelper::load();
         // Set.
         $config->root = $root;
 
@@ -51,7 +51,7 @@ class IndexDashboardRootController
         $body = 'Saved.';
         $modal_name = 'SuccessSavedRootDirectory';
         try {
-            Config::save($config);
+            ConfigHelper::save($config);
         }
         catch (WriteException $e) {
             $title = 'Attention.';
@@ -121,7 +121,7 @@ class IndexDashboardRootController
     }
     protected static function routeGetAjax()
     {
-        $config = Config::load();
+        $config = ConfigHelper::load();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 
@@ -165,7 +165,7 @@ class IndexDashboardRootController
     protected static function routeGetAjaxPart()
     {
 
-        $config = Config::load();
+        $config = ConfigHelper::load();
         $root = $config->root->value();
         // Jadikan empty string agar user ngeh bahwa belum di set.
         null !== $root or $root = '';

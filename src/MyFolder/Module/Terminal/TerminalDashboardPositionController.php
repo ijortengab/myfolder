@@ -5,7 +5,7 @@ namespace IjorTengab\MyFolder\Module\Terminal;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\RedirectResponse;
-use IjorTengab\MyFolder\Core\Config;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\TwigFile;
 
 class TerminalDashboardPositionController
@@ -43,7 +43,7 @@ class TerminalDashboardPositionController
         // verifikasi is_dir.
         // cannot write. dll.
         // Load.
-        $config = Config::load();
+        $config = ConfigHelper::load();
         // Set.
         $config->root = $root;
 
@@ -51,7 +51,7 @@ class TerminalDashboardPositionController
         $body = 'Saved.';
         $modal_name = 'SuccessSavedRootDirectory';
         try {
-            Config::save($config);
+            ConfigHelper::save($config);
         }
         catch (WriteException $e) {
             $title = 'Attention.';
@@ -121,7 +121,7 @@ class TerminalDashboardPositionController
     }
     protected static function routeGetAjax()
     {
-        $config = Config::load('terminal');
+        $config = ConfigHelper::load('terminal');
         $position =  $config->position->value();
         null !== $position or $position = 'bottom';
 
@@ -175,7 +175,7 @@ class TerminalDashboardPositionController
     protected static function routeGetAjaxPart()
     {
 
-        /* $config = Config::load();
+        /* $config = ConfigHelper::load();
         $root = $config->root->value();
         // Jadikan empty string agar user ngeh bahwa belum di set.
         null !== $root or $root = '';
