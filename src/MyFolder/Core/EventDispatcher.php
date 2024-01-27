@@ -8,7 +8,6 @@ namespace IjorTengab\MyFolder\Core;
  */
 class EventDispatcher
 {
-    public static $stop = false;
     protected $storage = array();
     public function addSubscriber(EventSubscriberInterface $subscriber)
     {
@@ -36,11 +35,8 @@ class EventDispatcher
         if (array_key_exists($event_name, $this->storage)) {
             // @todo, array_column tidak support di php 5.3
             $sorts = array_column($this->storage[$event_name], 'priority');
-            array_multisort($this->storage[$event_name], $sorts, SORT_DESC);
+            array_multisort($sorts, SORT_DESC, $this->storage[$event_name]);
             foreach ($this->storage[$event_name] as $each) {
-                if (static::$stop) {
-                    break;
-                }
                 call_user_func_array(array($each['handler'], $each['method']), array($event));
             }
         }
