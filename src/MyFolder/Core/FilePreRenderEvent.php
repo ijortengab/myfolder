@@ -8,6 +8,8 @@ class FilePreRenderEvent extends Event
 
     protected static $instance;
 
+    protected $response;
+
     protected $info;
 
     public function getInfo()
@@ -18,5 +20,15 @@ class FilePreRenderEvent extends Event
     public function setInfo(\SplFileInfo $info)
     {
         return $this->info = $info;
+    }
+
+    public function setResponse(Response $response)
+    {
+        $this->response = $response;
+    }
+
+    public function getResponse()
+    {
+        return $this->response;
     }
 }

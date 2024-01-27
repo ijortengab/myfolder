@@ -29,6 +29,8 @@ class Controller
             $event = FilePreRenderEvent::load();
             $event->setInfo(new \SplFileInfo($fullpath));
             $dispatcher->dispatch($event, FilePreRenderEvent::NAME);
+            $response = $event->getResponse();
+            return $response->send();
         }
         elseif (is_dir($fullpath)) {
             $dispatcher = Application::getEventDispatcher();

@@ -22,6 +22,6 @@ class FilePreRenderSubscriber implements EventSubscriberInterface
     {
         $fullpath = $event->getInfo()->getPathname();
         $response = new BinaryFileResponse($fullpath);
-        return $response->send();
+        $event->setResponse($response);
     }
 }
