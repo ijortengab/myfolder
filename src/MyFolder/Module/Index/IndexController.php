@@ -7,6 +7,7 @@ use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
+use IjorTengab\MyFolder\Core\HtmlElementEvent;
 
 class IndexController
 {
@@ -116,37 +117,25 @@ class IndexController
             'basePath' => $base_path,
             'rewriteUrl' => $rewrite_url,
             'commands' => $event->getCommands(),
-            'commandsExecuted' => [],
         );
         // Pada kasus terdapat `___pseudo`, maka hapus.
         if (strpos($settings['pathInfo'], '/___pseudo/') !== false) {
             $settings['pathInfo'] = preg_replace('/___pseudo.*/','',$settings['pathInfo']);
         }
-
-        $event = new IndexInvokeHtmlElementEvent();
-        $dispatcher->dispatch($event, IndexInvokeHtmlElementEvent::NAME);
-        $html_element = $event->dump();
-        $event = new IndexHtmlElementPreRenderEvent();
-        $event->restore($html_element);
-        $dispatcher->dispatch($event, IndexHtmlElementPreRenderEvent::NAME);
-        $html_element = $event->dump();
-        $js = $html_element['js'];
-        $css = $html_element['css'];
-        $rendered_list = array();
-        foreach ($html_element['list'] as $each) {
-            list($template, $array) = $each;
-            $rendered_list[] = TwigFile::process($template, $array);
-        }
+        $event = HtmlElementEvent::load();
+        $dispatcher->dispatch($event, HtmlElementEvent::NAME);
+        $js = $event->getResources('index/js/*');
+        $css = $event->getResources('index/css/*');
+        $nav_items = $event->getTemplates('index/navbar/item/*');
         $content = TwigFile::process(new Template\Index, array(
             'js' => $js,
             'css' => $css,
-            'list' => $rendered_list,
+            'list' => $nav_items,
             'settings' => array(
                 'global' => json_encode($settings),
                 'basePath' => $settings['basePath'],
             ),
         ));
-
         $response = new Response($content);
         return $response->send();
     }

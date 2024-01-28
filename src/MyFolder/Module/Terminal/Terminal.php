@@ -11,7 +11,7 @@ class Terminal implements ModuleInterface
     {
         // Register event.
         $dispatcher = Application::getEventDispatcher();
-        $dispatcher->addSubscriber(new IndexInvokeHtmlElementSubscriber());
+        $dispatcher->addSubscriber(new HtmlElementSubscriber());
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.
