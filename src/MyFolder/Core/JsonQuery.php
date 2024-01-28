@@ -124,5 +124,8 @@ class JsonQuery
                 }
             }
         }
+        // Jika method terakhir dieksekusi adalah ::add, maka kita perlu
+        // reset.
+        $this->array_helper->reset();
     }
 }
