@@ -20,8 +20,7 @@ class FilePreRenderSubscriber implements EventSubscriberInterface
     }
     public static function onFilePreRenderEvent(FilePreRenderEvent $event)
     {
-        $fullpath = $event->getInfo()->getPathname();
-        $response = new BinaryFileResponse($fullpath);
+        $response = new BinaryFileResponse($event->getInfo());
         $event->setResponse($response);
     }
 }

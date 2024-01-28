@@ -8,16 +8,20 @@ namespace IjorTengab\MyFolder\Core;
  */
 class BinaryFileResponse extends Response
 {
-    protected $file;
-    public function __construct($file)
+    protected $info;
+
+    /**
+     *
+     */
+    public function __construct(\SplFileInfo $info)
     {
-        $this->file = $file;
+        $this->info = $info;
     }
+
     public function send()
     {
-        $pathinfo = pathinfo(basename($this->file));
-        $filename = $pathinfo['filename'];
-        $extension = array_key_exists('extension', $pathinfo) ? $pathinfo['extension'] : '';
+        $extension = $this->info->getExtension();
+        $path = $this->info->getPathname();
         switch ($extension) {
             case 'css':
                 header('Content-Type: text/css');
@@ -28,10 +32,18 @@ class BinaryFileResponse extends Response
             case 'html':
                 header('Content-Type: text/html');
                 break;
+            case 'svg':
+                header('Content-Type: image/svg+xml');
+                break;
             default:
-                header('Content-Type: ' . mime_content_type($this->file));
+                header('Content-Type: ' . mime_content_type($path));
                 break;
         }
-        readfile($this->file);
+        if (null === $this->content) {
+            readfile($path);
+        }
+        else {
+            echo $this->content;
+        }
     }
 }

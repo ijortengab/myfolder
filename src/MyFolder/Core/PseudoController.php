@@ -13,15 +13,11 @@ class PseudoController extends Controller
         $part_file = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $filename)));
         $class = 'IjorTengab\\MyFolder\\Module\\'.$part_module.'\\Asset\\'.$part_file;
         if (class_exists($class)) {
-            switch ($extension) {
-                case 'js':
-                    header('Content-Type: text/javascript; charset=utf-8');
-                    break;
-                case 'svg':
-                    header('Content-Type: image/svg+xml');
-                    break;
-            }
-            $response = new Response(new $class);
+            // $basename tidak harus exists.
+            // dan karena tidak exist, jadi perlu kita kasih content via method
+            // ::setContent(). Basename diperlukan untuk mengecek extension.
+            $response = new BinaryFileResponse(new \SplFileInfo($basename));
+            $response->setContent((string) new $class);
             return $response->send();
         }
         else {
@@ -30,35 +26,29 @@ class PseudoController extends Controller
             return $response->send();
         }
     }
-    public static function getRootFile($a, $b = null, $c = null, $d = null, $e = null, $f = null, $g = null)
+    public static function getRootFile()
     {
-        $target_directory = Application::$cwd;
-        $fullpath = $target_directory.'/'.$a;
-        $b === null or $fullpath .= '/'.$b;
-        $c === null or $fullpath .= '/'.$c;
-        $d === null or $fullpath .= '/'.$d;
-        $e === null or $fullpath .= '/'.$e;
-        $f === null or $fullpath .= '/'.$f;
-        $g === null or $fullpath .= '/'.$g;
-        if (file_exists($fullpath)) {
-            // @todo, lakukan ini di module.
-            $basename = basename($fullpath);
-            switch ($basename) {
-                case 'jquery.min.js':
-                case 'jquery.once.min.js':
-                case 'jquery.once.min.js.map':
-                case 'popper.min.js':
-                case 'popper.min.js.map':
-                case 'bootstrap.min.js':
-                case 'bootstrap.min.js.map':
-                case 'bootstrap.min.css':
-                case 'bootstrap.min.css.map':
-                case 'bootstrap-icons.css':
-                case 'bootstrap-icons.woff2':
-                    header('Cache-Control: public, max-age=31536000, s-maxage=31536000, immutable');
-                    break;
+        $args = func_get_args();
+        if ($args[0] == 'cdn') {
+            // Kasih header agar di cache selamanya.
+            array_shift($args);
+            $fullpath = implode('/', $args);
+            $dispatcher = Application::getEventDispatcher();
+            $event = HtmlElementEvent::load();
+            $dispatcher->dispatch($event, HtmlElementEvent::NAME);
+            $remote_files = $event->getResources('*', 'https://'.$fullpath);
+            if (count($remote_files)) {
+                header('Cache-Control: public, max-age=31536000, s-maxage=31536000, immutable');
             }
-            $response = new BinaryFileResponse($fullpath);
+            $fullpath = '/cdn/'.$fullpath;
+        }
+        else {
+            $fullpath = '/'.implode('/', $args);
+        }
+        $target_directory = Application::$cwd;
+        $fullpath = $target_directory.$fullpath;
+        if (file_exists($fullpath)) {
+            $response = new BinaryFileResponse(new \SplFileInfo($fullpath));
             return $response->send();
         }
         $response = new Response('Not Found.');
