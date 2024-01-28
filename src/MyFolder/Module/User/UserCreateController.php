@@ -15,25 +15,6 @@ use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
  */
 class UserCreateController
 {
-    public static function getCommand()
-    {
-        return array(
-            'command' => 'modal',
-            'options' => array(
-                'name' => 'sysadminCreateAccountForm',
-                'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => false
-                ),
-                'layout' => array(
-                    'fetch' => '/user/create?part[]=body&part[]=footer',
-                    'title' => 'Create Account',
-                    'body' => 'Loading...',
-                    'footer' => '',
-                ),
-            ),
-        );
-    }
     public static function route()
     {
         $http_request = Application::getHttpRequest();

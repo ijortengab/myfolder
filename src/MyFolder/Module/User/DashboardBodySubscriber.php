@@ -10,7 +10,7 @@ class DashboardBodySubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            DashboardBodyEvent::NAME => 'onDashboardBodyEvent',
+            DashboardBodyEvent::NAME => array('onDashboardBodyEvent', 100),
         );
     }
     public static function onDashboardBodyEvent(DashboardBodyEvent $event)
