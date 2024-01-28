@@ -21,8 +21,8 @@ class EventDispatcher
             }
             $method = array_shift($info);
             $priority = array_shift($info);
-            // Default value is 10.
-            $priority = $priority ? $priority : 10;
+            // Default value is 0.
+            $priority = $priority ? $priority : 0;
             $this->storage[$event_name][] = array(
                 'handler' => $subscriber,
                 'method' => $method,
