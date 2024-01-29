@@ -13,5 +13,6 @@ class Markdown implements ModuleInterface
         $dispatcher = Application::getEventDispatcher();
         $dispatcher->addSubscriber(new FilePreRenderSubscriber());
         $dispatcher->addSubscriber(new HtmlElementSubscriber());
+        $dispatcher->addSubscriber(new HtmlElementIndexSubscriber());
     }
 }

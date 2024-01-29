@@ -170,12 +170,8 @@ MyFolder.index.prototype.drawColumnOther = function(data) {
                         $a.before('<i class="bi bi-filetype-'+info.type+'"></i> ');
                     }
                     $this.find("td.type").text(info.type.toUpperCase()+' File')
-                    // Array.prototype.includes() not support for old browser.
-                    var extensionReadByPHP = ['php', 'htaccess', 'twig'];
-                    if (extensionReadByPHP.includes(info.type.toLowerCase())) {
-                        $a.attr('href', MyFolder.settings.basePath+'/___pseudo/raw?path='+MyFolder.settings.pathInfo+info.name);
-                    }
                 }
+                MyFolder.elementModifier($a[0], info)
             }
         });
     }

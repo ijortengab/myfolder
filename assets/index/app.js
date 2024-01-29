@@ -24,7 +24,8 @@ debug = function (object) {
 MyFolder = {
     settings: settings,
     behaviors: {},
-    command: {}
+    command: {},
+    modifier: {}
 };
 
 /**
@@ -100,6 +101,19 @@ MyFolder.commandExecution = function (settings) {
     }
 }
 
+MyFolder.elementModifier = function (element, info) {
+    let hook = MyFolder.modifier;
+    Object.keys(hook || {}).forEach(function (i) {
+      if (typeof hook[i] === 'function') {
+        try {
+          hook[i](element, info);
+        } catch (e) {
+          console.log(e);
+        }
+      }
+    })
+}
+
 /**
  * Static function `MyFolder::pseudoLink()`
  *
@@ -121,6 +135,17 @@ MyFolder.ajaxLink = function (url) {
     let newurl = new URL(window.location.origin+url);
     newurl.searchParams.append('is_ajax','1');
     return newurl.href;
+}
+
+MyFolder.modifier.nginx = function (element, info) {
+    // nginx conf: location ~ \.php dan location ~ \.htaccess
+    // menyebabkan path tersebut diambil alih oleh web server,
+    // sehingga perlu kita akali.
+    var extensionReadByNginx = ['php', 'htaccess'];
+    if (extensionReadByNginx.includes(info.type.toLowerCase())) {
+        // Array.prototype.includes() not support for old browser.
+        $(element).attr('href', MyFolder.settings.basePath+'/___pseudo/raw?path='+MyFolder.settings.pathInfo+info.name);
+    }
 }
 
 /**

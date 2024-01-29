@@ -12,7 +12,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            HtmlElementEvent::NAME => array('onHtmlElementEvent', 100),
+            HtmlElementEvent::NAME => array('onHtmlElementEvent'),
         );
     }
     public static function onHtmlElementEvent(HtmlElementEvent $event)
