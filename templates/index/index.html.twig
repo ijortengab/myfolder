@@ -153,6 +153,7 @@
 
 <script>
 window.settings = JSON.parse('{{ settings.global | raw }}');
+window.settings.commandsExecuted = {}
 </script>
 {% for url in js %}
 <script src="{{ url }}"></script>
