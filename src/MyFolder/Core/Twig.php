@@ -20,13 +20,13 @@ class Twig
         return $this->html;
     }
 
-    public function render($placeholders)
+    public function render($placeholders = null)
     {
         // Kalo cuma angin, gak perlu structure.
         if (ctype_space($this->contents)) {
             return $this->contents;
         }
-        $this->placeholders = $placeholders;
+        $this->placeholders = (array) $placeholders;
 
         $structure = $this->parseContents();
 
@@ -70,30 +70,69 @@ class Twig
      */
     protected function subRender($contents)
     {
-        preg_match_all('/\{\{\s+([\w \|\.]+)\s+\}\}/', $contents, $matches, PREG_SET_ORDER);
+        preg_match_all('/\{\{\s+([\w \"\'\?\|\.]+)\s+\}\}/', $contents, $matches, PREG_SET_ORDER);
         if (empty($matches)) {
             return $contents;
         }
-
         $jq = new JsonQuery($this->placeholders);
         while ($each = array_shift($matches)) {
+            $replace = null;
             list($find, $something) = $each;
             if (array_key_exists($find, $this->cache_find)) {
                 $contents = str_replace($find, $this->cache_find[$find], $contents);
                 continue;
             }
-            if (\str_contains($something, '|')) {
-                preg_match('/(\S+)\s*\|\s*(\S+)/', $something, $matches2);
-                list(,$token, $filter) = $matches2;
+            // Contoh: value.top ? 'checked'
+            if (\str_contains($something, '?')) {
+                preg_match('/(\S+)\s*\?\s*(\S+)/', $something, $matches3);
+                list(,$parameter, $something) = $matches3;
+                // Jika parameter terdapat karakter titik, maka parent array yang
+                // menjadi placeholdernys.
+                // Contoh:
+                // $parameter = container.panel.body
+                // Maka ubah $parameter menjadi body, lalu
+                // Array container.panel menjadi $placeholders.
+                $placeholders = $this->placeholders;
+                if (($pos = strrpos($parameter, '.')) !== false) {
+                    $path = substr($parameter, 0, $pos);
+                    $parameter = substr($parameter, $pos+1);
+                    $placeholders = (array) $jq->path('.'.$path)->get();
+                }
+                if (array_key_exists($parameter, $placeholders)) {
+                    // https://twig.symfony.com/doc/3.x/tags/if.html.
+                    $judge = (bool) $placeholders[$parameter];
+                }
+                else {
+                    $judge = false;
+                }
+                if ($judge) {
+                    if ($this->isQuoted($something)) {
+                        $replace = substr($something, 1, -1);
+                        $filter = 'raw';
+                    }
+                }
+                else {
+                    $replace = '';
+                    $filter = 'raw';
+                }
+                // $replace = $judge ? $something: null;
             }
-            else {
-                $token = $something;
-                $filter = 'htmlentities';
+            if (!isset($replace)) {
+                if (\str_contains($something, '|')) {
+                    preg_match('/(\S+)\s*\|\s*(\S+)/', $something, $matches2);
+                    list(,$token, $filter) = $matches2;
+                }
+                else {
+                    $token = $something;
+                    $filter = 'htmlentities';
+                }
+                if (!array_key_exists($token, $this->cache_token)) {
+                    $this->cache_token[$token] = $jq->path('.'.$token)->get();
+                }
+                $replace = $this->cache_token[$token];
             }
-            if (!array_key_exists($token, $this->cache_token)) {
-                $this->cache_token[$token] = $jq->path('.'.$token)->get();
-            }
-            $replace = $this->cache_token[$token];
+
+            // Ubah boolean menjadi string.
             $replace = (string) $replace;
             switch ($filter) {
                 case 'raw':
@@ -147,26 +186,13 @@ class Twig
             $jq = new JsonQuery($this->placeholders);
             $placeholders = (array) $jq->path('.'.$path)->get();
         }
-        $judge = false;
-        do {
-            // Empty array adalah false
-            // Boolean false dan null adalah false.
-            if (!array_key_exists($parameter, $placeholders)) {
-                break;
-            }
-            elseif (null === $placeholders[$parameter]) {
-                break;
-            }
-            elseif (is_bool($placeholders[$parameter]) && !$placeholders[$parameter]) {
-                break;
-            }
-            // Selebihnya dianggap true.
-            // Integer 0 dianggap true.
-            // Empty string dianggap true.
-            // Empty array dianggap true.
-            $judge = true;
+        if (array_key_exists($parameter, $placeholders)) {
+            // https://twig.symfony.com/doc/3.x/tags/if.html.
+            $judge = (bool) $placeholders[$parameter];
         }
-        while (false);
+        else {
+            $judge = false;
+        }
         if ($judge) {
             $start = $info['position']['open'] + strlen($start_tag);
             if ($info['position']['else'] === null) {
@@ -715,5 +741,12 @@ class Twig
             $array['children'][$_open] = $this->structureToArray($_object);
         }
         return $array;
+    }
+
+    private function isQuoted($string) {
+        if (($left = substr($string, 0, 1)) && ($right = substr($string, -1)) && $left === $right && in_array($left, array('"', "'"))) {
+            return true;
+        }
+        return false;
     }
 }

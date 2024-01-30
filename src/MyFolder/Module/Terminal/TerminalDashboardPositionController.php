@@ -135,9 +135,7 @@ class TerminalDashboardPositionController
             ),
             'open' => 'Open',
             'value' => array(
-                'top' => false,
-                'bottom' => false,
-                'full' => true,
+                $position => true,
             ),
         ));
         $commands[] = array(
