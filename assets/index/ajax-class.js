@@ -19,6 +19,7 @@ MyFolder.ajax = function (base, element, element_settings) {
                 return response.json()
             })
             .then(function (result) {
+                ajax.enableTrigger(element);
                 ajax.result = result
                 ajax.resultProcessed = false
                 ajax.resultProcess();
@@ -82,5 +83,21 @@ MyFolder.ajax.prototype.commands = {
     },
     replaceWith: function (ajax, response) {
         $(response.selector, ajax.element).replaceWith(response.html);
+    }
+}
+MyFolder.ajax.prototype.enableTrigger = function (element) {
+    if (typeof element === 'undefined') {
+        return;
+    }
+    let $trigger = $(element).data('trigger');
+    if (typeof $trigger === 'undefined') {
+        return;
+    }
+    $trigger.prop("disabled", false);
+    // @todo, jika form , maka
+    $(element).data('isSending', false);
+    if ($(element).data('isUpdate') === true) {
+        $(element).data('isUpdate', false);
+        $(element).submit();
     }
 }
