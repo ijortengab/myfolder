@@ -35,81 +35,24 @@ class TerminalDashboardPositionController
     }
     protected static function routePost()
     {
-        /* $commands = array();
         $http_request = Application::getHttpRequest();
-        $root = $http_request->request->get('root');
+        $position = $http_request->request->get('position');
 
-        // @todo.
-        // verifikasi is_dir.
-        // cannot write. dll.
-        // Load.
-        $config = ConfigHelper::load();
-        // Set.
-        $config->root = $root;
-
-        $title = 'Success.';
-        $body = 'Saved.';
-        $modal_name = 'SuccessSavedRootDirectory';
-        try {
-            ConfigHelper::save($config);
-        }
-        catch (WriteException $e) {
-            $title = 'Attention.';
-            $body = $e->getMessage();
-            $modal_name = 'FailedSavedRootDirectory';
-        }
-        $commands[] = array(
-            'command' => 'modal',
-            'options' => array(
-                'name' => $modal_name,
-                'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => true
-                ),
-                'layout' => array(
-                    'title' => $title,
-                    'body' => $body,
-                ),
-            ),
-        );
-        $commands[] = array(
-            'command' => 'offcanvasHide',
-        );
-        $commands[] = array(
-            'command' => 'ajax',
-            'options' => array(
-                'method' => 'html',
-                'selector' => '#card-root-directory .card-body p.card-text',
-                'html' => htmlentities($root),
-            ),
-        );
-        $commands[] = array(
-            'command' => 'settings',
-            'options' => array(
-                'pathInfo' => '/',
-                'commands' => array(
-                    array(
-                        'command' => 'ajax',
-                        'options' => array(
-                            'method' => 'html',
-                            'selector' => '#table-main tbody',
-                            'html' => 'Loading...',
-                        ),
-                    ),
-                    array(
-                        'command' => 'index',
-                        'options' => array(
-                            'root' => $root,
-                        ),
-                    ),
-                ),
-            ),
-        );
+        $commands = array();
+        // @todo: verifikasi input user.
+        $config = ConfigHelper::load('terminal');
+        $config->position = $position;
+        // @todo, saving harus ada lock file.
+        // cek lagi function lock yang ada di versi 0.1
+        ConfigHelper::save($config);
+        // Kasih sleep aja deh, agar user tidak click
+        // berkali-kali.
+        sleep(1);
         $response = new JsonResponse(array(
             'commands' => $commands,
+            'position' => $position,
         ));
-        $response->send(); */
-
+        return $response->send();
     }
     protected static function routeGet()
     {

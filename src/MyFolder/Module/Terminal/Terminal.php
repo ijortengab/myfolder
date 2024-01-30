@@ -17,5 +17,6 @@ class Terminal implements ModuleInterface
         // Register route.
         $app->get('/terminal', 'IjorTengab\MyFolder\Module\Terminal\TerminalController::route');
         $app->get('/terminal/dashboard/position', 'IjorTengab\MyFolder\Module\Terminal\TerminalDashboardPositionController::route');
+        $app->post('/terminal/dashboard/position', 'IjorTengab\MyFolder\Module\Terminal\TerminalDashboardPositionController::route');
     }
 }
