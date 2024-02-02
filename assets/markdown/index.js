@@ -6,11 +6,14 @@ MyFolder.modifier.markdown = function (element, info) {
     if (extensionReadByNginx.includes(info.type.toLowerCase())) {
         // Array.prototype.includes() not support for old browser.
         let href = MyFolder.settings.pathInfo+info.name;
-        let object = new URL(window.location.origin+href);
+        let object = new URL(window.location.origin+MyFolder.settings.basePath+href);
         object.searchParams.append('html','');
         let newhref = object.href
+        // Hilangkan origin, contoh: http://localhost
+        newhref = newhref.substring(window.location.origin.length)
         // Hilangkan tanda = diakhir.
-        let url = newhref.substring(0,(newhref.length - 1))
-        $(element).attr('href', url);
+        newhref = newhref.substring(0,(newhref.length - 1))
+        // Fill.
+        $(element).attr('href', newhref);
     }
 }

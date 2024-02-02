@@ -22,7 +22,7 @@ debug = function (object) {
  * Mendefinisikan variable `MyFolder` pada global.
  */
 MyFolder = {
-    settings: settings,
+    settings: window.settings || {},
     behaviors: {},
     command: {},
     modifier: {}
@@ -47,7 +47,7 @@ MyFolder.attachBehaviors = function (context, settings) {
     // console.log(context);
     // console.log(settings);
     context = context || document;
-    settings = settings || MyFolder.settings;
+    settings = settings || window.settings;
     let hook = MyFolder.behaviors;
     Object.keys(hook || {}).forEach(function (i) {
       if (typeof hook[i].attach === 'function') {

@@ -65,9 +65,11 @@ MyFolder.behaviors.ajax = {
             }
             let $trigger = $form.data('trigger');
             if (typeof $trigger === 'undefined') {
-                let $trigger = $form.find('input[type=submit]')
+                $trigger = $form.find('input[type=submit]')
             }
-            $trigger.prop("disabled", true);
+            if (typeof $trigger !== 'undefined') {
+                $trigger.prop("disabled", true);
+            }
             // if (typeof trigger !== 'undefined') {
                 // trigger.disabled = true;
                 // trigger.innerText = 'Waiting';
