@@ -19,7 +19,6 @@ class Controller
         null !== $root or $root = Application::$cwd;
 
         list($base_path, $path_info,) = Application::extractUrlInfo();
-
         // Decode karena dijadikan sebagai path file system.
         $path_info = urldecode($path_info);
         $fullpath = $root.$path_info;
@@ -46,26 +45,21 @@ class Controller
     }
     public static function post()
     {
-        // @todo, harusnya adalah event.
-        $commands = array();
-        $commands[] = array(
-            'command' => 'modal',
-            'options' => array(
-                'name' => 'error',
-                'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => false
-                ),
-                'layout' => array(
-                    'title' => 'Error',
-                    'body' => 'Callback not defined.',
-                    'footer' => '...',
-                ),
-            ),
-        );
-        $response = new JsonResponse(array(
-            'commands' => $commands,
-        ));
-        return $response->send();
+        $config = ConfigHelper::load();
+        $root = $config->root->value();
+        null !== $root or $root = Application::$cwd;
+        list($base_path, $path_info,) = Application::extractUrlInfo();
+        // Decode karena dijadikan sebagai path file system.
+        $path_info = urldecode($path_info);
+        $fullpath = $root.$path_info;
+        $http_request = Application::getHttpRequest();
+        $is_html = !(null === $http_request->query->get('html'));
+        $contents = (string) $http_request->request->get('contents');
+        file_put_contents($fullpath, $contents);
+        // list($base_path, $path_info,) = Application::extractUrlInfo();
+        // $url = $base_path.$path_info;
+        // (null === $http_request->query->get('html')) or $url .= '?html';
+        // $response = new RedirectResponse($url);
+        // return $response->send();
     }
 }
