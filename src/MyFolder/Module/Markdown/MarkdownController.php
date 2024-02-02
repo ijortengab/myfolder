@@ -10,6 +10,7 @@ use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\EventDispatcher;
 use IjorTengab\MyFolder\Core\FilePreRenderEvent;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
+use IjorTengab\MyFolder\Core\HtmlWrapperHtmlElementEvent;
 
 class MarkdownController
 {
@@ -44,22 +45,25 @@ class MarkdownController
         $dispatcher->dispatch($event, HtmlElementEvent::NAME);
         $js = $event->getResources('markdown/js/*');
         $css = $event->getResources('markdown/css/*');
+
+        // Module yang implement html-wrapper juga kita sedot, gan.
+        // Return an instance of HtmlElementEvent.
+        $event = HtmlWrapperHtmlElementEvent::load();
+        $dispatcher->dispatch($event, HtmlWrapperHtmlElementEvent::NAME);
+        $js_1 = $event->getResources('core/js/html-wrapper/*');
+        $css_1 = $event->getResources('core/css/html-wrapper/*');
+
         // Get info file from Event.
         $event = FilePreRenderEvent::load();
         $info = $event->getInfo();
-        $raw = $info->openFile('r')->fread($info->getSize());
-        $result = preg_match('/^(-{3}(?:\n|\r)([\w\W]+?)(?:\n|\r)-{3})?([\w\W]*)*/',$raw,  $matches);
+        $size = $info->getSize();
+        $raw = ($size > 0) ? $info->openFile('r')->fread($size) : '';
         $placeholders = array(
-            'js' => $js,
-            'css' => $css,
+            'js' => array_unique(array_merge($js, $js_1)),
+            'css' => array_unique(array_merge($css, $css_1)),
         );
-        if (!empty($matches[1])) {
-            $placeholders['markdown'] = substr($raw, strlen($matches[1]));
-            $placeholders['front_matter'] = $matches[2];
-        }
-        else {
-            $placeholders['markdown'] = $matches[0];
-        }
+        $placeholders['markdown'] = $raw;
+
         $content = TwigFile::process(new Template\Markdown, $placeholders);
         $response = new Response($content);
         $event->setResponse($response);

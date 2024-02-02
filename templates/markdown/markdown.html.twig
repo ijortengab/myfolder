@@ -7,11 +7,6 @@
 {% endfor %}
 </head>
 <body>
-{% if front_matter %}
-<pre>
-<code>{{ front_matter | raw }}</code>
-</pre>
-{% endif %}
 <article>
 <pre>{{ markdown|raw }}</pre>
 </article>
