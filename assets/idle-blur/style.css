@@ -1,0 +1,3 @@
+body.idle-blur {
+    filter: blur(4px)
+}
