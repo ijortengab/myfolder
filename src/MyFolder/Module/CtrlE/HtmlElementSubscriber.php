@@ -19,6 +19,6 @@ class HtmlElementSubscriber implements EventSubscriberInterface
     public static function onHtmlElementEvent(HtmlElementEvent $event)
     {
         // Override backdrop of <dialog> if watercss exist.
-        $event->registerResource('ctrl_e/css/water-css', '/assets/ctrl-e/water.css', array('after' => 'markdown/css/water-css'));
+        $event->registerResource('ctrl_e/css/water', '/assets/ctrl-e/water.css', array('after' => 'markdown/css/water'));
     }
 }
