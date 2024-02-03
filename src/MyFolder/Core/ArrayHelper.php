@@ -154,6 +154,9 @@ class ArrayHelper
     }
     public function addBefore($key, $newKey, $value, $is_continue = false)
     {
+        if (null === $this->shortcut) {
+            $this->shortcut = &$this->array_storage;
+        }
         $array = &$this->shortcut;
         $keys = array_keys($array);
         $position = array_search($key, $keys);
@@ -165,6 +168,9 @@ class ArrayHelper
     }
     public function addBeforeIndex(int $index, $value, $is_continue = false)
     {
+        if (null === $this->shortcut) {
+            $this->shortcut = &$this->array_storage;
+        }
         $array = &$this->shortcut;
         $keys = array_keys($array);
         $position = array_search($index, $keys);
@@ -178,6 +184,9 @@ class ArrayHelper
     }
     public function addAfter($key, $newKey, $value, $is_continue = false)
     {
+        if (null === $this->shortcut) {
+            $this->shortcut = &$this->array_storage;
+        }
         $array = &$this->shortcut;
         $keys = array_keys($array);
         $position = array_search($key, $keys) + 1;
@@ -189,6 +198,9 @@ class ArrayHelper
     }
     public function addAfterIndex(int $index, $value, $is_continue = false)
     {
+        if (null === $this->shortcut) {
+            $this->shortcut = &$this->array_storage;
+        }
         $array = &$this->shortcut;
         $keys = array_keys($array);
         $i = array_search($index, $keys);
