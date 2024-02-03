@@ -8,11 +8,18 @@ class HtmlElementEvent extends Event
 
     protected static $instance;
     protected $resources = array();
+    protected $resources_alt = array();
     protected $templates = array();
 
-    public function registerResource($id, $value)
+    public function registerResource($id, $value, $condition = null)
     {
-        return $this->resources[$id] = $value;;
+        if (null === $condition) {
+            $this->resources[$id] = $value;;
+        }
+        else {
+            $this->resources_alt[] = array($condition, $id, $value);
+        }
+        return $this;
     }
 
     public function registerTemplate($id, $contents, $placeholders)
@@ -51,6 +58,23 @@ class HtmlElementEvent extends Event
                 }
             }
         }
+        $resources_alt = $this->resources_alt;
+        if (!empty($this->resources_alt)) {
+            $helper = new ArrayHelper($storage);
+            while($each = array_shift($resources_alt)){
+                list($condition, $key, $value) = $each;
+                $condition_key = key($condition);
+                $condition_value = current($condition);
+                if ($condition_key == 'after') {
+                    if (array_key_exists($condition_value, $storage)) {
+                        $helper->addAfter($condition_value, $key, $value);
+                    }
+                }
+            }
+            $storage = $helper->dump();
+        }
+
+        // Tambahkan `___pseudo`.
         // Jika offline_mode, maka prefix http perlu diganti menjadi local.
         list($base_path,,) = Application::extractUrlInfo();
         $offline_mode = (bool) ConfigHelper::load()->offline_mode->value();
@@ -64,5 +88,4 @@ class HtmlElementEvent extends Event
         }
         return array_values($storage);
     }
-
 }
