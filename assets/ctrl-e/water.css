@@ -1,0 +1,9 @@
+dialog::backdrop {
+    background: transparent;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none
+}
+dialog textarea {
+    background:var(--background-body);
+    font-family:monospace;
+}
