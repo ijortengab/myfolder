@@ -7,7 +7,7 @@ MyFolder.article = MyFolder.article || {}
 MyFolder.ctrlE = function () {
     // Start.
     this.isDialogHide = true;
-    this.goRender = false;
+    this.renderLock = false;
     this.confirmSave = false;
     this.timeout = undefined;
     // Prepend element.
@@ -29,6 +29,12 @@ MyFolder.ctrlE = function () {
         '</menu>',
         '</form>',
         '</dialog>',
+        '<dialog id="saved">',
+        '<header>Saved successfully</header>',
+        '<form method="dialog">',
+        '<button value="ok">Ok</button>',
+        '</form>',
+        '</dialog>',
         '',
     ].join('')).prependTo('body');
     this.$textarea = this.$dialog.find('textarea');
@@ -46,7 +52,6 @@ MyFolder.ctrlE = function () {
         else if (e.ctrlKey && e.key === 's') {
             // Prevent the Browser behaviour.
             e.preventDefault();
-            // console.log(that);
             let source = MyFolder.article.source;
             let userinput = this.$textarea.val();
             if (source !== userinput) {
@@ -57,6 +62,10 @@ MyFolder.ctrlE = function () {
             // this.isDialogHide = false;
         }
     });
+
+    if (typeof MyFolder.article.autoPreview === 'undefined') {
+        MyFolder.article.autoPreview = true;
+    }
 
     if (typeof MyFolder.article.source === 'undefined') {
         // Load contents.
@@ -83,20 +92,24 @@ MyFolder.ctrlE = function () {
 
     // Listen event change of textarea.
     this.$textarea.on('change update keyup', function () {
-        that.goRender = true;
+        if (!MyFolder.article.autoPreview) {
+            return;
+        }
         // Check
         if (that.timeout) {
             clearTimeout(that.timeout);
         }
         if (!that.isDialogHide) {
             that.timeout = setTimeout(function () {
+                that.renderLock = true;
                 that.render()
-            }, 1500);
+            }, 750);
         }
     })
     // Jika di close, maka clear timeout dan segera render.
     this.$dialog[0].addEventListener("close", (event) => {
         clearTimeout(this.timeout);
+        this.renderLock = true;
         this.render();
         this.isDialogHide = true;
         if (this.confirmSave) {
@@ -116,17 +129,20 @@ MyFolder.ctrlE = function () {
     this.$form.submit(function (e) {
         // Prevent the Browser behaviour.
         e.preventDefault();
-        // var actionUrl = $(this).attr('action');
-        // console.log(actionUrl);
+        // Ambil data dulu baru kita disable text area.
+        let data = $(this).serialize() // serializes the form's elements.
+        that.$textarea.prop('disabled', true)
         $.ajax({
             type: "POST",
             // url: actionUrl,
-            data: $(this).serialize(), // serializes the form's elements.
+            data: data,
             success: function(data)
             {
+                that.$textarea.prop('disabled', false)
                 MyFolder.article.source = that.$textarea.val()
-                // Ubah
-              // alert(data); // show response from the php script.
+                if (that.isDialogHide) {
+                    that.$dialog[2].showModal();
+                }
             }
         });
 
@@ -134,7 +150,7 @@ MyFolder.ctrlE = function () {
 }
 
 MyFolder.ctrlE.prototype.render = function () {
-    if (this.goRender) {
+    if (this.renderLock) {
         // jika tidak ada, beri warning.
         if (MyFolder.article) {
             let source = MyFolder.article.source;
@@ -148,7 +164,7 @@ MyFolder.ctrlE.prototype.render = function () {
                 $(element).html(html);
             }
         }
-        this.goRender = false;
+        this.renderLock = false;
     }
 }
 
