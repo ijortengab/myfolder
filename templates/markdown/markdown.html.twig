@@ -10,6 +10,9 @@
 <article>
 <pre>{{ markdown|raw }}</pre>
 </article>
+<script>
+window.settings = JSON.parse('{{ settings.global | raw }}');
+</script>
 {% for url in js %}
 <script src="{{ url }}"></script>
 {% endfor %}

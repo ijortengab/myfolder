@@ -9,6 +9,13 @@ MyFolder.markdown = markdownit({
 .use(markdownitTaskLists)
 .use(markdownItAnchor)
 .use(markdownitEmoji)
+.use(markdownitReplaceLink, {
+    replaceLink: function (link, env, token, htmlToken) {
+        if (link.startsWith('/')) {
+            return window.settings.basePath + link;
+        }
+    }
+})
 // Dibutuhkan options.html5embed atau error.
 .use(markdownitHTML5Embed, { html5embed: {attributes: {video: 'controls preload="metadata" class="video-js" data-setup="{}" '}}})
 
@@ -38,7 +45,7 @@ MyFolder.article.render= function (source) {
     let matches;
     let markdown;
     let front_matter;
-    let $code = $('body pre code');
+    let $code = $('body pre code.front-matter');
     matches = /^(-{3}(?:\n|\r)([\w\W]+?)(?:\n|\r)-{3})?([\w\W]*)*/.exec(source)
     if (matches[1]) {
         front_matter = matches[2];
@@ -50,11 +57,19 @@ MyFolder.article.render= function (source) {
     if (front_matter) {
         // Jika sebelumnya tidak ada, maka
         if ($code.length === 0) {
-            $code = $('<pre><code></code></pre>').prependTo('body').children();
+            $code = $('<pre><code class="front-matter"></code></pre>').prependTo('body').children();
         }
+        $code.parent().show();
         $code.text(front_matter);
         let json = MyFolder.parseYaml(front_matter);
         console.log(json);
+    }
+    else {
+        if ($code.length === 0) {
+            $code = $('<pre><code class="front-matter"></code></pre>').prependTo('body').children();
+        }
+        $code.text('');
+        $code.parent().hide();
     }
     return MyFolder.markdown.render(markdown);
 }

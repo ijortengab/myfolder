@@ -58,9 +58,20 @@ class MarkdownController
         $info = $event->getInfo();
         $size = $info->getSize();
         $raw = ($size > 0) ? $info->openFile('r')->fread($size) : '';
+
+        list($base_path, $path_info, $rewrite_url) = Application::extractUrlInfo();
+        $settings = array(
+            'pathInfo' => $path_info,
+            'basePath' => $base_path,
+            'rewriteUrl' => $rewrite_url,
+        );
         $placeholders = array(
             'js' => array_unique(array_merge($js, $js_1)),
             'css' => array_unique(array_merge($css, $css_1)),
+            'settings' => array(
+                'global' => json_encode($settings),
+                'basePath' => $settings['basePath'],
+            ),
         );
         $placeholders['markdown'] = $raw;
 
