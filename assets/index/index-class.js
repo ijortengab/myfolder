@@ -129,16 +129,17 @@ MyFolder.index.prototype.humanFileSize = function(size) {
 }
 MyFolder.index.prototype.drawColumnName = function() {
     const data = this.ls_result
-    const defer = $.Deferred();
+    this.deferColumnName = $.Deferred();
     for (let i = 0; i < data.length; i += this.chunkSize) {
         const chunk = data.slice(i, i + this.chunkSize);
         this.ls_chunks.push(chunk);
     }
     let that = this;
-    defer.done(function () {
-        return that.drawColumnNameChunk();
+    this.deferColumnName.then(function () {
+        console.log('>that.drawColumnNameChunk();');
+        that.drawColumnNameChunk();
     });
-    defer.resolve();
+    this.deferColumnName.resolve();
 }
 MyFolder.index.prototype.drawColumnNameChunk = function() {
     let data;
@@ -154,23 +155,24 @@ MyFolder.index.prototype.drawColumnNameChunk = function() {
             $tr.append('<td class="mtime"></td><td class="type"></td><td class="size"></td>');
         }
         //
-        const defer = $.Deferred();
         let that = this;
-        defer.done(function () {
-            return that.drawColumnNameChunk();
+        this.deferColumnName.then(function () {
+            console.log('>that.drawColumnNameChunk();');
+            that.drawColumnNameChunk();
         });
         setTimeout(function () {
-            defer.resolve();
+            that.deferColumnName.resolve();
         }, this.ls_delay);
     }
 }
 MyFolder.index.prototype.drawColumnOther = function() {
-    const defer = $.Deferred();
+    this.deferColumnOther = $.Deferred();
     let that = this;
-    defer.done(function () {
-        return that.drawColumnOtherChunk();
+    this.deferColumnOther.then(function () {
+        console.log('>that.drawColumnOtherChunk();');
+        that.drawColumnOtherChunk();
     });
-    defer.resolve();
+    this.deferColumnOther.resolve();
 }
 MyFolder.index.prototype.drawColumnOtherChunk = function() {
     const details = this.ls_la_result
@@ -220,13 +222,13 @@ MyFolder.index.prototype.drawColumnOtherChunk = function() {
             }
             this.cssNth++;
         }
-        const defer = $.Deferred();
         let that = this;
-        defer.done(function () {
-            return that.drawColumnOtherChunk();
+        this.deferColumnOther.then(function () {
+            console.log('>that.drawColumnOtherChunk();');
+            that.drawColumnOtherChunk();
         });
         setTimeout(function () {
-            defer.resolve();
+            that.deferColumnOther.resolve();
         }, this.ls_la_delay);
     }
 }
