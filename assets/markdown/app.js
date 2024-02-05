@@ -14,6 +14,9 @@ MyFolder.markdown = markdownit({
         if (link.startsWith('/')) {
             return window.settings.basePath + link;
         }
+        else {
+            return link;
+        }
     }
 })
 // Dibutuhkan options.html5embed atau error.
