@@ -137,17 +137,6 @@ MyFolder.ajaxLink = function (url) {
     return newurl.href;
 }
 
-MyFolder.modifier.nginx = function (element, info) {
-    // nginx conf: location ~ \.php dan location ~ \.htaccess
-    // menyebabkan path tersebut diambil alih oleh web server,
-    // sehingga perlu kita akali.
-    var extensionReadByNginx = ['php', 'htaccess'];
-    if (extensionReadByNginx.includes(info.type.toLowerCase())) {
-        // Array.prototype.includes() not support for old browser.
-        $(element).attr('href', MyFolder.settings.basePath+'/___pseudo/raw?path='+MyFolder.settings.pathInfo+info.name);
-    }
-}
-
 /**
  * Implements hook `MyFolder.commandExecution()`.
  */

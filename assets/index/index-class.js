@@ -7,7 +7,20 @@
  *   https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string/20732091#20732091
  */
 MyFolder.index = function (options) {
+    this.cssNth = 1
+    // Perlu di set timeout, agar render chunk terlihat
+    // user.
+    this.chunkSize = 100;
+    // 2000 files render dalam 1 detik.
+    this.ls_delay = 50;
+    // 1000 files render dalam 1 detik.
+    // 2000 files render dalam 2 detik.
+    this.ls_la_delay = 100;
+    this.ls_chunks = [];
+    this.ls_la_chunks = [];
     this.drawTable(options);
+    this.$table = $('#table-main');
+    this.$tbody = this.$table.find('tbody').empty();
 }
 MyFolder.index.prototype.drawTable = function (info) {
     let root;
@@ -36,17 +49,14 @@ MyFolder.index.prototype.drawTable = function (info) {
     });
     let that = this;
     ls.done(function (data) {
-        that.drawColumnName(data).then(function () {
-            ls_la.done(function (data) {
-                that.drawColumnOther(data)
-            })
-        })
+        that.ls_result = data;
+        that.drawColumnName()
+    })
+    ls_la.done(function (data) {
+        that.ls_la_result = data;
+        that.drawColumnOther()
     })
     this.drawBreadcrumb();
-    // $a.before('<i class="bi bi-house-door-fill"></i> ');
-    //
-    //house-door-fill$a.attr('href', href+'/');
-    //
 }
 MyFolder.index.prototype.drawBreadcrumb = function () {
     var array = MyFolder.settings.pathInfo.split('/').slice(1,-1);
@@ -60,7 +70,7 @@ MyFolder.index.prototype.drawBreadcrumb = function () {
         .attr('href',url2+'/')
         .on('click',this.gotoLink)
         .data('info',info)
-        .data('type',info.type)
+        .data('infoType',info.type)
         .text(info.name).appendTo($li);
     $('<i class="bi bi-house-door"></i>').appendTo($a);
     $li.appendTo($ol);
@@ -74,14 +84,14 @@ MyFolder.index.prototype.drawBreadcrumb = function () {
             .attr('href',url2+'/')
             .on('click',this.gotoLink)
             .data('info',info)
-            .data('type',info.type)
+            .data('infoType',info.type)
             .text(info.name).appendTo($li);
         $li.appendTo($ol);
     }
 }
 MyFolder.index.prototype.gotoLink = function (event) {
     $this = $(this);
-    if ($this.data('type') == '.') {
+    if ($this.data('infoType') == '.') {
         event.preventDefault();
         var info = $this.data('info')
         if (typeof info.directory !== 'undefined') {
@@ -117,62 +127,106 @@ MyFolder.index.prototype.humanFileSize = function(size) {
     var i = size == 0 ? 0 : Math.floor(Math.log(size) / Math.log(1024));
     return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
-MyFolder.index.prototype.drawColumnName = function(data) {
-    var defer = $.Deferred();
-    var $table = $('#table-main');
-    var $tbody = $table.find('tbody').empty();
-    for (i in data) {
-        var $tr = $('<tr></tr>').data('info',data[i]).html('<th scope="row"></th>').appendTo($tbody);
-        var $td = $('<td></td>').appendTo($tr);
-        var href = MyFolder.settings.basePath + MyFolder.settings.pathInfo+data[i];
-        var $a = $('<a></a>')
-            .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
-            .on('click',this.gotoLink)
-            .text(data[i]).attr('href',href).appendTo($td);
-        $('<td class="mtime"></td><td class="type"></td><td class="size"></td>').appendTo($tr);
+MyFolder.index.prototype.drawColumnName = function() {
+    const data = this.ls_result
+    const defer = $.Deferred();
+    for (let i = 0; i < data.length; i += this.chunkSize) {
+        const chunk = data.slice(i, i + this.chunkSize);
+        this.ls_chunks.push(chunk);
     }
-    defer.resolve();
-    // console.log('sleep 2');
-    // setTimeout(function () {
-        // defer.resolve();
-    // }, 2000);
-    return defer;
-}
-MyFolder.index.prototype.drawColumnOther = function(data) {
-    var $table = $('#table-main');
-    var $tbody = $table.find('tbody');
     let that = this;
-    for (i in data) {
-        var info = data[i]
-        $tbody.find('tr').filter(function (i) {
-            var $this = $(this);
-            if ($this.data('info') == info.name) {
+    defer.done(function () {
+        return that.drawColumnNameChunk();
+    });
+    defer.resolve();
+}
+MyFolder.index.prototype.drawColumnNameChunk = function() {
+    let data;
+    data = this.ls_chunks.shift()
+    if (data) {
+        // Daripada bikin object baru, manfaatin aja object
+        // yang kelepas, pasang lagi.
+        this.ls_la_chunks.push(data);
+
+        for (i in data) {
+            let $tr = $('<tr></tr>').data('infoName',data[i]).html('<th scope="row"></th>').appendTo(this.$tbody);
+            let $td = $('<td class="name"></td>').text(data[i]).appendTo($tr);
+            $tr.append('<td class="mtime"></td><td class="type"></td><td class="size"></td>');
+        }
+        //
+        const defer = $.Deferred();
+        let that = this;
+        defer.done(function () {
+            return that.drawColumnNameChunk();
+        });
+        setTimeout(function () {
+            defer.resolve();
+        }, this.ls_delay);
+    }
+}
+MyFolder.index.prototype.drawColumnOther = function() {
+    const defer = $.Deferred();
+    let that = this;
+    defer.done(function () {
+        return that.drawColumnOtherChunk();
+    });
+    defer.resolve();
+}
+MyFolder.index.prototype.drawColumnOtherChunk = function() {
+    const details = this.ls_la_result
+    let data;
+    data = this.ls_la_chunks.shift()
+    if (data) {
+        for (i in data) {
+            find = data[i];
+            let info = details.find((object) => {
+                if (object.name == find) {
+                    return object;
+                }
+            })
+            // Jangan gunakan find(), gunakan nth child.
+            // Karena secara paralel, method drawColumnNameChunk juga sedang
+            // menggambar tr.
+            $tr = $("tr:nth-child("+this.cssNth+")", this.$tbody);
+            // Make sure, jika ada kekacauan karena insert row dadakan oleh
+            // module lainnya, maka draw details akan gagal.
+            if ($tr.data('infoName') == info.name) {
+                let $tdName = $tr.find("td.name").empty();
+                let $a = $('<a></a>')
+                    .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
+                    .on('click',this.gotoLink)
+                    .text(info.name).appendTo($tdName);
                 if (info.type == '.') {
-                    $this.find("td.type").text('File folder')
-                    var $a = $this.find("td > a");
+                    $tr.find("td.type").text('File folder');
                     $a.before('<i class="bi bi-folder"></i> ');
-                    var href = $a.attr('href');
-                    $a.attr('href', href+'/');
                     $a.data('info',info);
-                    $a.data('type',info.type);
+                    $a.data('infoType',info.type);
                 }
                 else {
                     let ms = info.mtime * 1000
                     let d = new Date(ms)
-                    $this.find("td.mtime").text(d.format('Y-m-d H:i:s'))
-                    $this.find("td.size").text(that.humanFileSize(info.size))
-                    var $a = $this.find("td > a");
-                    var biclass = that.getClassByType(info.type)
+                    $tr.find("td.mtime").text(d.format('Y-m-d H:i:s'))
+                    $tr.find("td.size").text(this.humanFileSize(info.size))
+                    var biclass = this.getClassByType(info.type)
                     if (biclass != '') {
                         $a.before('<i class="'+biclass+'"></i> ');
                     }
                     else {
                         $a.before('<i class="bi bi-filetype-'+info.type+'"></i> ');
                     }
-                    $this.find("td.type").text(info.type.toUpperCase()+' File')
+                    $tr.find("td.type").text(info.type.toUpperCase()+' File')
                 }
                 MyFolder.elementModifier($a[0], info)
             }
+            this.cssNth++;
+        }
+        const defer = $.Deferred();
+        let that = this;
+        defer.done(function () {
+            return that.drawColumnOtherChunk();
         });
+        setTimeout(function () {
+            defer.resolve();
+        }, this.ls_la_delay);
     }
 }
