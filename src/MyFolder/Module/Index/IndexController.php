@@ -7,6 +7,7 @@ use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
+use IjorTengab\MyFolder\Core\BinaryFileResponse;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
 
 class IndexController
@@ -50,7 +51,8 @@ class IndexController
         }
         if ($http_request->request->has('action')) {
             // @todo: Jika tidak ada $_POST['directory'], maka throw error.
-            $current_directory = $root.$http_request->request->get('directory');
+            $directory = $http_request->request->get('directory');
+            $current_directory = $root.$directory;
             if (!is_dir($current_directory)) {
                 $response = new JsonResponse();
                 $response->setData(array());
@@ -59,6 +61,19 @@ class IndexController
             $action = $http_request->request->get('action');
             $list_directory = scandir($current_directory);
             $list_directory = array_diff($list_directory, array('.','..'));
+
+            // Persiapan cache.
+            $post = array(
+                'action' => $action,
+                'directory' => $directory,
+            );
+            $cache_filename = http_build_query($post);
+            $cache_path = '/tmp/'.$cache_filename.'.json';
+            if (file_exists($cache_path)) {
+                // @todo, how to set expire? event if user edit or add file.
+                $response = new BinaryFileResponse(new \SplFileInfo($cache_path));
+                return $response->send();
+            }
             switch ($action) {
                 case 'ls':
                     // Direktori diatas
@@ -75,6 +90,11 @@ class IndexController
                     $list_directory = array_merge($dir_only, $file_only);
                     // Sorting Folder like files.
                     // $list_directory = array_values($list_directory);
+
+                    // Set cache.
+                    // @todo: what's next?
+                    file_put_contents($cache_path, json_encode($list_directory));
+
                     $response = new JsonResponse();
                     $response->setData($list_directory);
                     return $response->send();
@@ -96,6 +116,11 @@ class IndexController
                         }
                         $ls_la[] = $_ls_la;
                     }
+
+                    // Set cache.
+                    // @todo: what's next?
+                    file_put_contents($cache_path, json_encode($ls_la));
+
                     $response = new JsonResponse();
                     $response->setData($ls_la);
                     return $response->send();
