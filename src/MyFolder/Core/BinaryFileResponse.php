@@ -35,6 +35,9 @@ class BinaryFileResponse extends Response
             case 'svg':
                 header('Content-Type: image/svg+xml');
                 break;
+            case 'json':
+                header('Content-Type: application/json');
+                break;
             default:
                 header('Content-Type: ' . mime_content_type($path));
                 break;
