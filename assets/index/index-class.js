@@ -48,13 +48,16 @@ MyFolder.index.prototype.drawTable = function (info) {
       }
     });
     let that = this;
+    this.defer = $.Deferred();
     ls.done(function (data) {
         that.ls_result = data;
-        that.drawColumnName()
-    })
-    ls_la.done(function (data) {
-        that.ls_la_result = data;
-        that.drawColumnOther()
+        that.drawColumnName().done(function () {
+            // Series (not async, not parallel) process draw column other, after main column finished.
+            ls_la.done(function (data) {
+                that.ls_la_result = data;
+                that.drawColumnOther()
+            })
+        })
     })
     this.drawBreadcrumb();
 }
@@ -136,10 +139,10 @@ MyFolder.index.prototype.drawColumnName = function() {
     }
     let that = this;
     this.deferColumnName.then(function () {
-        console.log('>that.drawColumnNameChunk();');
         that.drawColumnNameChunk();
     });
     this.deferColumnName.resolve();
+    return this.defer;
 }
 MyFolder.index.prototype.drawColumnNameChunk = function() {
     let data;
@@ -157,12 +160,15 @@ MyFolder.index.prototype.drawColumnNameChunk = function() {
         //
         let that = this;
         this.deferColumnName.then(function () {
-            console.log('>that.drawColumnNameChunk();');
             that.drawColumnNameChunk();
         });
         setTimeout(function () {
             that.deferColumnName.resolve();
         }, this.ls_delay);
+    }
+    else {
+        // Finish draw first column.
+        this.defer.resolve();
     }
 }
 MyFolder.index.prototype.drawColumnOther = function() {
