@@ -5,7 +5,7 @@ MyFolder.command.index = {
     execute: function (options) {
         // Reset javascript history here.
         window.history.replaceState({pathInfo: MyFolder.settings.pathInfo}, "", MyFolder.settings.basePath+MyFolder.settings.pathInfo);
-        new MyFolder.index(options);
+        MyFolder.index.instance = new MyFolder.index(options);
     }
 }
 

@@ -21,6 +21,9 @@ MyFolder.index = function (options) {
     this.drawTable(options);
     this.$table = $('#table-main');
     this.$tbody = this.$table.find('tbody').empty();
+    // Jika user menge-click breadcrumb, sementara proses drawing masih
+    // berjalan.
+    this.cancelDrawing = false
 }
 MyFolder.index.prototype.drawTable = function (info) {
     let root;
@@ -93,6 +96,8 @@ MyFolder.index.prototype.drawBreadcrumb = function () {
     }
 }
 MyFolder.index.prototype.gotoLink = function (event) {
+    // Interruption if any.
+    MyFolder.index.instance.cancelDrawing = true;
     $this = $(this);
     if ($this.data('infoType') == '.') {
         event.preventDefault();
@@ -112,7 +117,7 @@ MyFolder.index.prototype.gotoLink = function (event) {
             }
         }
         // MyFolder.index.drawTable();
-        new MyFolder.index();
+        MyFolder.index.instance = new MyFolder.index();
     }
 }
 MyFolder.index.prototype.getClassByType = function (type) {
@@ -131,6 +136,9 @@ MyFolder.index.prototype.humanFileSize = function(size) {
     return (size / Math.pow(1024, i)).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
 }
 MyFolder.index.prototype.drawColumnName = function() {
+    if (this.cancelDrawing) {
+        return;
+    }
     const data = this.ls_result
     this.deferColumnName = $.Deferred();
     for (let i = 0; i < data.length; i += this.chunkSize) {
@@ -145,6 +153,9 @@ MyFolder.index.prototype.drawColumnName = function() {
     return this.defer;
 }
 MyFolder.index.prototype.drawColumnNameChunk = function() {
+    if (this.cancelDrawing) {
+        return;
+    }
     let data;
     data = this.ls_chunks.shift()
     if (data) {
@@ -172,6 +183,9 @@ MyFolder.index.prototype.drawColumnNameChunk = function() {
     }
 }
 MyFolder.index.prototype.drawColumnOther = function() {
+    if (this.cancelDrawing) {
+        return;
+    }
     this.deferColumnOther = $.Deferred();
     let that = this;
     this.deferColumnOther.then(function () {
@@ -181,6 +195,9 @@ MyFolder.index.prototype.drawColumnOther = function() {
     this.deferColumnOther.resolve();
 }
 MyFolder.index.prototype.drawColumnOtherChunk = function() {
+    if (this.cancelDrawing) {
+        return;
+    }
     const details = this.ls_la_result
     let data;
     data = this.ls_la_chunks.shift()
