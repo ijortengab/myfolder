@@ -17,18 +17,22 @@ class ConfigHelper extends ArrayHelper
                 return static::$core;
             }
         }
-        else {
+        elseif (is_string($module)) {
             if (array_key_exists($module, static::$modules)) {
                 return static::$modules[$module];
             }
         }
-        $editor = new ConfigEditor;
         if (null === $module) {
+            $editor = new ConfigEditor;
             $editor->setClassName('Config', 'IjorTengab\MyFolder\Core');
         }
-        else {
+        elseif (is_string($module)) {
             $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
+            $editor = new ConfigEditor;
             $editor->setClassName('Config', 'IjorTengab\\MyFolder\\Module\\'.$class);
+        }
+        elseif (is_object($module)) {
+            $editor = new ConfigEditor($module);
         }
         $config = new self;
         $config->setEditor($editor);
@@ -39,7 +43,7 @@ class ConfigHelper extends ArrayHelper
         if (null === $module) {
             static::$core = $config;
         }
-        else {
+        elseif (is_string($module)) {
             static::$modules[$module] = $config;
         }
         return $config;
