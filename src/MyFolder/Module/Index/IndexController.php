@@ -5,6 +5,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigEditor;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\BinaryFileResponse;
@@ -59,21 +60,43 @@ class IndexController
                 return $response->send();
             }
             $action = $http_request->request->get('action');
+
+            // Persiapan cache.
+            // @todo, cek security, bgaimana jika user lain menebak cache.
+            $post = array(
+                'root' => $root,
+                'directory' => $directory,
+                'action' => $action,
+            );
+            $home = $http_request->server->get('HOME');
+            $cache_directory = $home.'/.cache/myfolder';
+            if (!is_dir($cache_directory)) {
+                mkdir($cache_directory, 0775, true);
+            }
+            // buat event, agar module user bisa mengubah path dari cache
+            // menjadi per user per instance.
+            $cache_filename = http_build_query($post);
+            $cache_path = $cache_directory.'/'.$cache_filename.'.json';
+            if (file_exists($cache_path)) {
+                $filemtime = filemtime($cache_path);
+                // Untuk TTL nya 24 jam.
+                // $ttl = $filemtime + (24 * 60 * 60);
+                // Untuk TTL nya 5 menit.
+                $ttl = $filemtime + (5 * 60);
+                // @todo user bisa ngedit.
+                if (time() < $ttl) {
+                    # @todo, how to set expire? event if user edit or add file.
+                    $response = new BinaryFileResponse(new \SplFileInfo($cache_path));
+                    return $response->send();
+                }
+                else {
+                    // hapus file cache.
+                }
+            }
+
             $list_directory = scandir($current_directory);
             $list_directory = array_diff($list_directory, array('.','..'));
 
-            // Persiapan cache.
-            $post = array(
-                'action' => $action,
-                'directory' => $directory,
-            );
-            $cache_filename = http_build_query($post);
-            $cache_path = '/tmp/'.$cache_filename.'.json';
-            if (file_exists($cache_path)) {
-                // @todo, how to set expire? event if user edit or add file.
-                $response = new BinaryFileResponse(new \SplFileInfo($cache_path));
-                return $response->send();
-            }
             switch ($action) {
                 case 'ls':
                     // Direktori diatas
