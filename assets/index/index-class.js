@@ -10,22 +10,27 @@ MyFolder.index = function (options) {
     this.cssNth = 1
     // Perlu di set timeout, agar render chunk terlihat
     // user.
-    this.chunkSize = 100;
-    // 2000 files render dalam 1 detik.
-    this.ls_delay = 50;
-    // 1000 files render dalam 1 detik.
-    // 2000 files render dalam 2 detik.
-    this.ls_la_delay = 100;
+    this.draw_start;
+    this.ls_start;
+    this.ls_la_start;
+    this.ls_chunk_size = 50;
+    // Harus lebih kecil.
+    // ls_la_chunk_size < ls_chunk_size.
+    this.ls_la_chunk_size = 25;
+    // this.ls_delay = 100;
+    // this.ls_la_delay = 200;
     this.ls_chunks = [];
     this.ls_la_chunks = [];
-    this.drawTable(options);
     this.$table = $('#table-main');
     this.$tbody = this.$table.find('tbody').empty();
     // Jika user menge-click breadcrumb, sementara proses drawing masih
     // berjalan.
     this.cancelDrawing = false
+    // Lets drawing;
+    this.drawTable(options);
 }
 MyFolder.index.prototype.drawTable = function (info) {
+    this.draw_start = Date.now();
     let root;
     if (typeof info === 'object' && 'root' in info) {
         root = info.root;
@@ -35,6 +40,7 @@ MyFolder.index.prototype.drawTable = function (info) {
     let ls = $.ajax({
       type: "POST",
       url: url,
+      dataType: "json",
       data: {
         action: 'ls',
         directory: MyFolder.settings.pathInfo,
@@ -44,6 +50,7 @@ MyFolder.index.prototype.drawTable = function (info) {
     let ls_la = $.ajax({
       type: "POST",
       url: url,
+      dataType: "json",
       data: {
         action: 'ls -la',
         directory: MyFolder.settings.pathInfo,
@@ -53,12 +60,20 @@ MyFolder.index.prototype.drawTable = function (info) {
     let that = this;
     this.defer = $.Deferred();
     ls.done(function (data) {
+        // console.log('ls done.');
+        that.ls_start = Date.now();
         that.ls_result = data;
-        that.drawColumnName().done(function () {
-            // Series (not async, not parallel) process draw column other, after main column finished.
-            ls_la.done(function (data) {
-                that.ls_la_result = data;
-                that.drawColumnOther()
+        that.drawColumnName()
+        // Selesai load metadata.
+        ls_la.done(function (data) {
+            // console.log('ls -la done.');
+            that.ls_la_start = Date.now();
+            that.ls_la_result = data;
+            that.drawColumnOther().done(function () {
+                // Finish draw table.
+                const draw_start = that.draw_start;
+                const draw_end = Date.now();
+                console.log(`Execution time of drawTable: ${draw_end - draw_start} ms`);
             })
         })
     })
@@ -141,16 +156,16 @@ MyFolder.index.prototype.drawColumnName = function() {
     }
     const data = this.ls_result
     this.deferColumnName = $.Deferred();
-    for (let i = 0; i < data.length; i += this.chunkSize) {
-        const chunk = data.slice(i, i + this.chunkSize);
+    for (let i = 0; i < data.length; i += this.ls_chunk_size) {
+        const chunk = data.slice(i, i + this.ls_chunk_size);
         this.ls_chunks.push(chunk);
     }
+
     let that = this;
     this.deferColumnName.then(function () {
         that.drawColumnNameChunk();
     });
     this.deferColumnName.resolve();
-    return this.defer;
 }
 MyFolder.index.prototype.drawColumnNameChunk = function() {
     if (this.cancelDrawing) {
@@ -159,10 +174,6 @@ MyFolder.index.prototype.drawColumnNameChunk = function() {
     let data;
     data = this.ls_chunks.shift()
     if (data) {
-        // Daripada bikin object baru, manfaatin aja object
-        // yang kelepas, pasang lagi.
-        this.ls_la_chunks.push(data);
-
         for (i in data) {
             let $tr = $('<tr></tr>').data('infoName',data[i]).html('<th scope="row"></th>').appendTo(this.$tbody);
             let $td = $('<td class="name"></td>').text(data[i]).appendTo($tr);
@@ -170,29 +181,42 @@ MyFolder.index.prototype.drawColumnNameChunk = function() {
         }
         //
         let that = this;
+        this.deferColumnName = $.Deferred();
         this.deferColumnName.then(function () {
+            // console.log('>that.drawColumnNameChunk();');
             that.drawColumnNameChunk();
         });
-        setTimeout(function () {
+        // console.log('>setTimeout('+this.ls_delay+')');
+        // setTimeout(function () {
+            // console.log('>that.deferColumnName.resolve();');
             that.deferColumnName.resolve();
-        }, this.ls_delay);
+        // }, this.ls_delay);
     }
     else {
         // Finish draw first column.
-        this.defer.resolve();
+        const ls_start = this.ls_start;
+        const ls_end = Date.now();
+        console.log(`Execution time of drawColumnName: ${ls_end - ls_start} ms`);
     }
 }
 MyFolder.index.prototype.drawColumnOther = function() {
     if (this.cancelDrawing) {
         return;
     }
+    const data = this.ls_result
+    this.deferColumnName = $.Deferred();
+    for (let i = 0; i < data.length; i += this.ls_la_chunk_size) {
+        const chunk = data.slice(i, i + this.ls_la_chunk_size);
+        this.ls_la_chunks.push(chunk);
+    }
     this.deferColumnOther = $.Deferred();
     let that = this;
     this.deferColumnOther.then(function () {
-        console.log('>that.drawColumnOtherChunk();');
+        // console.log('>that.drawColumnOtherChunk();');
         that.drawColumnOtherChunk();
     });
     this.deferColumnOther.resolve();
+    return this.defer;
 }
 MyFolder.index.prototype.drawColumnOtherChunk = function() {
     if (this.cancelDrawing) {
@@ -246,12 +270,22 @@ MyFolder.index.prototype.drawColumnOtherChunk = function() {
             this.cssNth++;
         }
         let that = this;
+        this.deferColumnOther = $.Deferred();
         this.deferColumnOther.then(function () {
-            console.log('>that.drawColumnOtherChunk();');
+            // console.log('>that.drawColumnOtherChunk();');
             that.drawColumnOtherChunk();
         });
-        setTimeout(function () {
+        // console.log('>setTimeout('+this.ls_la_delay+')');
+        // setTimeout(function () {
+            // console.log('>that.deferColumnOther.resolve();');
             that.deferColumnOther.resolve();
-        }, this.ls_la_delay);
+        // }, this.ls_la_delay);
+    }
+    else {
+        // Finish draw other column.
+        const ls_la_start = this.ls_la_start;
+        const ls_la_end = Date.now();
+        console.log(`Execution time of drawColumnOther: ${ls_la_end - ls_la_start} ms`);
+        this.defer.resolve();
     }
 }
