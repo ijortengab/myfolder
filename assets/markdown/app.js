@@ -37,7 +37,7 @@ MyFolder.parseYaml = function (string) {
 
 // Populate MyFolder.article agar bisa dioprek oleh module lainnya.
 // Standard:
-// MyFolder.article = {source:, STRING, element: ELEMENT, render = FUNCTION }
+// MyFolder.article = {source: STRING, element: DOM, render = FUNCTION, autoPreview: BOOLEAN}
 MyFolder.article = MyFolder.article || {}
 
 MyFolder.article.source = $('body article pre').text()
@@ -73,6 +73,29 @@ MyFolder.article.render= function (source) {
         }
         $code.text('');
         $code.parent().hide();
+    }
+    let markdownArray = [];
+    do {
+        matches = /`{3}csv(?:\n|\r)([\w\W]+?)(?:\n|\r)`{3}/.exec(markdown)
+        if (matches) {
+            markdownArray.push({string: markdown.substring(0,matches.index)})
+            markdownArray.push({csv: matches[1]})
+            markdown = markdown.substring(matches.index + matches[0].length);
+            matches = /`{3}csv(?:\n|\r)([\w\W]+?)(?:\n|\r)`{3}/.exec(markdown)
+        }
+    }
+    while (matches);
+    if (markdownArray.length) {
+        markdownArray.push({string: markdown})
+        markdown = '';
+        markdownArray.forEach(function (e) {
+            if (e.csv) {
+                markdown += csvToMarkdown(e.csv, ";", true)
+            }
+            else {
+                markdown += e.string;
+            }
+        });
     }
     return MyFolder.markdown.render(markdown);
 }

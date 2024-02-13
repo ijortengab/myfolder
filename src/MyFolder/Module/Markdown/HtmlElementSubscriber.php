@@ -33,6 +33,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         $event->registerResource('markdown/js/markdown-it/emoji', 'https://cdn.jsdelivr.net/npm/markdown-it-emoji@3.0.0/dist/markdown-it-emoji.min.js');
         $event->registerResource('markdown/js/markdown-it/task-lists', 'https://cdn.jsdelivr.net/npm/markdown-it-task-lists@2.1.1/dist/markdown-it-task-lists.min.js');
         $event->registerResource('markdown/js/markdown-it/anchor', 'https://cdn.jsdelivr.net/npm/markdown-it-anchor@8.6.7/dist/markdownItAnchor.umd.min.js');
+        $event->registerResource('markdown/js/csv-to-markdown-table', 'https://cdn.jsdelivr.net/npm/csv-to-markdown-table@1.4.1/lib/CsvToMarkdown.min.js');
         // @todo, sementara pakai akun ijortengab dulu.
         $event->registerResource('markdown/js/markdown-it/markdown-it-replace-link', 'https://cdn.jsdelivr.net/gh/ijortengab/markdown-it-replace-link@1.2.1/dist/markdown-it-replace-link.min.js');
         $event->registerResource('markdown/js/local/app', '/assets/markdown/app.js');

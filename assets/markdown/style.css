@@ -2,3 +2,10 @@
 body article pre{
     color: transparent;
 }
+
+/* Table dari CSV-to-MarkDown perlu fit to windows. */
+tbody td {
+    white-space: nowrap;
+    width: min-content;
+    overflow-x: auto;
+}
