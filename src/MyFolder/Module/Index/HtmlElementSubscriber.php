@@ -32,6 +32,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         $event->registerResource('index/js/local/app', '/assets/index/app.js');
         $event->registerResource('index/js/local/index/class', '/assets/index/index-class.js');
         $event->registerResource('index/js/local/index/static', '/assets/index/index.js');
+        $event->registerResource('index/js/local/index/filter', '/assets/index/filter.js');
         $event->registerResource('index/js/local/ajax/class', '/assets/index/ajax-class.js');
         $event->registerResource('index/js/local/ajax/static', '/assets/index/ajax.js');
         $event->registerResource('index/js/local/modal/class', '/assets/index/modal-class.js');

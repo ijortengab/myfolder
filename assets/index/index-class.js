@@ -236,7 +236,7 @@ MyFolder.index.prototype.drawColumnOtherChunk = function() {
             // Jangan gunakan find(), gunakan nth child.
             // Karena secara paralel, method drawColumnNameChunk juga sedang
             // menggambar tr.
-            $tr = $("tr:nth-child("+this.cssNth+")", this.$tbody);
+            let $tr = $("tr:nth-child("+this.cssNth+")", this.$tbody);
             // Make sure, jika ada kekacauan karena insert row dadakan oleh
             // module lainnya, maka draw details akan gagal.
             if ($tr.data('infoName') == info.name) {

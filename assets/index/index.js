@@ -42,6 +42,6 @@ $(document).ready(function () {
     window.onpopstate = (event) => {
         var pathInfo = event.state.pathInfo;
         MyFolder.settings.pathInfo = pathInfo
-        new MyFolder.index;
+        MyFolder.index.instance = new MyFolder.index;
     };
 });
