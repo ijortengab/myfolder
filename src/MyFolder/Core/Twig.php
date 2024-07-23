@@ -9,6 +9,7 @@ class Twig
     protected $matches_references = array();
     protected $cache_find = array();
     protected $cache_token = array();
+    protected $placeholders;
 
     public function __construct($contents)
     {
