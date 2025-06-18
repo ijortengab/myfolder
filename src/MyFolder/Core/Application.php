@@ -56,7 +56,7 @@ class Application
         // '/home/ijortengab/repositories/ahmadkemal/myfolder/index.php'
         // Solusi untuk hal ini adalah mengecek dengan nilai Application::$script_filename
         $filename = basename($http_request->server->get('SCRIPT_FILENAME'));
-        if ($http_request->server->get('SCRIPT_FILENAME') !== Application::$script_filename) {
+        if (realpath($http_request->server->get('SCRIPT_FILENAME')) !== Application::$script_filename) {
             // Koreksi.
             $filename = basename(Application::$script_filename);
             // Nilai dari $path_info seharusnya bukan '/', melainkan
@@ -97,7 +97,7 @@ class Application
     public function __construct($directory, $file)
     {
         self::$cwd = $directory;
-        self::$script_filename = $file;
+        self::$script_filename = realpath($file);
     }
 
     public function post($pathinfo, $callback)
