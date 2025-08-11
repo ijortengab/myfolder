@@ -4,6 +4,8 @@ namespace IjorTengab\MyFolder\Core;
 
 class Event
 {
+    private $propagationStopped = false;
+
     protected static $instance;
 
     /**
@@ -15,5 +17,15 @@ class Event
             static::$instance = new static;
         }
         return static::$instance;
+    }
+
+    public function stopPropagation()
+    {
+        $this->propagationStopped = true;
+    }
+
+    public function isPropagationStopped()
+    {
+        return $this->propagationStopped;
     }
 }

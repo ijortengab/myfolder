@@ -37,7 +37,9 @@ class EventDispatcher
             $sorts = array_column($this->storage[$event_name], 'priority');
             array_multisort($sorts, SORT_DESC, $this->storage[$event_name]);
             foreach ($this->storage[$event_name] as $each) {
-                call_user_func_array(array($each['handler'], $each['method']), array($event));
+                if (!$event->isPropagationStopped()) {
+                    call_user_func_array(array($each['handler'], $each['method']), array($event));
+                }
             }
         }
     }
