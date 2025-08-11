@@ -166,6 +166,9 @@ class Application
     {
         $config = ConfigHelper::load();
         $modules = $config->module->value();
+        if (null === $modules) {
+            return;
+        }
         foreach ($modules as $module) {
             $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
             if (!class_exists("\\IjorTengab\\MyFolder\\Module\\$class\\$class")) {
