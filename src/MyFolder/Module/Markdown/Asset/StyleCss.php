@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\Markdown\Asset;
 
 use IjorTengab\MyFolder\Core\Application;
 
-class Style
+class StyleCss
 {
     public function __toString()
     {

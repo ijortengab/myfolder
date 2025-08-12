@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\IdleBlur\Asset;
 
 use IjorTengab\MyFolder\Core\Application;
 
-class App
+class AppJs
 {
     public function __toString()
     {

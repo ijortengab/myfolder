@@ -4,10 +4,10 @@ namespace IjorTengab\MyFolder\Module\Index\Asset;
 
 use IjorTengab\MyFolder\Core\Application;
 
-class Ajax
+class ModalClassJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/index/ajax.js');
+        return file_get_contents(Application::$cwd.'/assets/index/modal-class.js');
     }
 }

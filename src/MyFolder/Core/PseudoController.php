@@ -12,6 +12,10 @@ class PseudoController extends Controller
         $part_module = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $module)));
         $part_file = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $filename)));
         $class = 'IjorTengab\\MyFolder\\Module\\'.$part_module.'\\Asset\\'.$part_file;
+        if (!empty($extension)) {
+            $part_extension = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $extension)));
+            $class .= $part_extension;
+        }
         if (class_exists($class)) {
             // $basename tidak harus exists.
             // dan karena tidak exist, jadi perlu kita kasih content via method

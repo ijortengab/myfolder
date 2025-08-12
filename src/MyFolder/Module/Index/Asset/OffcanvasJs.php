@@ -4,10 +4,10 @@ namespace IjorTengab\MyFolder\Module\Index\Asset;
 
 use IjorTengab\MyFolder\Core\Application;
 
-class AjaxClass
+class OffcanvasJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/index/ajax-class.js');
+        return file_get_contents(Application::$cwd.'/assets/index/offcanvas.js');
     }
 }

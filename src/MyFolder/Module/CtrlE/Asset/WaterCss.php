@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\CtrlE\Asset;
 
 use IjorTengab\MyFolder\Core\Application;
 
-class Water
+class WaterCss
 {
     public function __toString()
     {
