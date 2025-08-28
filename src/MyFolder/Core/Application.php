@@ -93,13 +93,11 @@ class Application
         }
         return self::$event_dispatcher;
     }
-
     public function __construct($directory, $file)
     {
         self::$cwd = $directory;
         self::$script_filename = realpath($file);
     }
-
     public function post($pathinfo, $callback)
     {
         // Allow module to override pathinfo and callback.
@@ -128,8 +126,8 @@ class Application
     public function run()
     {
         try {
-            $this->handle();
             $this->scanModule();
+            $this->handle();
             $this->route();
         }
         catch (\Exception $e) {
@@ -158,14 +156,14 @@ class Application
     protected function handle()
     {
         // Register event.
-        $dispatcher = Application::getEventDispatcher();
+        $dispatcher = self::getEventDispatcher();
         $dispatcher->addSubscriber(new FilePreRenderSubscriber());
+        $dispatcher->addSubscriber(new HtmlElementSubscriber());
 
         // Register route.
         $this->get('/', 'IjorTengab\MyFolder\Core\Controller::get');
         $this->post('/', 'IjorTengab\MyFolder\Core\Controller::post');
 
-        // Route dibawah ini secara real, maka diawali oleh `/___pseudo`.
         $this->get('/assets/{module}/{file}', 'IjorTengab\MyFolder\Core\PseudoController::getAssetFile');
         $this->get('/root/{a}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/root/{a}/{b}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
@@ -174,6 +172,17 @@ class Application
         $this->get('/root/{a}/{b}/{c}/{d}/{e}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
         $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}/{q}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}/{q}/{r}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
     }
     protected function scanModule()
     {
@@ -208,61 +217,54 @@ class Application
             throw new RouteException('Request Method not found.');
         }
         $register = $this->register[$method];
-        if (str_starts_with($path_info, '/___pseudo')) {
-            // Hapus prefix '/___pseudo' pada path.
-            $path_info = substr($path_info, strlen('/___pseudo'));
-            do {
-                // Filter berdasarkan fix string.
-                $register_filtered = array_filter($register, function ($key) use ($path_info) {
-                    return $path_info === $key;
-                }, ARRAY_FILTER_USE_KEY);
-                if ($register_filtered) {
-                    $key = key($register_filtered);
-                    $callback = $register_filtered[$key];
-                    $args = array();
-                    break;
-                }
-                // Filter berdasarkan regex.
-                $register_filtered = array_filter($register, function ($key) use ($path_info) {
-                    $pattern_parts = preg_split('/\{[^}]+\}/', $key);
-                    $pattern_quoted_parts = array_map(function ($value) {
-                        return preg_quote($value,'/');
-                    }, $pattern_parts);
-                    $pattern_quoted = implode('[^\/]+', $pattern_quoted_parts);
-                    return preg_match('/^'.$pattern_quoted.'$/', $path_info);
-                }, ARRAY_FILTER_USE_KEY);
-                if ($register_filtered) {
-                    $key = key($register_filtered);
-                    $save = array();
-                    $pattern = preg_replace_callback('/\{[^}]+\}/', function ($matches) use (&$save) {
-                        $value = array_shift($matches);
-                        $name = trim($value, '{}');
-                        $save[] = $name;
-                        return '(?P<'.$name.'>.+)';
-                    }, $key);
-                    $pattern_parts = preg_split('/\(\?P\<[a-z]+\>\.\+\)/', $pattern);
-                    $pattern_quoted_parts = array_map(function ($value, $name) {
-                        if (!empty($name)) {
-                            $name = '(?P<'.$name.'>.+)';
-                        }
-                        return preg_quote($value,'/').$name;
-                    }, $pattern_parts, $save);
-                    $pattern_quoted = implode('', $pattern_quoted_parts);
-                    preg_match('/^'.$pattern_quoted.'/', $path_info, $matches);
-                    $args = array_filter($matches, function ($key) {
-                        return !is_numeric($key);
-                    }, ARRAY_FILTER_USE_KEY);
-                    $callback = $register_filtered[$key];
-                    break;
-                }
-            }
-            while (false);
-            if (empty($callback)) {
-                $callback = $register['/'];
+
+        do {
+            // Filter berdasarkan fix string.
+            $register_filtered = array_filter($register, function ($key) use ($path_info) {
+                return $path_info === $key;
+            }, ARRAY_FILTER_USE_KEY);
+            if ($register_filtered) {
+                $key = key($register_filtered);
+                $callback = $register_filtered[$key];
                 $args = array();
+                break;
+            }
+            // Filter berdasarkan regex.
+            $register_filtered = array_filter($register, function ($key) use ($path_info) {
+                $pattern_parts = preg_split('/\{[^}]+\}/', $key);
+                $pattern_quoted_parts = array_map(function ($value) {
+                    return preg_quote($value,'/');
+                }, $pattern_parts);
+                $pattern_quoted = implode('[^\/]+', $pattern_quoted_parts);
+                return preg_match('/^'.$pattern_quoted.'$/', $path_info);
+            }, ARRAY_FILTER_USE_KEY);
+            if ($register_filtered) {
+                $key = key($register_filtered);
+                $save = array();
+                $pattern = preg_replace_callback('/\{[^}]+\}/', function ($matches) use (&$save) {
+                    $value = array_shift($matches);
+                    $name = trim($value, '{}');
+                    $save[] = $name;
+                    return '(?P<'.$name.'>.+)';
+                }, $key);
+                $pattern_parts = preg_split('/\(\?P\<[a-z]+\>\.\+\)/', $pattern);
+                $pattern_quoted_parts = array_map(function ($value, $name) {
+                    if (!empty($name)) {
+                        $name = '(?P<'.$name.'>.+)';
+                    }
+                    return preg_quote($value,'/').$name;
+                }, $pattern_parts, $save);
+                $pattern_quoted = implode('', $pattern_quoted_parts);
+                preg_match('/^'.$pattern_quoted.'/', $path_info, $matches);
+                $args = array_filter($matches, function ($key) {
+                    return !is_numeric($key);
+                }, ARRAY_FILTER_USE_KEY);
+                $callback = $register_filtered[$key];
+                break;
             }
         }
-        else {
+        while (false);
+        if (empty($callback)) {
             $callback = $register['/'];
             $args = array();
         }

@@ -172,12 +172,18 @@ class IndexController
         }
         $event = HtmlElementEvent::load();
         $dispatcher->dispatch($event, HtmlElementEvent::NAME);
+        $core_js = $event->getResources('core/js/*');
+        $core_css = $event->getResources('core/css/*');
+        $core_logo = $event->getResources('core/logo/myfolder/svg');
+        $core_favicon = $event->getResources('core/favicon/myfolder/svg');
         $js = $event->getResources('index/js/*');
         $css = $event->getResources('index/css/*');
         $nav_items = $event->getTemplates('index/navbar/item/*');
         $content = TwigFile::process(new Template\Index, array(
-            'js' => $js,
-            'css' => $css,
+            'js' => array_merge($core_js, $js),
+            'css' => array_merge($core_css, $css),
+            'logo' => array_shift($core_logo),
+            'favicon' => array_shift($core_favicon),
             'list' => $nav_items,
             'settings' => array(
                 'global' => json_encode($settings),

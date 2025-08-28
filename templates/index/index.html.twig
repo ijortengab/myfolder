@@ -6,14 +6,14 @@
 {% for url in css %}
 <link href="{{ url }}" rel="stylesheet">
 {% endfor %}
-<link rel="icon" type="image/svg+xml" href="{{ settings.basePath }}/___pseudo/assets/index/favicon.svg">
+<link rel="icon" type="image/svg+xml" href="{{ favicon }}">
 </head>
 <body>
 <div class="sticky-top">
   <nav class="navbar navbar-expand-lg bg-body-tertiary">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
-      <img src="{{ settings.basePath }}/___pseudo/assets/index/favicon.svg" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
+      <img src="{{ logo }}" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
       MyFolder
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">

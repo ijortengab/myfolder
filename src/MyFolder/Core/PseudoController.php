@@ -11,7 +11,12 @@ class PseudoController extends Controller
         $extension = $pathinfo['extension'];
         $part_module = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $module)));
         $part_file = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $filename)));
-        $class = 'IjorTengab\\MyFolder\\Module\\'.$part_module.'\\Asset\\'.$part_file;
+        if ($part_module == 'Core') {
+            $class = 'IjorTengab\\MyFolder\\Core\\Asset\\'.$part_file;
+        }
+        else {
+            $class = 'IjorTengab\\MyFolder\\Module\\'.$part_module.'\\Asset\\'.$part_file;
+        }
         if (!empty($extension)) {
             $part_extension = str_replace(' ', '', ucwords(str_replace(array('-','_'), ' ', $extension)));
             $class .= $part_extension;
