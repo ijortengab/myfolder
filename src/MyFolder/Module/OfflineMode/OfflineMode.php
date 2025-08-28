@@ -9,5 +9,8 @@ class OfflineMode implements ModuleInterface
 {
     public static function handle($app)
     {
+        // Register event.
+        $dispatcher = Application::getEventDispatcher();
+        $dispatcher->addSubscriber(new HtmlElementGetResourcesSubscriber());
     }
 }

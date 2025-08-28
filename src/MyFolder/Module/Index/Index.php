@@ -14,6 +14,7 @@ class Index implements ModuleInterface
         $dispatcher->addSubscriber(new DirectoryPreRenderSubscriber());
         $dispatcher->addSubscriber(new IndexInvokeCommandSubscriber());
         $dispatcher->addSubscriber(new HtmlElementSubscriber());
+        $dispatcher->addSubscriber(new HtmlElementGetResourcesSubscriber());
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
 
         // Register route.

@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Core;
 
 class HtmlElementEvent extends Event
 {
-    const NAME = 'html_element.event';
+    const NAME = 'core.html_element.event';
 
     protected static $instance;
     protected $resources = array();
@@ -74,18 +74,11 @@ class HtmlElementEvent extends Event
             $storage = $helper->dump();
         }
 
-        // Tambahkan `___pseudo`.
-        // Jika offline_mode, maka prefix http perlu diganti menjadi local.
-        list($base_path,,) = Application::extractUrlInfo();
-        $offline_mode = (bool) ConfigHelper::load()->offline_mode->value();
-        foreach ($storage as $id => &$value) {
-            if (fnmatch('/*', $value)) {
-                $value = $base_path.'/___pseudo' . $value;
-            }
-            elseif ($offline_mode && fnmatch('https://*', $value)) {
-                $value = str_replace('https://', $base_path.'/___pseudo/root/cdn/', $value);
-            }
-        }
+        // Allov module to override.
+        $dispatcher = Application::getEventDispatcher();
+        $event = new HtmlElementGetResourcesEvent($storage);
+        $dispatcher->dispatch($event, HtmlElementGetResourcesEvent::NAME);
+        $storage = $event->getResources();
         return array_values($storage);
     }
 }
