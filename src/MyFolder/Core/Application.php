@@ -102,6 +102,12 @@ class Application
 
     public function post($pathinfo, $callback)
     {
+        // Allow module to override pathinfo and callback.
+        $dispatcher = self::getEventDispatcher();
+        $event = new RouteRegisterEvent('post', $pathinfo, $callback);
+        $dispatcher->dispatch($event, RouteRegisterEvent::NAME);
+        $pathinfo = $event->getPathInfo();
+        $callback = $event->getCallback();
         $this->register['post'][$pathinfo] = $callback;
     }
     public function get($pathinfo, $callback)
@@ -110,6 +116,13 @@ class Application
         // $app->get('/target_directory/{sch|eme}', 'IjorTengab\MyFolder\Controller::pseudoHandle');
         // maka sejak awal sudah dikasih throw exception aja.
         // karena gak valid sebagai placeholder.
+
+        // Allow module to override pathinfo and callback.
+        $dispatcher = self::getEventDispatcher();
+        $event = new RouteRegisterEvent('get', $pathinfo, $callback);
+        $dispatcher->dispatch($event, RouteRegisterEvent::NAME);
+        $pathinfo = $event->getPathInfo();
+        $callback = $event->getCallback();
         $this->register['get'][$pathinfo] = $callback;
     }
     public function run()
