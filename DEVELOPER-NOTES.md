@@ -58,3 +58,25 @@ find * -type f -iname HtmlElementSubscriber\.php | while IFS= read line; do dirn
 git commit -m 'Mengubah class name dari HtmlElementEvent menjadi IndexInvokeHtmlElementEvent. Mengubah class name dari HtmlElementSubscriber menjadi IndexInvokeHtmlElementSubscriber.'
 
 ```
+
+OfflineMode
+-----------
+
+```
+mkdir -p cdn
+cd cdn
+wget -x https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js
+wget -x https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css
+wget -x https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
+wget -x https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/fonts/bootstrap-icons.woff2
+wget -x https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js
+wget -x https://cdn.jsdelivr.net/npm/jquery-once@2.2.3/jquery.once.min.js
+wget -x https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js
+wget -x https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css
+wget -x https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js
+wget -x https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js
+wget -x https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css
+wget -x https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css
+wget -x https://cdn.jsdelivr.net/npm/jquery-csv@1.0.21/src/jquery.csv.min.js
+
+```
