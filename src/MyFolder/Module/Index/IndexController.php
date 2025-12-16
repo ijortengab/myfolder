@@ -75,7 +75,7 @@ class IndexController
             }
             // buat event, agar module user bisa mengubah path dari cache
             // menjadi per user per instance.
-            $cache_filename = http_build_query($post);
+            $cache_filename = md5(http_build_query($post));
             $cache_path = $cache_directory.'/'.$cache_filename.'.json';
             if (file_exists($cache_path)) {
                 $filemtime = filemtime($cache_path);
