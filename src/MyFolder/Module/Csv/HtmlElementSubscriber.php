@@ -25,14 +25,16 @@ class HtmlElementSubscriber implements EventSubscriberInterface
         // https://cdn.jsdelivr.net/npm/@vrcd-community/csv-it-video@1.1.1/index.js
         // https://vjs.zencdn.net/8.9.0/video.min.js
         // https://vjs.zencdn.net/8.9.0/video-js.css
-        $event->registerResource('csv/js/jquery', 'https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js');
-        $event->registerResource('csv/js/jquery-csv', 'https://cdn.jsdelivr.net/npm/jquery-csv@1.0.21/src/jquery.csv.min.js');
-        $event->registerResource('csv/js/datatables', 'https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js');
-        $event->registerResource('csv/js/datatables/bootstrap5', 'https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js');
-        $event->registerResource('csv/css/bootstrap', 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
-        $event->registerResource('csv/css/bootstrap/icons', 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css');
-        $event->registerResource('csv/css/datatables/bootstrap5', 'https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css');
-        $event->registerResource('csv/js/local/app', '/assets/csv/app.js');
-        $event->registerResource('csv/css/local/style', '/assets/csv/style.css');
+
+        $event->registerResource('csv/js/jquery',                   'https://cdn.jsdelivr.net/npm/jquery@3.7.0/dist/jquery.min.js');
+        $event->registerResource('csv/js/jquery-csv',               'https://cdn.jsdelivr.net/npm/jquery-csv@1.0.21/src/jquery.csv.min.js');
+        $event->registerResource('csv/js/datatables',               'https://cdn.datatables.net/2.3.5/js/dataTables.min.js');
+        $event->registerResource('csv/js/datatables/bootstrap5',    'https://cdn.datatables.net/2.3.5/js/dataTables.bootstrap5.min.js');
+        $event->registerResource('csv/js/datatables/absolute',      'https://cdn.datatables.net/plug-ins/2.3.5/sorting/absolute.min.js');
+        $event->registerResource('csv/css/bootstrap',               'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css');
+        $event->registerResource('csv/css/bootstrap/icons',         'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css');
+        $event->registerResource('csv/css/datatables/bootstrap5',   'https://cdn.datatables.net/2.3.5/css/dataTables.bootstrap5.min.css');
+        $event->registerResource('csv/js/local/app',                '/assets/csv/app.js');
+        $event->registerResource('csv/css/local/style',             '/assets/csv/style.css');
     }
 }
