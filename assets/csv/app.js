@@ -14,6 +14,9 @@ MyFolder.article.render = function (source) {
     }
     let array = $.csv.toArrays(source, csv_options);
     var $table = $('<table class="table table-striped" style="width:100%"></table>');
+    var namesType = $.fn.dataTable.absoluteOrderNumber([
+        {value: '', position: 'bottom'}
+    ]);
     let header = [];
     array.shift().forEach(function (i) {
         header.push({title: i, defaultContent: ''})
@@ -21,7 +24,11 @@ MyFolder.article.render = function (source) {
     $table.DataTable({
         deferRender: true,
         columns: header,
-        data: array
+        data: array,
+        paging: false,
+        columnDefs: [
+            { type: namesType, targets: 0 }
+        ]
     });
     return $table;
 }
