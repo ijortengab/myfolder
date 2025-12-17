@@ -28,7 +28,8 @@ MyFolder.article.render = function (source) {
         paging: false,
         columnDefs: [
             { type: namesType, targets: 0 }
-        ]
+        ],
+        fixedHeader: true
     });
     return $table;
 }
@@ -40,4 +41,6 @@ $(document).ready(function () {
     let $articlePre = $('body article pre');
     let html = MyFolder.article.render(MyFolder.article.source)
     $articlePre.replaceWith(html);
+    // Aktifkan fixed header dengan resize event.
+    $(document).resize();
 })
