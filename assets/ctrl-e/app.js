@@ -130,12 +130,11 @@ MyFolder.ctrlE = function () {
         // Prevent the Browser behaviour.
         e.preventDefault();
         // Ambil data dulu baru kita disable text area.
-        let data = $(this).serialize() // serializes the form's elements.
         that.$textarea.prop('disabled', true)
         $.ajax({
             type: "POST",
             // url: actionUrl,
-            data: data,
+            data: {contents: that.$textarea.val()},
             success: function(data)
             {
                 that.$textarea.prop('disabled', false)
