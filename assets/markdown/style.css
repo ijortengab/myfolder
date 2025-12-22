@@ -9,3 +9,12 @@ tbody td {
     width: min-content;
     overflow-x: auto;
 }
+
+tbody td:first-child {
+    width: 1px;
+}
+
+/* Override water css*/
+table {
+    table-layout: auto
+}
