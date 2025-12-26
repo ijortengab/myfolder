@@ -48,6 +48,7 @@ MyFolder.article.render= function (source) {
     let matches;
     let markdown;
     let front_matter;
+    let json;
     let $code = $('body pre code.front-matter');
     matches = /^(-{3}(?:\n|\r)([\w\W]+?)(?:\n|\r)-{3})?([\w\W]*)*/.exec(source)
     if (matches[1]) {
@@ -64,7 +65,7 @@ MyFolder.article.render= function (source) {
         }
         $code.parent().show();
         $code.text(front_matter);
-        let json = MyFolder.parseYaml(front_matter);
+        json = MyFolder.parseYaml(front_matter);
         console.log(json);
     }
     else {
@@ -90,7 +91,27 @@ MyFolder.article.render= function (source) {
         markdown = '';
         markdownArray.forEach(function (e) {
             if (e.csv) {
-                markdown += csvToMarkdown(e.csv, ";", true)
+                let _markdown = csvToMarkdown(e.csv, ";", true)
+                // Jika pada front matter terdapat informasi sebagai berikut:
+                // ```yml
+                // csv:
+                //   first_column:
+                //     text_align: right
+                // ```
+                // Maka seluruh table hasil generate CSV to Markdown Table
+                // akan kita kasih align right pada first column.
+                // Contoh sebelumnya.
+                // | no | balance |
+                // |----|---------|
+                // Menjadi:
+                // | no | balance |
+                // |---:|---------|
+                // Ini cocok untuk Integer pada kolom pertama.
+                let text_align = json?.csv?.first_column?.text_align;
+                if (text_align == 'right') {
+                    _markdown = _markdown.replace(/(\|)(-+)-/, '$1$2:');
+                }
+                markdown += _markdown;
             }
             else {
                 markdown += e.string;
