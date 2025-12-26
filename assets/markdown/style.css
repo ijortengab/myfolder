@@ -18,3 +18,8 @@ tbody td:first-child {
 table {
     table-layout: auto
 }
+
+p img {
+    border: 1px solid #eee;
+    padding: 1px;
+}
