@@ -7,7 +7,6 @@
  *   https://stackoverflow.com/questions/10420352/converting-file-size-in-bytes-to-human-readable-string/20732091#20732091
  */
 MyFolder.index = function (options) {
-    this.cssNth = 1
     // Perlu di set timeout, agar render chunk terlihat
     // user.
     this.draw_start;
@@ -22,18 +21,49 @@ MyFolder.index = function (options) {
     this.ls_chunks = [];
     this.ls_la_chunks = [];
     this.$table = $('#table-main');
-    this.$tbody = this.$table.find('tbody').empty();
+    this.$theadtr = this.$table.find('thead tr');
+    this.$tbody = this.$table.find('tbody');
+
+    // Property indexView.
+    this.indexView = 'details';
+    // Ambil informasi indexView dari server terlebih dahulu, baru kemudian di-
+    // override dari local storage.
+    if (typeof options === 'object' && 'indexView' in options) {
+        this.indexView = options.indexView;
+    }
+
     // Jika user menge-click breadcrumb, sementara proses drawing masih
     // berjalan.
     this.cancelDrawing = false
     // Lets drawing;
     this.drawTable(options);
 }
-MyFolder.index.prototype.drawTable = function (info) {
+MyFolder.index.prototype.resetTable = function () {
+    this.cssNth = 1
+    let indexView = localStorage.getItem("indexView");
+    if (indexView != null) {
+        this.indexView = indexView;
+    }
+    // Rebuild heading and body.
+    this.$theadtr.empty();
+    this.$tbody.empty();
+
+    // Rebuild Heading.
+    $('<th scope="col"></th>').attr('data-field', 'id').text('#').appendTo(this.$theadtr);
+    $('<th scope="col"></th>').attr('data-field', 'name').text('Name').appendTo(this.$theadtr);
+
+    if (this.indexView == 'details') {
+        $('<th scope="col"></th>').attr('data-field', 'date-modified').text('Date Modified').appendTo(this.$theadtr);
+        $('<th scope="col"></th>').attr('data-field', 'date-type').text('Type').appendTo(this.$theadtr);
+        $('<th scope="col"></th>').attr('data-field', 'date-size').text('Size').appendTo(this.$theadtr);
+    }
+}
+MyFolder.index.prototype.drawTable = function (options) {
+    this.resetTable();
     this.draw_start = Date.now();
     let root;
-    if (typeof info === 'object' && 'root' in info) {
-        root = info.root;
+    if (typeof options === 'object' && 'root' in options) {
+        root = options.root;
     }
     let url = '/index';
     url = MyFolder.pseudoLink(url);
@@ -166,6 +196,7 @@ MyFolder.index.prototype.drawColumnName = function() {
         that.drawColumnNameChunk();
     });
     this.deferColumnName.resolve();
+    return this;
 }
 MyFolder.index.prototype.drawColumnNameChunk = function() {
     if (this.cancelDrawing) {
@@ -177,9 +208,10 @@ MyFolder.index.prototype.drawColumnNameChunk = function() {
         for (i in data) {
             let $tr = $('<tr></tr>').data('infoName',data[i]).html('<th scope="row"></th>').appendTo(this.$tbody);
             let $td = $('<td class="name"></td>').text(data[i]).appendTo($tr);
-            $tr.append('<td class="mtime"></td><td class="type"></td><td class="size"></td>');
+            if (this.indexView == 'details') {
+                $tr.append('<td class="mtime"></td><td class="type"></td><td class="size"></td>');
+            }
         }
-        //
         let that = this;
         this.deferColumnName = $.Deferred();
         this.deferColumnName.then(function () {
