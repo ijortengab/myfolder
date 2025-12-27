@@ -164,6 +164,11 @@ MyFolder.index.prototype.gotoLink = function (event) {
         // MyFolder.index.drawTable();
         MyFolder.index.instance = new MyFolder.index();
     }
+    else {
+        // Bugfix. Kembalikan ke false. User yang menge-click file, maka
+        // info cancelDrawing perlu dikembalikan.
+        MyFolder.index.instance.cancelDrawing = false;
+    }
 }
 MyFolder.index.prototype.getClassByType = function (type) {
     switch (type) {
