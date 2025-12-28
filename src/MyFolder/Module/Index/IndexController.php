@@ -52,8 +52,26 @@ class IndexController
         }
         if ($http_request->request->has('action')) {
             // @todo: Jika tidak ada $_POST['directory'], maka throw error.
+            // @todo: $_POST['directory'] harus diakhiri dengan slash.
             $directory = $http_request->request->get('directory');
+            // Bersihkan dari double slash.
+            $directory_sanitized = preg_replace('/\/+/','/',$directory);
+            // User boleh mengetik double dot: `..` pada input search,
+            // namun perlu sanitasi, atau bug yakni user bisa scan dir parent
+            // sampai ke direktori root `/`
+            $directory_sanitized_array = explode('/',trim($directory_sanitized, '/'));
+            $directory_resolved = array();
+            while ($each = array_shift($directory_sanitized_array)) {
+                if ($each == '..') {
+                    array_pop($directory_resolved);
+                }
+                else {
+                    $directory_resolved[] = $each;
+                }
+            }
+            $directory = empty($directory_resolved) ? '/' : '/' . implode('/', $directory_resolved) . '/';
             $current_directory = $root.$directory;
+
             if (!is_dir($current_directory)) {
                 $response = new JsonResponse();
                 $response->setData(array());
