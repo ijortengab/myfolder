@@ -91,7 +91,7 @@ MyFolder.index.filter.$input.on('focus', function () {
                     if (val.includes('*') || val.includes('?')) {
                         return MyFolder.index.filter.fnmatch(val, currentValue)
                     }
-                    return currentValue.includes(val)
+                    return currentValue.toLowerCase().includes(val.toLowerCase())
                 })
                 instance.$tbody.find('tr').hide().each(function () {
                     let name = $(this).data('infoName')
