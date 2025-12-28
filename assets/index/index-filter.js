@@ -54,6 +54,23 @@ MyFolder.index.filter.$input.on('focus', function () {
     if (val === '') {
         instance.$tbody.find('tr').show()
     }
+    else if (e.keyCode == 13) {
+        let $first = instance.$tbody.find('tr:visible').first();
+        if ($first.length) {
+            let $a = $first.find('td.name a');
+            let infoType = $a.data('infoType');
+            if (infoType == '.') {
+                // Dikosongkan karena akan di redraw table oleh
+                // history API.
+                $(this).val('');
+                $a.click();
+            }
+            else {
+                let href = $a.attr('href');
+                location.href = href
+            }
+        }
+    }
     else {
         // @todo, jika user mengetik ..
         // maka bisa mengindex diluar jail root.
@@ -83,10 +100,8 @@ MyFolder.index.filter.$input.on('focus', function () {
                     };
                 })
             }
-
         },250)
     }
-
 }).hide();
 
 MyFolder.index.filter.$buttonTrigger.on('click', function (e) {
