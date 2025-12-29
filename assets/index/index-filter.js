@@ -69,6 +69,7 @@ MyFolder.index.filter.$input.on('focus', function () {
     let that = this;
     if (val === '') {
         if (e.keyCode == 13) {
+            $(this).val('')
             MyFolder.index.filter.first()
         }
         else {
@@ -76,6 +77,7 @@ MyFolder.index.filter.$input.on('focus', function () {
         }
     }
     else if (e.keyCode == 13) {
+        $(this).val('')
         MyFolder.index.filter.first()
     }
     else {
