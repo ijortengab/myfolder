@@ -56,6 +56,11 @@ class IndexController
             $directory = $http_request->request->get('directory');
             // Bersihkan dari double slash.
             $directory_sanitized = preg_replace('/\/+/','/',$directory);
+            // Sanitasi /blog/././ menjadi /blog/
+            do {
+                $directory_sanitized = str_replace('/./','/',$directory_sanitized);
+            }
+            while (strstr($directory_sanitized, '/./') !== false);
             // User boleh mengetik double dot: `..` pada input search,
             // namun perlu sanitasi, atau bug yakni user bisa scan dir parent
             // sampai ke direktori root `/`
