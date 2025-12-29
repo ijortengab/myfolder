@@ -84,12 +84,15 @@ MyFolder.index.filter.$input.on('focus', function () {
         MyFolder.index.filter.timeout = setTimeout(function () {
             if (val.endsWith('/')) {
                 $(that).val('');
-                MyFolder.settings.pathInfo = MyFolder.settings.pathInfo + val;
+                let name = val.slice(0, -1);
+                MyFolder.settings.pathInfo = MyFolder.settings.pathInfo + name + '/'
+                MyFolder.settings.pathInfoEncoded = MyFolder.settings.pathInfoEncoded + encodeURIComponent(name) + '/'
+                let state = {pathInfo: MyFolder.settings.pathInfo, pathInfoEncoded: MyFolder.settings.pathInfoEncoded}
                 if (MyFolder.settings.rewriteUrl) {
-                    history.pushState({pathInfo: MyFolder.settings.pathInfo}, "", val);
+                    window.history.pushState(state, "", encodeURIComponent(name) + '/');
                 }
                 else {
-                    history.pushState({pathInfo: MyFolder.settings.pathInfo}, "", MyFolder.settings.basePath+MyFolder.settings.pathInfo);
+                    window.history.pushState(state, "", MyFolder.settings.basePath + MyFolder.settings.pathInfoEncoded);
                 }
                 MyFolder.index.instance = new MyFolder.index();
             }
