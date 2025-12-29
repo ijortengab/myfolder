@@ -115,7 +115,8 @@ MyFolder.index.prototype.drawBreadcrumb = function () {
     var $li = $('<li></li>').addClass('breadcrumb-item');
     let url2 = MyFolder.settings.basePath;
     var directory = '';
-    var info = {type: '.', name: '', directory: directory+'/'}
+    var directoryEncoded = '';
+    var info = {type: '.', name: '', directory: directory+'/', directoryEncoded: directoryEncoded+'/'}
     var $a = $('<a></a>')
         .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
         .attr('href',url2+'/')
@@ -126,10 +127,11 @@ MyFolder.index.prototype.drawBreadcrumb = function () {
     $('<i class="bi bi-house-door"></i>').appendTo($a);
     $li.appendTo($ol);
     for (i in array) {
-        url2 += '/'+array[i]
+        url2 += '/'+encodeURIComponent(array[i])
         directory+='/'+array[i]
+        directoryEncoded+='/'+encodeURIComponent(array[i])
         var $li = $('<li></li>').addClass('breadcrumb-item');
-        var info = {type: '.', name: array[i], directory: directory+'/'}
+        var info = {type: '.', name: array[i], directory: directory+'/', directoryEncoded: directoryEncoded+'/'}
         var $a = $('<a></a>')
             .addClass('link-primary link-offset-2 link-underline-opacity-0 link-underline-opacity-100-hover')
             .attr('href',url2+'/')
@@ -148,17 +150,22 @@ MyFolder.index.prototype.gotoLink = function (event) {
         event.preventDefault();
         var info = $this.data('info')
         if (typeof info.directory !== 'undefined') {
+            // Draw breadcrumb.
             MyFolder.settings.pathInfo = info.directory
-            history.pushState({pathInfo: MyFolder.settings.pathInfo}, "", MyFolder.settings.basePath + info.directory);
+            MyFolder.settings.pathInfoEncoded = info.directoryEncoded
+            let state = {pathInfo: MyFolder.settings.pathInfo, pathInfoEncoded: MyFolder.settings.pathInfoEncoded}
+            window.history.pushState(state, "", MyFolder.settings.basePath + info.directoryEncoded);
         }
         else {
             var name = $this.data('info').name
             MyFolder.settings.pathInfo = MyFolder.settings.pathInfo + name + '/'
+            MyFolder.settings.pathInfoEncoded = MyFolder.settings.pathInfoEncoded + encodeURIComponent(name) + '/'
+            let state = {pathInfo: MyFolder.settings.pathInfo, pathInfoEncoded: MyFolder.settings.pathInfoEncoded}
             if (MyFolder.settings.rewriteUrl) {
-                history.pushState({pathInfo: MyFolder.settings.pathInfo}, "", name + '/');
+                window.history.pushState(state, "", encodeURIComponent(name) + '/');
             }
             else {
-                history.pushState({pathInfo: MyFolder.settings.pathInfo}, "", MyFolder.settings.basePath+MyFolder.settings.pathInfo);
+                window.history.pushState(state, "", MyFolder.settings.basePath + MyFolder.settings.pathInfoEncoded);
             }
         }
         // MyFolder.index.drawTable();

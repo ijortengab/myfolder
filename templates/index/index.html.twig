@@ -157,6 +157,10 @@
 
 <script>
 window.settings = JSON.parse('{{ settings.global | raw }}');
+if (typeof settings === 'object' && 'pathInfo' in settings) {
+    settings.pathInfoEncoded = settings.pathInfo;
+    settings.pathInfo = decodeURIComponent(settings.pathInfo);
+}
 window.settings.commandsExecuted = []
 </script>
 {% for url in js %}

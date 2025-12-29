@@ -4,7 +4,8 @@
 MyFolder.command.index = {
     execute: function (options) {
         // Reset javascript history here.
-        window.history.replaceState({pathInfo: MyFolder.settings.pathInfo}, "", MyFolder.settings.basePath+MyFolder.settings.pathInfo);
+        let state = {pathInfo: MyFolder.settings.pathInfo, pathInfoEncoded: MyFolder.settings.pathInfoEncoded}
+        window.history.replaceState(state, "", MyFolder.settings.basePath + MyFolder.settings.pathInfoEncoded);
         MyFolder.index.instance = new MyFolder.index(options);
     }
 }
@@ -13,7 +14,7 @@ MyFolder.command.index = {
  * Implements hook `MyFolder.elementModifier()`.
  */
 MyFolder.modifier.index = function (element, info) {
-    let href = MyFolder.settings.basePath + MyFolder.settings.pathInfo+info.name;
+    let href = MyFolder.settings.basePath + MyFolder.settings.pathInfoEncoded + encodeURIComponent(info.name);
     if (info.type == '.') {
         href += '/';
     }
@@ -41,7 +42,9 @@ MyFolder.modifier.nginx = function (element, info) {
 $(document).ready(function () {
     window.onpopstate = (event) => {
         var pathInfo = event.state.pathInfo;
+        var pathInfoEncoded = event.state.pathInfoEncoded;
         MyFolder.settings.pathInfo = pathInfo
+        MyFolder.settings.pathInfoEncoded = pathInfoEncoded
         MyFolder.index.instance = new MyFolder.index;
     };
 });
