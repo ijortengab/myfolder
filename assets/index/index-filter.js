@@ -79,21 +79,34 @@ MyFolder.index.filter.$input.on('focus', function () {
         MyFolder.index.filter.first()
     }
     else {
-        // @todo, jika user mengetik ..
-        // maka bisa mengindex diluar jail root.
         MyFolder.index.filter.timeout = setTimeout(function () {
             if (val.endsWith('/')) {
                 $(that).val('');
-                let name = val.slice(0, -1);
-                MyFolder.settings.pathInfo = MyFolder.settings.pathInfo + name + '/'
-                MyFolder.settings.pathInfoEncoded = MyFolder.settings.pathInfoEncoded + encodeURIComponent(name) + '/'
+                let directory = MyFolder.settings.pathInfo + '/' + val
+                // Bersihkan dari double slash.
+                let directorySanitized = directory.replace(/\/+/g,'/');
+                // Sanitasi /blog/././ menjadi /blog/
+                do {
+                    directorySanitized = directorySanitized.replace(/\/\.\//g, '/');
+                } while (directorySanitized.includes('/./'));
+                // User boleh mengetik double dot: `..` pada input search,
+                let directorySanitizedArray = directorySanitized.replace(/^\//,'').replace(/\/$/,'').split('/');
+                let directoryResolved = [];
+                let directoryEncodedResolved = [];
+                while (directorySanitizedArray.length > 0) {
+                    let each = directorySanitizedArray.shift();
+                    if (each === '..') {
+                        directoryResolved.pop();
+                        directoryEncodedResolved.pop();
+                    } else {
+                        directoryResolved.push(each);
+                        directoryEncodedResolved.push(encodeURIComponent(each));
+                    }
+                }
+                MyFolder.settings.pathInfo = directoryResolved.length === 0 ? '/' : '/' + directoryResolved.join('/') + '/';
+                MyFolder.settings.pathInfoEncoded = directoryEncodedResolved.length === 0 ? '/' : '/' + directoryResolved.join('/') + '/';
                 let state = {pathInfo: MyFolder.settings.pathInfo, pathInfoEncoded: MyFolder.settings.pathInfoEncoded}
-                if (MyFolder.settings.rewriteUrl) {
-                    window.history.pushState(state, "", encodeURIComponent(name) + '/');
-                }
-                else {
-                    window.history.pushState(state, "", MyFolder.settings.basePath + MyFolder.settings.pathInfoEncoded);
-                }
+                window.history.pushState(state, "", MyFolder.settings.basePath + MyFolder.settings.pathInfoEncoded);
                 MyFolder.index.instance = new MyFolder.index();
             }
             else {
