@@ -27,7 +27,24 @@ MyFolder.index.filter.shortcut = function (e) {
         MyFolder.index.filter.$input.focus();
     }
 }
-
+MyFolder.index.filter.first = function () {
+    const instance = MyFolder.index.instance
+    let $first = instance.$tbody.find('tr:visible').first();
+    if ($first.length) {
+        let $a = $first.find('td.name a');
+        let infoType = $a.data('infoType');
+        if (infoType == '.') {
+            // Dikosongkan karena akan di redraw table oleh
+            // history API.
+            $(this).val('');
+            $a.click();
+        }
+        else {
+            let href = $a.attr('href');
+            location.href = href
+        }
+    }
+}
 MyFolder.index.filter.$input.on('focus', function () {
     if (MyFolder.index.filter.$buttonTrigger.is(':visible')) {
         MyFolder.index.filter.$buttonTrigger.click();
@@ -50,26 +67,16 @@ MyFolder.index.filter.$input.on('focus', function () {
         return;
     }
     let that = this;
-
     if (val === '') {
-        instance.$tbody.find('tr').show()
+        if (e.keyCode == 13) {
+            MyFolder.index.filter.first()
+        }
+        else {
+            instance.$tbody.find('tr').show()
+        }
     }
     else if (e.keyCode == 13) {
-        let $first = instance.$tbody.find('tr:visible').first();
-        if ($first.length) {
-            let $a = $first.find('td.name a');
-            let infoType = $a.data('infoType');
-            if (infoType == '.') {
-                // Dikosongkan karena akan di redraw table oleh
-                // history API.
-                $(this).val('');
-                $a.click();
-            }
-            else {
-                let href = $a.attr('href');
-                location.href = href
-            }
-        }
+        MyFolder.index.filter.first()
     }
     else {
         // @todo, jika user mengetik ..
