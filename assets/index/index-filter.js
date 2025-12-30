@@ -1,5 +1,4 @@
 MyFolder = window.MyFolder || {}
-
 MyFolder.index.filter = {
     $input: $('input[type=search]'),
     timeout: undefined,
@@ -7,11 +6,10 @@ MyFolder.index.filter = {
         const matcher = glob
             .replace(/\*/g, '.*')
             .replace(/\?/g, '.'); // Replace wild cards with regular expression equivalents
-        const r = new RegExp(`^${ matcher }$`); // Match beginning and end of input using ^ and $
+        const r = new RegExp(`${ matcher }`, "ig"); // Match beginning and end of input using ^ and $
         return r.test(input);
     }
 }
-
 MyFolder.index.filter.$buttonTrigger = $([
     '<button style="cursor:pointer;"class="form-control me-2" type="search" placeholder="" aria-label="Search">',
     'Type ',
@@ -19,7 +17,6 @@ MyFolder.index.filter.$buttonTrigger = $([
     ' to search',
     '</button>'
 ].join('')).css('width',MyFolder.index.filter.$input.css('width')).prependTo(MyFolder.index.filter.$input.parent());
-
 MyFolder.index.filter.shortcut = function (e) {
     if (e.key === '/') {
         e.preventDefault();
@@ -128,7 +125,6 @@ MyFolder.index.filter.$input.on('focus', function () {
         },250)
     }
 }).hide();
-
 MyFolder.index.filter.$buttonTrigger.on('click', function (e) {
     e.preventDefault();
     MyFolder.index.filter.$buttonTrigger.hide();
