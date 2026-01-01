@@ -171,5 +171,47 @@ MyFolder.modal.prototype.setFooter = function (footer) {
     else if (typeof footer === 'object' && 'html' in footer) {
         $(this.currentModal._element).find('.modal-footer').html(footer.html);
     }
+    else if (typeof footer === 'object' && 'button' in footer) {
+        let footer_button = footer.button
+        while (footer_button.length > 0) {
+            let each = footer_button.shift()
+            let $button = $('<button type="button" class="btn"></button>')
+            if ('text' in each) {
+                $button.text(each.text);
+            }
+            if ('class' in each) {
+                $button.addClass(each.class);
+            }
+            if ('bind' in each) {
+                while (each.bind.length > 0) {
+                    let bind = each.bind.shift()
+                    let _event = bind.event
+                    let _component = bind.component
+                    let _method = bind.method
+                    let _name = bind.name
+                    $button.on(_event, function () {
+                        let loaded
+                        switch (_component) {
+                            case 'self':
+                                loaded = MyFolder.modal.load().currentModal
+                                loaded[_method]();
+                                break;
+
+                            default:
+                                loaded = MyFolder[_component].load();
+                                loaded[_method](_name);
+                                break;
+                        }
+
+                    })
+
+                }
+            }
+            $button.appendTo();
+            $(this.currentModal._element).find('.modal-footer').append($button);
+        }
+
+        $(this.currentModal._element).find('.modal-footer').html(footer.html);
+    }
     return this;
 }
