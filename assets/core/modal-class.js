@@ -64,8 +64,15 @@ MyFolder.modal.prototype.reset = function () {
 MyFolder.modal.prototype.toggle = function (name) {
     // console.info('::toggle() on fire.');
     if (typeof name === 'string') {
-        this.reset();
-        this.registry.byQueue.push(name);
+        if (typeof this.currentModal === 'undefined') {
+            this.reset();
+            this.registry.byQueue.push(name);
+        }
+        else {
+            this.registry.byQueue.push(name);
+            this.currentModal.hide();
+            return;
+        }
     }
     if (this.registry.byQueue.length === 0) {
         return;
