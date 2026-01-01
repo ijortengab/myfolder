@@ -9,7 +9,6 @@ use IjorTengab\MyFolder\Core\Session;
 use IjorTengab\MyFolder\Module\Index\IndexController;
 use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
 
-
 class UserLoginController
 {
     public static function route()
@@ -43,6 +42,7 @@ class UserLoginController
             if ($user->isAuthenticated()) {
                 $title = 'Sorry';
                 $body = 'You are already logged in.';
+                $footer = '';
                 $modal_name = 'userHaveLoggedIn';
                 break;
             }
@@ -59,7 +59,8 @@ class UserLoginController
             if ($input_name == $name && $input_pass == $pass) {
                 $title = 'Success';
                 $body = 'You are login now.';
-                $modal_name = 'SuccessLogin';
+                $footer = '';
+                $modal_name = 'successLogin';
                 $session = Session::load();
                 $session->start();
                 $session->set('logged', true);
@@ -76,7 +77,25 @@ class UserLoginController
             // Failed.
             $title = 'Failed';
             $body = 'Either username or password is not match.';
-            $modal_name = 'FailedLogin';
+            $footer = array(
+                'button' => array(
+                    array(
+                        'text' => 'Try Again',
+                        'class' => 'btn-primary',
+                        'bind' => array(
+                            array(
+                                'event' => 'click',
+                                'component' => 'modal',
+                                'method' => 'toggle',
+                                'name' => 'loginForm',
+                            ),
+                        ),
+                    ),
+                )
+            );
+            // @todo, beri flood per IP dan atau per user.
+            // jika sudah lebih dari 5 kali gagal login.
+            $modal_name = 'failedLogin';
         }
         while (false);
         $commands[] = array(
@@ -90,6 +109,7 @@ class UserLoginController
                 'layout' => array(
                     'title' => $title,
                     'body' => $body,
+                    'footer' => $footer,
                 ),
             ),
         );
