@@ -123,8 +123,15 @@ MyFolder.offcanvas.prototype.reset = function () {
 MyFolder.offcanvas.prototype.toggle = function (name) {
     // console.info('::toggle() on fire.');
     if (typeof name === 'string') {
-        this.reset();
-        this.registry.byQueue.push(name);
+        if (typeof this.currentOffcanvas === 'undefined') {
+            this.reset();
+            this.registry.byQueue.push(name);
+        }
+        else {
+            this.registry.byQueue.push(name);
+            this.currentOffcanvas.hide();
+            return;
+        }
     }
     if (this.registry.byQueue.length === 0) {
         return;
