@@ -56,7 +56,7 @@ class UserLoginController
             $name = $config->sysadmin->name->value();
             $pass = $config->sysadmin->pass->value();
             // Verify.
-            if ($input_name == $name && $input_pass == $pass) {
+            if ($input_name == $name && password_verify($input_pass, $pass)) {
                 $title = 'Success';
                 $body = 'You are login now.';
                 $footer = '';

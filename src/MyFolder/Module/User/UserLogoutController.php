@@ -36,9 +36,9 @@ class UserLogoutController
     {
         $session = Session::load();
         $session->destroy();
-        $title = 'Logout successful.';
+        // $title = 'Notice.';
         $body = 'Logout successful.';
-        $footer = 'Logout successful.';
+        // $footer = 'Logout successful.';
         $commands[] = array(
             'command' => 'modal',
             'options' => array(
@@ -48,13 +48,13 @@ class UserLogoutController
                     'keyboard' => false
                 ),
                 'layout' => array(
-                    'title' => $title,
+                    // 'title' => $title,
                     'body' => array(
                         'html' => $body,
                     ),
-                    'footer' => array(
-                        'html' => $footer,
-                    ),
+                    // 'footer' => array(
+                        // 'html' => $footer,
+                    // ),
                 ),
             ),
         );

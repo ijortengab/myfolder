@@ -37,7 +37,7 @@ class IndexInvokeCommandSubscriber implements EventSubscriberInterface
                     ),
                     'layout' => array(
                         'title' => 'Attention',
-                        'body' => 'The System Administrator has not been created yet.',
+                        'body' => 'The account of System Administrator has not been created yet.',
                         'footer' => array(
                             'button' => array(
                                 array(
@@ -50,7 +50,6 @@ class IndexInvokeCommandSubscriber implements EventSubscriberInterface
                                             'method' => 'hide',
                                         ),
                                     ),
-
                                 ),
                                 array(
                                     'text' => 'Open dashboard',

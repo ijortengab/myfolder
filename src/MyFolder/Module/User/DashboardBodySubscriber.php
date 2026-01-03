@@ -3,6 +3,7 @@
 namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Module\Index\DashboardBodyEvent;
 
 class DashboardBodySubscriber implements EventSubscriberInterface
@@ -18,6 +19,15 @@ class DashboardBodySubscriber implements EventSubscriberInterface
         $user = new UserSession;
         if ($user->isAuthenticated()) {
             $event->registerCard(new CardUserSession);
+        }
+        else {
+            $config = ConfigHelper::load('user');
+            $name = $config->sysadmin->name->value();
+            $pass = $config->sysadmin->pass->value();
+            if (empty($name) || empty($pass)) {
+                $event->registerCard(new CardUserSysAdminCreate);
+            }
+
         }
 
     }

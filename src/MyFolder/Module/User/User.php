@@ -22,5 +22,7 @@ class User implements ModuleInterface
         $app->post('/user/login', 'IjorTengab\MyFolder\Module\User\UserLoginController::route');
         $app->get('/user/dashboard/session', 'IjorTengab\MyFolder\Module\User\UserDashboardSessionController::route');
         $app->post('/user/logout', 'IjorTengab\MyFolder\Module\User\UserLogoutController::route');
+        $app->get('/user/sysadmin/create', 'IjorTengab\MyFolder\Module\User\UserSysAdminCreateController::route');
+        $app->post('/user/sysadmin/create', 'IjorTengab\MyFolder\Module\User\UserSysAdminCreateController::route');
     }
 }
