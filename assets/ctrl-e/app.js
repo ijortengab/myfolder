@@ -35,6 +35,12 @@ MyFolder.ctrlE = function () {
         '<button value="ok">Ok</button>',
         '</form>',
         '</dialog>',
+        '<dialog id="failed">',
+        '<header>Save failed</header>',
+        '<form method="dialog">',
+        '<button value="ok">Ok</button>',
+        '</form>',
+        '</dialog>',
         '',
     ].join('')).prependTo('body');
     this.$textarea = this.$dialog.find('textarea');
@@ -124,7 +130,9 @@ MyFolder.ctrlE = function () {
             this.save();
         }
     });
-
+    this.$dialog[3].addEventListener("close", (event) => {
+        this.$textarea.prop('disabled', false)
+    });
     // Listen form submit.
     this.$form.submit(function (e) {
         // Prevent the Browser behaviour.
@@ -135,16 +143,17 @@ MyFolder.ctrlE = function () {
             type: "POST",
             // url: actionUrl,
             data: {contents: that.$textarea.val()},
-            success: function(data)
-            {
+            success: function(data){
                 that.$textarea.prop('disabled', false)
                 MyFolder.article.source = that.$textarea.val()
                 if (that.isDialogHide) {
                     that.$dialog[2].showModal();
                 }
+            },
+            error: function (e) {
+                that.$dialog[3].showModal();
             }
         });
-
     })
 }
 
