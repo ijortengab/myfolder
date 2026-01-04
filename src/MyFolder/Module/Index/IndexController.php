@@ -92,6 +92,9 @@ class IndexController
                 'action' => $action,
             );
             $home = $http_request->server->get('HOME');
+            if(null == $home) {
+                $home = $http_request->server->get('DOCUMENT_ROOT');
+            }
             $cache_directory = $home.'/.cache/myfolder';
             if (!is_dir($cache_directory)) {
                 mkdir($cache_directory, 0775, true);
