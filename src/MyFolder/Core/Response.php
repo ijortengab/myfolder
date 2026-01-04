@@ -27,8 +27,18 @@ class Response
     }
     public function send()
     {
-        if ($this->statusCode == 404) {
-            header('HTTP/1.1 404 Not Found');
+        switch ($this->statusCode) {
+            case 403:
+                header('HTTP/1.1 403 Access Denied');
+                break;
+
+            case 404:
+                header('HTTP/1.1 404 Not Found');
+                break;
+
+            default:
+                // Do something.
+                break;
         }
         echo $this->content;
     }
