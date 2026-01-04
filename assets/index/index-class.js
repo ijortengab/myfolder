@@ -107,6 +107,17 @@ MyFolder.index.prototype.drawTable = function (options) {
             })
         })
     })
+    ls.fail(function (data) {
+        let code = data.status.toString()
+        let info = {
+            name: 'Failed' + code,
+            layout: {
+                title: code,
+                body: data.statusText
+            }
+        }
+        MyFolder.modal.process(info, ['register', 'show']);
+    })
     this.drawBreadcrumb();
 }
 MyFolder.index.prototype.drawBreadcrumb = function () {

@@ -78,8 +78,8 @@ class IndexController
             $current_directory = $root.$directory;
 
             if (!is_dir($current_directory)) {
-                $response = new JsonResponse();
-                $response->setData(array());
+                $response = new Response('Not Found.');
+                $response->setStatusCode(404);
                 return $response->send();
             }
             $action = $http_request->request->get('action');

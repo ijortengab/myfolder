@@ -36,6 +36,14 @@ class Controller
             $event = DirectoryPreRenderEvent::load();
             $event->setInfo(new \SplFileInfo($fullpath));
             $dispatcher->dispatch($event, DirectoryPreRenderEvent::NAME);
+            // Direktori listing sepenuhnya di handle oleh module.
+            // Core tidak memberikan respond.
+        }
+        elseif (substr($path_info, -1) == '/') {
+            $dispatcher = Application::getEventDispatcher();
+            $event = DirectoryPreRenderEvent::load();
+            $event->setInfo(new \SplFileInfo($fullpath));
+            $dispatcher->dispatch($event, DirectoryPreRenderEvent::NAME);
         }
         else {
             $response = new Response('Not Found.');
