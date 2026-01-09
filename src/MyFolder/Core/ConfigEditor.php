@@ -61,6 +61,10 @@ EOF;
         // Bring back the group, so we still editable this code.
         chmod($this->file_name, 0664);
         chgrp($this->file_name, $oldgroup);
+
+        // Penting. Wajib invalidate atau jika tidak, maka ReflectionClass
+        // akan mengembalikan doc comment versi cached pada simultan request.
+        opcache_invalidate($this->file_name);
     }
     protected function populateConfigContents()
     {
