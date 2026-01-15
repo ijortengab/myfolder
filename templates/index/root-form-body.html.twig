@@ -4,5 +4,14 @@
     <span class="input-group-text" id="inputGroup-sizing-default">Root Directory</span>
     <input value="{{ root }}" required="" name="root" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
   </div>
+    <p>Public access: </p>
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="access_root_public" id="inlineRadio1" value="1" {{ access.1 ? 'checked' }}>
+    <label class="form-check-label" for="inlineRadio1">allowed</label>
+    </div>
+    <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="access_root_public" id="inlineRadio2" value="0" {{ access.0 ? 'checked' }}>
+    <label class="form-check-label" for="inlineRadio2">forbidden</label>
+    </div>
   <input name="submit" type="submit" class="form-control d-none">
 </form>

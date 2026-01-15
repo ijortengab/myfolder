@@ -18,6 +18,7 @@ class Index implements ModuleInterface
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
         $dispatcher->addSubscriber(new RouteRegisterSubscriber());
         $dispatcher->addSubscriber(new ReloadBrowserSubscriber());
+        $dispatcher->addSubscriber(new ConventionalPolicySubscriber());
 
         // Register route.
         $app->post('/index', 'IjorTengab\MyFolder\Module\Index\IndexController::route');

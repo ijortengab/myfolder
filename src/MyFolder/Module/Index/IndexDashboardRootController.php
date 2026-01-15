@@ -7,6 +7,7 @@ use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\RedirectResponse;
 use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\TwigFile;
+use IjorTengab\MyFolder\Core\AccessControl;
 
 class IndexDashboardRootController
 {
@@ -38,6 +39,9 @@ class IndexDashboardRootController
         $commands = array();
         $http_request = Application::getHttpRequest();
         $root = $http_request->request->get('root');
+        $access_root_public = $http_request->request->get('access_root_public');
+        //@todo, validate input user.
+        // jika bukan 0 maupun 1, maka invalid request.
 
         // @todo.
         // verifikasi is_dir.
@@ -46,6 +50,7 @@ class IndexDashboardRootController
         $config = ConfigHelper::load();
         // Set.
         $config->root = $root;
+        $config->access->root->public = $access_root_public;;
 
         $title = 'Success.';
         $body = 'Saved.';
@@ -167,6 +172,27 @@ class IndexDashboardRootController
 
         $config = ConfigHelper::load();
         $root = $config->root->value();
+        $access_root_public = $config->access->root->public->value();
+        switch ($access_root_public) {
+            case '0':
+                $access_root_public = false;
+                break;
+
+            case '1':
+                $access_root_public = true;
+                break;
+
+            default:
+                $access_root_public = null;
+                break;
+        }
+
+        if ($access_root_public === null) {
+            $access_root_public = AccessControl::DEFAULT_DIRECTORY_LISTING;
+        }
+
+        $access_root_public = $access_root_public ? '1' : '0';
+
         // Jadikan empty string agar user ngeh bahwa belum di set.
         null !== $root or $root = '';
 
@@ -176,6 +202,9 @@ class IndexDashboardRootController
         if (in_array('body', $query_part)) {
             $body = (string) TwigFile::process(new Template\RootFormBody, array(
                 'root' => htmlentities($root),
+                'access' => array(
+                    $access_root_public => true,
+                ),
             ));
             $commands[] = array(
                 'command' => 'ajax',

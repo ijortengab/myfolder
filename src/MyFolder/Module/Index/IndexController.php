@@ -9,6 +9,7 @@ use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\BinaryFileResponse;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
+use IjorTengab\MyFolder\Core\AccessControl;
 
 class IndexController
 {
@@ -50,6 +51,25 @@ class IndexController
             $root = $root_request;
         }
         if ($http_request->request->has('action')) {
+            $action = $http_request->request->get('action');
+            // Validate.
+            switch ($action) {
+                case 'ls':
+                    $operation = 'listing_directory';
+                    break;
+
+                case 'ls -la':
+                    $operation = 'listing_directory_metadata';
+                    // hack
+                    // return;
+
+                    break;
+
+                default:
+                    throw new \Exception('Action is unknown.');
+                    break;
+            }
+
             // @todo: Jika tidak ada $_POST['directory'], maka throw error.
             // @todo: $_POST['directory'] harus diakhiri dengan slash.
             $directory = $http_request->request->get('directory');
@@ -73,6 +93,7 @@ class IndexController
                     $directory_resolved[] = $each;
                 }
             }
+
             $directory = empty($directory_resolved) ? '/' : '/' . implode('/', $directory_resolved) . '/';
             $current_directory = $root.$directory;
 
@@ -81,7 +102,11 @@ class IndexController
                 $response->setStatusCode(404);
                 return $response->send();
             }
-            $action = $http_request->request->get('action');
+
+            // @todo: cari tahu scope sebaiknya menggunakan path
+            // $current_directory atau path $directory.
+            // Untuk sementara kita pilih $directory saja.
+            AccessControl::load($directory, $operation)->decision();
 
             // Persiapan cache.
             // @todo, cek security, bgaimana jika user lain menebak cache.
