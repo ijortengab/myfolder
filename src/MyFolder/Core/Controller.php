@@ -86,6 +86,9 @@ class Controller
         $http_request = Application::getHttpRequest();
         $is_html = !(null === $http_request->query->get('html'));
         $contents = (string) $http_request->request->get('contents');
+
+        AccessControl::load($path_info, 'file_editing')->decision();
+
         file_put_contents($fullpath, $contents);
     }
     public static function getAjax()
