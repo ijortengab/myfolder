@@ -4,6 +4,29 @@ namespace IjorTengab\MyFolder\Core;
 
 class Controller
 {
+    public static function route()
+    {
+        $http_request = Application::getHttpRequest();
+        $method = strtolower($http_request->server->get('REQUEST_METHOD'));
+        $is_ajax = !(null === $http_request->query->get('is_ajax'));
+        $has_query_part = !(null === $http_request->query->get('part'));
+        switch ($method) {
+            case 'post':
+                self::post();
+                break;
+            case 'get':
+                if (!$is_ajax) {
+                    self::get();
+                }
+                elseif ($has_query_part) {
+                    // self::getAjaxPart();
+                }
+                else {
+                    self::getAjax();
+                }
+                break;
+        }
+    }
     /**
      * Default controller for `index.php`.
      */
@@ -64,10 +87,16 @@ class Controller
         $is_html = !(null === $http_request->query->get('html'));
         $contents = (string) $http_request->request->get('contents');
         file_put_contents($fullpath, $contents);
-        // list($base_path, $path_info,) = Application::extractUrlInfo();
-        // $url = $base_path.$path_info;
-        // (null === $http_request->query->get('html')) or $url .= '?html';
-        // $response = new RedirectResponse($url);
-        // return $response->send();
+    }
+    public static function getAjax()
+    {
+        $dispatcher = Application::getEventDispatcher();
+        $event = new ReloadBrowserEvent;
+        $dispatcher->dispatch($event, ReloadBrowserEvent::NAME);
+        $commands = $event->getCommands();
+        $response = new JsonResponse(array(
+            'commands' => $commands,
+        ));
+        return $response->send();
     }
 }
