@@ -3,11 +3,8 @@
 namespace IjorTengab\MyFolder\Module\Csv;
 
 use IjorTengab\MyFolder\Core\Application;
-use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
-use IjorTengab\MyFolder\Core\EventDispatcher;
 use IjorTengab\MyFolder\Core\FilePreRenderEvent;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
 use IjorTengab\MyFolder\Core\HtmlWrapperHtmlElementEvent;
