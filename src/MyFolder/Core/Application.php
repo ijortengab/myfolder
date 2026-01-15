@@ -130,26 +130,13 @@ class Application
             $this->handle();
             $this->route();
         }
+        catch (AccessException $e) {
+            $response = $e->getResponse();
+            return $response->send();
+        }
         catch (\Exception $e) {
-            // @todo, gunakan toasts.
-            $commands = array();
-            $commands[] = array(
-                'command' => 'modal',
-                'options' => array(
-                    'name' => 'exception',
-                    'bootstrapOptions' => array(
-                        'backdrop' => 'static',
-                        'keyboard' => true
-                    ),
-                    'layout' => array(
-                        'title' => 'Exception',
-                        'body' => $e->getMessage(),
-                    ),
-                ),
-            );
-            $response = new JsonResponse(array(
-                'commands' => $commands,
-            ));
+            $response = new Response($e->getMessage());
+            $response->setStatusCode(500);
             return $response->send();
         }
     }
