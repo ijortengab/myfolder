@@ -161,8 +161,8 @@ class Application
         $dispatcher->addSubscriber(new HtmlElementSubscriber());
 
         // Register route.
-        $this->get('/', 'IjorTengab\MyFolder\Core\Controller::get');
-        $this->post('/', 'IjorTengab\MyFolder\Core\Controller::post');
+        $this->get('/', 'IjorTengab\MyFolder\Core\Controller::route');
+        $this->post('/', 'IjorTengab\MyFolder\Core\Controller::route');
 
         $this->get('/assets/{module}/{file}', 'IjorTengab\MyFolder\Core\PseudoController::getAssetFile');
         $this->get('/root/{a}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
