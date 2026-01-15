@@ -3,6 +3,7 @@
 namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\Session;
+use IjorTengab\MyFolder\Core\ConfigHelper;
 
 class UserSession
 {
@@ -37,5 +38,19 @@ class UserSession
             $this->is_anonymous = Session::load()->get('logged') !== true;
         }
         return $this->is_anonymous;
+    }
+
+    /**
+     *
+     */
+    public function isSysAdmin()
+    {
+        if ($this->isAnonymous()) {
+            return false;
+        }
+        $config = ConfigHelper::load('user');
+        $name_config = $config->sysadmin->name->value();
+        $name_session = Session::load()->get('username');
+        return $name_config === $name_session;
     }
 }

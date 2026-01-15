@@ -14,6 +14,8 @@ class User implements ModuleInterface
         $dispatcher->addSubscriber(new IndexInvokeCommandSubscriber());
         $dispatcher->addSubscriber(new HtmlElementSubscriber());
         $dispatcher->addSubscriber(new DashboardBodySubscriber());
+        $dispatcher->addSubscriber(new ConventionalPolicySubscriber());
+        $dispatcher->addSubscriber(new AlternativePolicySubscriber());
 
         // Register route.
         $app->get('/user/create', 'IjorTengab\MyFolder\Module\User\UserCreateController::route');
