@@ -36,6 +36,10 @@ class Response
                 header('HTTP/1.1 404 Not Found');
                 break;
 
+            case 500:
+                header('HTTP/1.1 500 Internal Server Error');
+                break;
+
             default:
                 // Do something.
                 break;
