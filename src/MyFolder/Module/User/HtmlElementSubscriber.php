@@ -2,7 +2,6 @@
 
 namespace IjorTengab\MyFolder\Module\User;
 
-use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
