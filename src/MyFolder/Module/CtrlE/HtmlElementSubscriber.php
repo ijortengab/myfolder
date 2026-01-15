@@ -2,10 +2,7 @@
 
 namespace IjorTengab\MyFolder\Module\CtrlE;
 
-use IjorTengab\MyFolder\Core\Application;
-use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
-use IjorTengab\MyFolder\Core\HtmlWrapperHtmlElementEvent;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
 
 class HtmlElementSubscriber implements EventSubscriberInterface
