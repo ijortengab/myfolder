@@ -43,7 +43,7 @@ class UserLoginController
                 $title = 'Sorry';
                 $body = 'You are already logged in.';
                 $footer = '';
-                $modal_name = 'userHaveLoggedIn';
+                $modal_name = 'UserHaveLoggedIn';
                 break;
             }
             // User input.
@@ -60,7 +60,7 @@ class UserLoginController
                 $title = 'Success';
                 $body = 'You are login now.';
                 $footer = '';
-                $modal_name = 'successLogin';
+                $modal_name = 'SuccessLogin';
                 $session = Session::load();
                 $session->start();
                 $session->set('logged', true);
@@ -95,7 +95,7 @@ class UserLoginController
             );
             // @todo, beri flood per IP dan atau per user.
             // jika sudah lebih dari 5 kali gagal login.
-            $modal_name = 'failedLogin';
+            $modal_name = 'FailedLogin';
         }
         while (false);
         $commands[] = array(
@@ -103,14 +103,20 @@ class UserLoginController
             'options' => array(
                 'name' => $modal_name,
                 'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => false
+                    // 'backdrop' => 'static',
+                    // 'keyboard' => false
                 ),
                 'layout' => array(
                     'title' => $title,
                     'body' => $body,
                     'footer' => $footer,
                 ),
+            ),
+        );
+        $commands[] = array(
+            'command' => 'fetch',
+            'options' => array(
+                'url' => '/',
             ),
         );
         $response = new JsonResponse(array(

@@ -44,8 +44,8 @@ class UserLogoutController
             'options' => array(
                 'name' => 'logoutSuccess',
                 'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => false
+                    // 'backdrop' => 'static',
+                    // 'keyboard' => true
                 ),
                 'layout' => array(
                     // 'title' => $title,
@@ -56,6 +56,12 @@ class UserLogoutController
                         // 'html' => $footer,
                     // ),
                 ),
+            ),
+        );
+        $commands[] = array(
+            'command' => 'fetch',
+            'options' => array(
+                'url' => '/',
             ),
         );
         $commands[] = array(
