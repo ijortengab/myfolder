@@ -59,29 +59,8 @@ class DashboardController
                     'body' => 'Loading...',
                     'footer' => '',
                 ),
-                // 'layout' => array(
-                    // 'size' => 'Fullscreen',
-                    // 'title' => $title,
-                    // 'body' => array(
-                        // 'html' => $body,
-                    // ),
-                    // 'footer' => array(
-                        // 'html' => $footer,
-                    // ),
-                    // 'ajax' => array(
-                        // 'method' => 'addClass',
-                        // 'selector' => '.modal-dialog',
-                        // 'value' => 'modal-fullscreen',
-                    // ),
-                // ),
             ),
         );
-        // $commands[] = array(
-            // 'command' => 'ajax',
-            // 'options' => array(
-            // ),
-        // );
-
         $response = new JsonResponse(array(
             'commands' => $commands,
         ));

@@ -5,7 +5,6 @@ namespace IjorTengab\MyFolder\Module\Index;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\ConfigHelper;
-use IjorTengab\MyFolder\Core\ConfigEditor;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\BinaryFileResponse;

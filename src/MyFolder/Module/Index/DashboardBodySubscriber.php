@@ -15,9 +15,6 @@ class DashboardBodySubscriber implements EventSubscriberInterface
     }
     public static function onDashboardBodyEvent(DashboardBodyEvent $event)
     {
-        // if (AccessControl::judge('a|b|(c&d)', new UserAccessControl) {
-        // }
-        // @ todo, is user sysadmin.
         $user = new UserSession;
         if ($user->isAuthenticated()) {
             $event->registerCard(new CardRootDirectory);

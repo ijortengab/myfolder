@@ -7,8 +7,6 @@ use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\DirectoryPreRenderEvent;
 use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\RedirectResponse;
-use IjorTengab\MyFolder\Core\BinaryFileResponse;
-use IjorTengab\MyFolder\Core\ConfigHelper;
 
 class DirectoryPreRenderSubscriber implements EventSubscriberInterface
 {
