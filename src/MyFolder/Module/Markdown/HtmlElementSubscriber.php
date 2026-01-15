@@ -2,8 +2,6 @@
 
 namespace IjorTengab\MyFolder\Module\Markdown;
 
-use IjorTengab\MyFolder\Core\Application;
-use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
 
