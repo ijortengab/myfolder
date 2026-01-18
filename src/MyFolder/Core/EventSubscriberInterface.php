@@ -2,6 +2,7 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-interface EventSubscriberInterface {
+interface EventSubscriberInterface
+{
     public static function getSubscribedEvents();
 }

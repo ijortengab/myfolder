@@ -2,9 +2,6 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-use IjorTengab\MyFolder\Core\EventSubscriberInterface;
-use IjorTengab\MyFolder\Core\HtmlElementEvent;
-
 class HtmlElementSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()

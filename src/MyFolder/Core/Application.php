@@ -151,25 +151,27 @@ class Application
         $this->get('/', 'IjorTengab\MyFolder\Core\Controller::route');
         $this->post('/', 'IjorTengab\MyFolder\Core\Controller::route');
 
-        $this->get('/assets/{module}/{file}', 'IjorTengab\MyFolder\Core\PseudoController::getAssetFile');
-        $this->get('/root/{a}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}/{q}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
-        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}/{q}/{r}', 'IjorTengab\MyFolder\Core\PseudoController::getRootFile');
+        $pseudo_getasset = 'IjorTengab\MyFolder\Core\PseudoController::getAssetFile';
+        $pseudo_getroot = 'IjorTengab\MyFolder\Core\PseudoController::getRootFile';
+        $this->get('/assets/{module}/{file}', $pseudo_getasset);
+        $this->get('/root/{a}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}/{q}', $pseudo_getroot);
+        $this->get('/root/{a}/{b}/{c}/{d}/{e}/{f}/{g}/{h}/{i}/{j}/{k}/{l}/{m}/{n}/{o}/{p}/{q}/{r}', $pseudo_getroot);
     }
     protected function scanModule()
     {

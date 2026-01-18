@@ -2,10 +2,6 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-use IjorTengab\MyFolder\Core\EventSubscriberInterface;
-use IjorTengab\MyFolder\Core\FilePreRenderEvent;
-use IjorTengab\MyFolder\Core\BinaryFileResponse;
-
 class FilePreRenderSubscriber implements EventSubscriberInterface
 {
     public static function getSubscribedEvents()
