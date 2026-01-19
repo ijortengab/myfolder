@@ -4,12 +4,11 @@ namespace IjorTengab\MyFolder\Core;
 
 class ConfigEditor
 {
-    protected $doc_comment;
     protected $config_contents;
-    protected $file_name;
     protected $object;
     protected $class;
     protected $namespace;
+    protected $reflection_class;
 
     public static function toDocComment($string)
     {
@@ -43,35 +42,55 @@ EOF;
         if (null === $this->config_contents) {
             $this->populateConfigContents();
         }
-        if (!is_writable(dirname($this->file_name))) {
+        $filename = $this->reflection_class->getFileName();
+        if (!is_writable(dirname($filename))) {
             throw new WriteException('Directory of file is not writable.');
         }
 
         // Turn object into string and convert as doc comment.
         $data = $this->toDocComment((string) $data);
 
-        $contents = file_get_contents($this->file_name);
-        $contents = str_replace($this->doc_comment, $data, $contents);
+        $class_start_line =  $this->reflection_class->getStartLine();
+        $doc_comment = $this->reflection_class->getDocComment();
+        $additional_lines = 0;
+        if ($doc_comment) {
+            $count_chars = count_chars($doc_comment, 1);
+            if (array_key_exists(10, $count_chars)) {
+                $additional_lines = $count_chars[10] + 1;
+            }
+        }
+        $lines = file($filename);
+        if ($additional_lines) {
+            $doc_comment_start_line = $class_start_line - $additional_lines;
+            $doc_comment_end_line = $class_start_line - 1;
+            array_splice($lines, --$doc_comment_start_line, $doc_comment_end_line - $doc_comment_start_line, $data.PHP_EOL);
+        }
+        else {
+            // doc comment gak exists karena user menghapus manual.
+            array_splice($lines, --$class_start_line, 0, $data.PHP_EOL);
+        }
+        $contents = implode('', $lines);
         $temp_file = tempnam(sys_get_temp_dir(), 'MyFolder');
         file_put_contents($temp_file, $contents);
 
-        $oldgroup = filegroup($this->file_name);
-        rename($temp_file, $this->file_name);
+        $oldgroup = filegroup($filename);
+        rename($temp_file, $filename);
 
         // Bring back the group, so we still editable this code.
-        chmod($this->file_name, 0664);
-        chgrp($this->file_name, $oldgroup);
+        chmod($filename, 0664);
+        chgrp($filename, $oldgroup);
 
         // Penting. Wajib invalidate atau jika tidak, maka ReflectionClass
         // akan mengembalikan doc comment versi cached pada simultan request.
-        opcache_invalidate($this->file_name);
+        opcache_invalidate($filename);
     }
     protected function populateConfigContents()
     {
         $this->config_contents = '';
         if (isset($this->object)) {
             //construct the Reflective class.
-            $reflective_class = new \ReflectionClass($this->object);
+            $reflection_class = new \ReflectionClass($this->object);
+            $this->reflection_class = $reflection_class;
         }
         else {
             if (null === $this->namespace) {
@@ -84,15 +103,15 @@ EOF;
                 throw new WriteException('Class to get the configuration is not exists.');
             }
             //construct the Reflective class.
-            $reflective_class = new \ReflectionClass($class_name);
+            $reflection_class = new \ReflectionClass($class_name);
+            $this->reflection_class = $reflection_class;
         }
         // Turn false return into empty string.
-        $this->doc_comment = (string) $reflective_class->getDocComment();
-        $this->file_name = $reflective_class->getFileName();
+        $doc_comment = (string) $reflection_class->getDocComment();
         $this->config_contents = trim(preg_replace(array(
             '/^\/\*\*$/m',
             '/^\s\*\s/m',
             '/^\s\*\/$/m',
-        ), '', $this->doc_comment));
+        ), '', $doc_comment));
     }
 }
