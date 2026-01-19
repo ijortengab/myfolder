@@ -135,7 +135,7 @@ class IndexController
                 $ttl = $filemtime + (5 * 60);
                 // @todo user bisa ngedit.
                 if (time() < $ttl) {
-                    # @todo, how to set expire? event if user edit or add file.
+                    // @todo, how to set expire? event if user edit or add file.
                     $response = new BinaryFileResponse(new \SplFileInfo($cache_path));
                     return $response->send();
                 }
@@ -179,7 +179,8 @@ class IndexController
                             'name' => $each,
                             'mtime' => '',
                             'size' => '',
-                            'type' => '.', // dot means directory
+                            // dot means directory
+                            'type' => '.',
                         );
                         if (is_file($current_directory.$each)) {
                             $file = $current_directory.$each;
