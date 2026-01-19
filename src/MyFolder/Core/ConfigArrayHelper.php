@@ -2,58 +2,57 @@
 
 namespace IjorTengab\MyFolder\Core;
 
-class ConfigHelper extends ArrayHelper
+class ConfigArrayHelper extends ArrayHelper
 {
-    protected static $core;
+    protected static $short_name = 'Config';
 
-    protected static $modules = array();
+    protected static $cache;
+
+    protected static $cache_storage = array();
 
     protected $editor;
 
-    public static function load($module = null)
+    public static function load($module_name = null)
     {
-        if (null === $module) {
-            if (null !== static::$core) {
-                return static::$core;
+        if (null === $module_name) {
+            if (null !== static::$cache) {
+                return static::$cache;
             }
         }
-        elseif (is_string($module)) {
-            if (array_key_exists($module, static::$modules)) {
-                return static::$modules[$module];
+        else {
+            if (array_key_exists($module_name, static::$cache_storage)) {
+                return static::$cache_storage[$module_name];
             }
         }
-        if (null === $module) {
+        if (null === $module_name) {
             $editor = new ConfigEditor;
-            $editor->setClassName('Config', 'IjorTengab\MyFolder\Core');
+            $editor->setClassName(static::$short_name, 'IjorTengab\MyFolder\Core');
         }
-        elseif (is_string($module)) {
-            $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
+        else {
+            $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module_name)));
             $editor = new ConfigEditor;
-            $editor->setClassName('Config', 'IjorTengab\\MyFolder\\Module\\'.$class);
+            $editor->setClassName(static::$short_name, 'IjorTengab\\MyFolder\\Module\\'.$class);
         }
-        elseif (is_object($module)) {
-            $editor = new ConfigEditor($module);
-        }
-        $config = new self;
+        $config = new static;
         $config->setEditor($editor);
         $jq = new JsonQuery($config);
         $jq->import($editor->get());
         unset($jq);
         // Save to static.
-        if (null === $module) {
-            static::$core = $config;
+        if (null === $module_name) {
+            static::$cache = $config;
         }
-        elseif (is_string($module)) {
-            static::$modules[$module] = $config;
+        else {
+            static::$cache_storage[$module_name] = $config;
         }
         return $config;
     }
 
-    public static function save(ConfigHelper $config)
+    public function save()
     {
         // Bring back editor.
-        $editor = $config->getEditor();
-        $editor->set($config);
+        $editor = $this->getEditor();
+        $editor->set($this);
     }
 
     public function __toString()
@@ -66,9 +65,9 @@ class ConfigHelper extends ArrayHelper
     {
         return $this->editor;
     }
+
     public function setEditor(ConfigEditor $editor)
     {
         $this->editor = $editor;
     }
-
 }
