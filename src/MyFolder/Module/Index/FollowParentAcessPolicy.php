@@ -5,7 +5,6 @@ namespace IjorTengab\MyFolder\Module\Index;
 use IjorTengab\MyFolder\Core\PolicyInterface;
 use IjorTengab\MyFolder\Core\ConfigHelper;
 use IjorTengab\MyFolder\Core\AccessControl;
-use IjorTengab\MyFolder\Module\Index\AccessControl as IndexAccessControl;
 
 class FollowParentAcessPolicy implements PolicyInterface
 {
@@ -51,7 +50,7 @@ class FollowParentAcessPolicy implements PolicyInterface
                     break;
             }
             if ($access_root_public === null) {
-                $access_root_public = IndexAccessControl::DEFAULT_DIRECTORY_LISTING;
+                $access_root_public = AccessControl::DEFAULT_DIRECTORY_LISTING;
             }
             return $access_root_public;
         }

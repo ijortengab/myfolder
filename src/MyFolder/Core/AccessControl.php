@@ -4,6 +4,8 @@ namespace IjorTengab\MyFolder\Core;
 
 class AccessControl
 {
+    const DEFAULT_DIRECTORY_LISTING = true;
+
     const DEFAULT_FILE_EDITING = false;
 
     const RESERVED_CHARACTERS = array('(', ')', '&', '|');
