@@ -125,6 +125,7 @@ class Application
     }
     public function run()
     {
+        spl_autoload_register(array($this, 'autoload'));
         try {
             $this->scanModule();
             $this->handle();
@@ -138,6 +139,40 @@ class Application
             $response = new Response($e->getMessage());
             $response->setStatusCode(500);
             return $response->send();
+        }
+    }
+    public function autoload($class_name)
+    {
+        static $valid;
+        $config_replace_php = self::$cwd.'/'.Template\ConfigReplace::BASENAME;
+        if (!file_exists($config_replace_php)) {
+            return;
+        }
+        if ($valid === null) {
+            if (ConfigLoader::isConfigReplaceValid($config_replace_php)) {
+                $valid = true;
+            }
+            else {
+                $valid = false;
+            }
+        }
+        if ($valid === false) {
+            return;
+        }
+
+        switch ($class_name) {
+            // Frequent.
+            case 'IjorTengab\MyFolder\Core\ConfigReplace':
+            case 'IjorTengab\MyFolder\Module\Index\ConfigReplace':
+            case 'IjorTengab\MyFolder\Module\User\ConfigReplace':
+                require_once($config_replace_php);
+                break;
+
+            default:
+                if (str_starts_with($class_name, 'IjorTengab\MyFolder\Module') && str_ends_with($class_name, 'ConfigReplace')) {
+                    require_once($config_replace_php);
+                }
+                break;
         }
     }
     protected function handle()
@@ -175,7 +210,7 @@ class Application
     }
     protected function scanModule()
     {
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         $modules = $config->module->value();
         if (null === $modules) {
             return;
