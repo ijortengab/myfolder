@@ -10,6 +10,7 @@
  */
 MyFolder.ajax = function (base, element, element_settings) {
     $.extend(this, element_settings);
+    this.element = element;
     if ('url' in this) {
         let url = MyFolder.ajaxLink(this.url);
         let options = this.options || {};
@@ -63,26 +64,29 @@ MyFolder.ajax.prototype.resultProcess = function () {
 };
 MyFolder.ajax.prototype.commands = {
     remove: function (ajax, response) {
-        $(response.selector, ajax.element).remove();
+        $(response.selector).remove();
     },
     html: function (ajax, response) {
-        $(response.selector, ajax.element).html(response.html);
+        $(response.selector).html(response.html);
     },
     append: function (ajax, response) {
-        $(response.selector, ajax.element).append(response.html);
+        $(response.selector).append(response.html);
     },
     prepend: function (ajax, response) {
-        $(response.selector, ajax.element).prepend(response.html);
+        $(response.selector).prepend(response.html);
     },
     addClass: function (ajax, response) {
-        $(response.selector, ajax.element).addClass(response.value);
+        $(response.selector).addClass(response.value);
     },
     fetch: function (ajax, response) {
         let url = MyFolder.pseudoLink(response.url);
         new MyFolder.ajax(null, ajax.element, {url: url})
     },
     replaceWith: function (ajax, response) {
-        $(response.selector, ajax.element).replaceWith(response.html);
+        $(response.selector).replaceWith(response.html);
+    },
+    submit: function (ajax, response) {
+        $(response.selector).submit();
     }
 }
 MyFolder.ajax.prototype.enableTrigger = function (element) {
