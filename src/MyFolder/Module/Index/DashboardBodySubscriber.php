@@ -15,9 +15,11 @@ class DashboardBodySubscriber implements EventSubscriberInterface
     }
     public static function onDashboardBodyEvent(DashboardBodyEvent $event)
     {
-        $user = new UserSession;
-        if ($user->isAuthenticated()) {
-            $event->registerCard(new CardRootDirectory);
+        if (class_exists('IjorTengab\MyFolder\Module\User\UserSession')) {
+            $user = new UserSession;
+            if ($user->isSysAdmin()) {
+                $event->registerCard(new CardRootDirectory);
+            }
         }
     }
 }
