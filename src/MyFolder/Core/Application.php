@@ -180,15 +180,20 @@ class Application
         if (null === $modules) {
             return;
         }
+        $modules = array_filter($modules, function ($a) {
+            // String value = 1.
+            return $a === '1';
+        });
+        $modules = array_keys($modules);
         foreach ($modules as $module) {
             $class = str_replace(' ', '', ucwords(str_replace('_', ' ', $module)));
-            if (!class_exists("\\IjorTengab\\MyFolder\\Module\\$class\\$class")) {
+            if (!class_exists("IjorTengab\\MyFolder\\Module\\$class\\$class")) {
                 throw new ModuleException("Module $module is not exists.");
             }
             $class_implements = class_implements("\\IjorTengab\\MyFolder\\Module\\$class\\$class");
             if (in_array('IjorTengab\MyFolder\Core\ModuleInterface', $class_implements)) {
                 $callback = array(
-                    "\\IjorTengab\\MyFolder\\Module\\$class\\$class",
+                    "IjorTengab\\MyFolder\\Module\\$class\\$class",
                     'handle'
                 );
                 $args = array($this);
