@@ -5,7 +5,7 @@ namespace IjorTengab\MyFolder\Module\Terminal;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\RedirectResponse;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\TwigFile;
 
 class TerminalDashboardPositionController
@@ -40,11 +40,11 @@ class TerminalDashboardPositionController
 
         $commands = array();
         // @todo: verifikasi input user.
-        $config = ConfigHelper::load('terminal');
+        $config = ConfigLoader::module('terminal');
         $config->position = $position;
         // @todo, saving harus ada lock file.
         // cek lagi function lock yang ada di versi 0.1
-        ConfigHelper::save($config);
+        $config->save();
         // Kasih sleep aja deh, agar user tidak click
         // berkali-kali.
         sleep(1);
@@ -64,7 +64,7 @@ class TerminalDashboardPositionController
     }
     protected static function routeGetAjax()
     {
-        $config = ConfigHelper::load('terminal');
+        $config = ConfigLoader::module('terminal');
         $position =  $config->position->value();
         null !== $position or $position = 'bottom';
 
@@ -116,7 +116,7 @@ class TerminalDashboardPositionController
     protected static function routeGetAjaxPart()
     {
 
-        /* $config = ConfigHelper::load();
+        /* $config = ConfigLoader::core();
         $root = $config->root->value();
         // Jadikan empty string agar user ngeh bahwa belum di set.
         null !== $root or $root = '';

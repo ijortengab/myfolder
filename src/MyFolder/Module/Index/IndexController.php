@@ -4,7 +4,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\Response;
 use IjorTengab\MyFolder\Core\BinaryFileResponse;
@@ -38,7 +38,7 @@ class IndexController
     }
     protected static function routePost()
     {
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 

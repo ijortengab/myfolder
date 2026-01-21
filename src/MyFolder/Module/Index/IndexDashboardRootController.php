@@ -5,7 +5,7 @@ namespace IjorTengab\MyFolder\Module\Index;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\RedirectResponse;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\TwigFile;
 use IjorTengab\MyFolder\Core\AccessControl;
 
@@ -47,7 +47,7 @@ class IndexDashboardRootController
         // verifikasi is_dir.
         // cannot write. dll.
         // Load.
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         // Set.
         $config->root = $root;
         $config->access->root->public = $access_root_public;;
@@ -56,7 +56,7 @@ class IndexDashboardRootController
         $body = 'Saved.';
         $modal_name = 'SuccessSavedRootDirectory';
         try {
-            ConfigHelper::save($config);
+            $config->save();
         }
         catch (WriteException $e) {
             $title = 'Attention.';
@@ -126,7 +126,7 @@ class IndexDashboardRootController
     }
     protected static function routeGetAjax()
     {
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 
@@ -170,7 +170,7 @@ class IndexDashboardRootController
     protected static function routeGetAjaxPart()
     {
 
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         $root = $config->root->value();
         $access_root_public = $config->access->root->public->value();
         switch ($access_root_public) {

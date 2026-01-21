@@ -37,7 +37,7 @@ class Controller
         $event = new BootEvent();
         $dispatcher->dispatch($event, BootEvent::NAME);
 
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
 
@@ -76,7 +76,7 @@ class Controller
     }
     public static function post()
     {
-        $config = ConfigHelper::load();
+        $config = ConfigLoader::core();
         $root = $config->root->value();
         null !== $root or $root = Application::$cwd;
         list($base_path, $path_info,) = Application::extractUrlInfo();

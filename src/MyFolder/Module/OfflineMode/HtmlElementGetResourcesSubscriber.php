@@ -5,7 +5,7 @@ namespace IjorTengab\MyFolder\Module\OfflineMode;
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\HtmlElementGetResourcesEvent;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 
 class HtmlElementGetResourcesSubscriber implements EventSubscriberInterface
 {
@@ -21,7 +21,7 @@ class HtmlElementGetResourcesSubscriber implements EventSubscriberInterface
         // Jika offline_mode, maka prefix http perlu diganti menjadi local.
         list($base_path,,) = Application::extractUrlInfo();
         $storage = $event->getResources();
-        $offline_mode = (bool) ConfigHelper::load()->offline_mode->value();
+        $offline_mode = (bool) ConfigLoader::core()->offline_mode->value();
 
         foreach ($storage as $id => &$value) {
             if ($offline_mode && fnmatch('https://*', $value)) {

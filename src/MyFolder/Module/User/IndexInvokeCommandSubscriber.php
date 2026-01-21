@@ -3,7 +3,7 @@
 namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
 
 class IndexInvokeCommandSubscriber implements EventSubscriberInterface
@@ -16,7 +16,7 @@ class IndexInvokeCommandSubscriber implements EventSubscriberInterface
     }
     public static function onIndexInvokeCommandEvent(IndexInvokeCommandEvent $event)
     {
-        $config = ConfigHelper::load('user');
+        $config = ConfigLoader::module('user');
         $name = $config->sysadmin->name->value();
         $pass = $config->sysadmin->pass->value();
 

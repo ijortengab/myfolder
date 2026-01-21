@@ -3,7 +3,7 @@
 namespace IjorTengab\MyFolder\Module\Index;
 
 use IjorTengab\MyFolder\Core\PolicyInterface;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\AccessControl;
 
 class FollowParentAcessPolicy implements PolicyInterface
@@ -33,7 +33,7 @@ class FollowParentAcessPolicy implements PolicyInterface
     public function accessResult()
     {
         if ($this->scope == '/' ) {
-            $config = ConfigHelper::load();
+            $config = ConfigLoader::core();
             $access_root_public = $config->access->root->public->value();
 
             switch ($access_root_public) {

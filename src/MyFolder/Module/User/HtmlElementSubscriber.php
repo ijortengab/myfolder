@@ -2,7 +2,7 @@
 
 namespace IjorTengab\MyFolder\Module\User;
 
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\EventSubscriberInterface;
 use IjorTengab\MyFolder\Core\HtmlElementEvent;
 
@@ -16,7 +16,7 @@ class HtmlElementSubscriber implements EventSubscriberInterface
     }
     public static function onHtmlElementEvent(HtmlElementEvent $event)
     {
-        $config = ConfigHelper::load('user');
+        $config = ConfigLoader::module('user');
         $name = $config->sysadmin->name->value();
         $pass = $config->sysadmin->pass->value();
 
