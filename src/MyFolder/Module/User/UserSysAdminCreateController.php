@@ -4,9 +4,10 @@ namespace IjorTengab\MyFolder\Module\User;
 
 use IjorTengab\MyFolder\Core\Application;
 use IjorTengab\MyFolder\Core\JsonResponse;
-use IjorTengab\MyFolder\Core\ConfigHelper;
+use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\WriteException;
 use IjorTengab\MyFolder\Core\TwigFile;
+use IjorTengab\MyFolder\Core\Template\ConfigReplace;
 use IjorTengab\MyFolder\Module\Index\IndexController;
 use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
 
@@ -23,14 +24,14 @@ class UserSysAdminCreateController
         $has_query_part = !(null === $http_request->query->get('part'));
         switch ($method) {
             case 'post':
-                self::routePost();
+                self::routePost($http_request);
                 break;
             case 'get':
                 if (!$is_ajax) {
                     self::routeGet();
                 }
                 elseif ($has_query_part) {
-                    self::routeGetAjaxPart();
+                    self::routeGetAjaxPart($http_request);
                 }
                 else {
                     self::routeGetAjax();
@@ -38,21 +39,20 @@ class UserSysAdminCreateController
                 break;
         }
     }
-    protected static function routePost()
+    protected static function routePost($http_request)
     {
-        $http_request = Application::getHttpRequest();
+        // @todo csrf token.
         $name = $http_request->request->get('name');
         $pass = $http_request->request->get('pass');
         $action = $http_request->request->get('action');
-
-        $config = ConfigHelper::load('user');
+        $commands = array();
+        $result = array();
+        $config = ConfigLoader::module('user');
         $config->sysadmin->name = $name;
         $config->sysadmin->pass = password_hash($pass, PASSWORD_DEFAULT);
 
-        $result = array();
-        $commands = array();
         try {
-            ConfigHelper::save($config);
+            $config->save();
             $title = 'Success.';
             $body = 'You can login now.';
             $modal_name = 'SuccessCreate';
@@ -67,8 +67,8 @@ class UserSysAdminCreateController
             'options' => array(
                 'name' => $modal_name,
                 'bootstrapOptions' => array(
-                    'backdrop' => 'static',
-                    'keyboard' => false
+                    // 'backdrop' => 'static',
+                    // 'keyboard' => false
                 ),
                 'layout' => array(
                     'title' => $title,
@@ -112,6 +112,7 @@ class UserSysAdminCreateController
             'sysadmin_default' => 'SysAdmin',
             'description' => 'Create account for yourself before continue.',
             'url' => '/user/sysadmin/create',
+            'urlAsk' => '/user/sysadmin/create?part=ask-confirmation',
         ));
         $commands[] = array(
             'command' => 'ajax',
@@ -126,7 +127,65 @@ class UserSysAdminCreateController
         ));
         return $response->send();
     }
-    protected static function routeGetAjaxPart()
+    protected static function routeGetAjaxPart($http_request)
     {
+        $part = $http_request->query->get('part');
+        switch ($part) {
+            case 'ask-confirmation':
+                $title = 'Confirmation of creation file config-replace.php';
+                $body = (string) TwigFile::process(new Template\UserSysAdminCreateConfirmationFormBody);
+                $footer = (string) TwigFile::process(new Template\UserSysAdminCreateConfirmationFormFooter, array(
+                    'urlyes' => '/user/sysadmin/create?part=confirmation-yes',
+                    'urlno' => '/user/sysadmin/create?part=confirmation-no',
+                    'yes' => 'Yes',
+                    'no' => 'No',
+                ));
+                $modal_name = 'UserSysAdminCreateConfirmationForm';
+                $commands[] = array(
+                    'command' => 'modal',
+                    'options' => array(
+                        'name' => $modal_name,
+                        'bootstrapOptions' => array(
+                            'backdrop' => 'static',
+                            'keyboard' => false
+                        ),
+                        'layout' => array(
+                            'title' => $title,
+                            'body' => array('html' => $body),
+                            'footer' => array('html' => $footer),
+                        ),
+                    ),
+                );
+                break;
+
+            case 'confirmation-yes':
+                ConfigReplace::init('user');
+                $commands[] = array(
+                    'command' => 'ajax',
+                    'options' => array(
+                        'method' => 'submit',
+                        'selector' => '#form-create',
+                    ),
+                );
+                break;
+
+            case 'confirmation-no':
+                $commands[] = array(
+                    'command' => 'ajax',
+                    'options' => array(
+                        'method' => 'submit',
+                        'selector' => '#form-create',
+                    ),
+                );
+                break;
+
+            default:
+                $commands = array();
+                break;
+        }
+
+        $result['commands'] = $commands;
+        $response = new JsonResponse($result);
+        $response->send();
     }
 }

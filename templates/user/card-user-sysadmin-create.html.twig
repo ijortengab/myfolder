@@ -2,7 +2,7 @@
   <div class="card-body">
     <p>Welcome, {{ sysadmin_default }}.</p>
     <p>{{ description }}</p>
-    <form id="form-create" class="ajax" action="{{ url }}">
+    <form method="post" id="form-create" class="ajax" action="{{ url }}">
       <div class="input-group mb-3">
         <span class="input-group-text" id="inputGroup-sizing-default">Username</span>
         <input required="" name="name" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
@@ -11,9 +11,10 @@
         <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
         <input required="" name="pass" type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
       </div>
-      <input name="action" type="hidden" class="form-control" value="sed">
       <input name="submit" type="submit" class="form-control d-none">
     </form>
-    <button id="create-account-next" type="submit" data-target="#form-create" class="btn btn-primary ajax">Next</button>
+    <form method="get" action="{{ urlAsk }}" class="ajax">
+        <button id="create-account-next" class="btn btn-primary">Next</button>
+    </form>
   </div>
 </div>
