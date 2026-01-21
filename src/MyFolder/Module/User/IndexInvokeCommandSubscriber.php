@@ -26,7 +26,7 @@ class IndexInvokeCommandSubscriber implements EventSubscriberInterface
         $title = 'Logout successful.';
         $body = 'Logout successful.';
         $footer = 'Logout successful.';
-        if (empty($pass) || empty($pass)) {
+        if (empty($name) || empty($pass)) {
             $event->setCommand(array(
                 'command' => 'modal',
                 'options' => array(
