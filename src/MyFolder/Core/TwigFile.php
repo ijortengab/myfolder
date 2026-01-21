@@ -7,12 +7,12 @@ class TwigFile
     protected $template;
     protected $placeholders;
 
-    public static function process($template, $placeholders)
+    public static function process($template, $placeholders = null)
     {
         $twig = new self($template, $placeholders);
         return $twig;
     }
-    public function __construct($template, $placeholders)
+    public function __construct($template, $placeholders = null)
     {
         $this->template = $template;
         $this->placeholders = $placeholders;
