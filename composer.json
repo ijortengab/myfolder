@@ -13,7 +13,10 @@
     "require": {
     },
     "autoload": {
-        "psr-4": {"IjorTengab\\MyFolder\\": "src/MyFolder/"}
+        "psr-4": {
+            "IjorTengab\\MyFolder\\": "src/MyFolder/",
+            "IjorTengab\\MyFolder\\Tools\\": "tools/"
+        }
     },
     "repositories": [
         {
