@@ -112,8 +112,8 @@ MyFolder.index.prototype.drawTable = function (options) {
         let info = {
             name: 'Failed' + code,
             layout: {
-                title: code,
-                body: data.statusText
+                title: code+' '+data.statusText,
+                body: data.responseText
             }
         }
         MyFolder.modal.process(info, ['register', 'show']);
