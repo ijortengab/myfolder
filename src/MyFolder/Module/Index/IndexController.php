@@ -144,6 +144,11 @@ class IndexController
                 }
             }
 
+            if (!is_readable($current_directory)) {
+                $response = new Response('Directory is not accessible.');
+                $response->setStatusCode(500);
+                return $response->send();
+            }
             $list_directory = scandir($current_directory);
             $list_directory = array_diff($list_directory, array('.','..'));
 
