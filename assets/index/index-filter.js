@@ -132,3 +132,24 @@ MyFolder.index.filter.$buttonTrigger.on('click', function (e) {
 })
 
 $(document).on('keydown', MyFolder.index.filter.shortcut);
+
+// Tambah support untuk modal.
+let primary = document.getElementById('ModalPrimary');
+primary.addEventListener('show.bs.modal', event => {
+    // console.log('show.bs.modal primary');
+    $(document).off('keydown', MyFolder.index.filter.shortcut);
+})
+primary.addEventListener('hide.bs.modal', event => {
+    // console.log('hide.bs.modal primary');
+    $(document).on('keydown', MyFolder.index.filter.shortcut);
+})
+
+let secondary = document.getElementById('ModalSecondary');
+secondary.addEventListener('show.bs.modal', event => {
+    // console.log('show.bs.modal secondary');
+    $(document).off('keydown', MyFolder.index.filter.shortcut);
+})
+secondary.addEventListener('hide.bs.modal', event => {
+    // console.log('hide.bs.modal secondary');
+    $(document).off('keydown', MyFolder.index.filter.shortcut);
+})
