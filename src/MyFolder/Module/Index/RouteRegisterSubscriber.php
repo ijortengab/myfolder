@@ -15,15 +15,15 @@ class RouteRegisterSubscriber implements EventSubscriberInterface
     }
     public static function onRouteRegisterEvent(RouteRegisterEvent $event)
     {
+        // Javascript pada module index, mengubah semua link dengan memberi
+        // prefix '/___pseudo' dengan tujuan agar membedakan dengan path
+        // dari file/direktori.
+        // Callback ini akan mengembalikan pathinfo ke posisi nya semula,
+        // sehingga route yang didapat hasilnya sempurna.
         $pathinfo = $event->getPathInfo();
-        $callback = $event->getCallback();
-        if ($pathinfo === '/') {
-            return;
-        }
         if (str_starts_with($pathinfo, '/___pseudo')) {
-            return;
+            $pathinfo = substr($pathinfo,strlen('/___pseudo'));
+            $event->setPathInfo($pathinfo);
         }
-        $pathinfo = '/___pseudo'.$pathinfo;
-        $event->setPathInfo($pathinfo);
     }
 }

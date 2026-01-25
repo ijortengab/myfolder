@@ -17,20 +17,11 @@ class RouteRegisterEvent extends Event
     /**
      *
      */
-    public function __construct($method, $pathinfo, $callback)
+    public function __construct($method, $pathinfo)
     {
         $this->method = $method;
         $this->pathinfo = $pathinfo;
-        $this->callback = $callback;
         return $this;
-    }
-
-    /**
-     *
-     */
-    public function getMethod()
-    {
-        return $this->method;
     }
 
     /**
@@ -48,22 +39,5 @@ class RouteRegisterEvent extends Event
     public function getPathInfo()
     {
         return $this->pathinfo;
-    }
-
-    /**
-     *
-     */
-    public function setCallback($callback)
-    {
-        $this->callback = $callback;
-        return $this;
-    }
-
-    /**
-     *
-     */
-    public function getCallback()
-    {
-        return $this->callback;
     }
 }

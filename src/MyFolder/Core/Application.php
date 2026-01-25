@@ -100,12 +100,6 @@ class Application
     }
     public function post($pathinfo, $callback)
     {
-        // Allow module to override pathinfo and callback.
-        $dispatcher = self::getEventDispatcher();
-        $event = new RouteRegisterEvent('post', $pathinfo, $callback);
-        $dispatcher->dispatch($event, RouteRegisterEvent::NAME);
-        $pathinfo = $event->getPathInfo();
-        $callback = $event->getCallback();
         $this->register['post'][$pathinfo] = $callback;
     }
     public function get($pathinfo, $callback)
@@ -115,12 +109,6 @@ class Application
         // maka sejak awal sudah dikasih throw exception aja.
         // karena gak valid sebagai placeholder.
 
-        // Allow module to override pathinfo and callback.
-        $dispatcher = self::getEventDispatcher();
-        $event = new RouteRegisterEvent('get', $pathinfo, $callback);
-        $dispatcher->dispatch($event, RouteRegisterEvent::NAME);
-        $pathinfo = $event->getPathInfo();
-        $callback = $event->getCallback();
         $this->register['get'][$pathinfo] = $callback;
     }
     public function run()
@@ -241,16 +229,22 @@ class Application
         $http_request = self::getHttpRequest();
         $this->loadSession($http_request);
         $method = strtolower($http_request->server->get('REQUEST_METHOD'));
-        $path_info = $http_request->getPathInfo();
+        $pathinfo = $http_request->getPathInfo();
         if (!isset($this->register[$method])) {
             throw new RouteException('Request Method not found.');
         }
+
+        // Allow module to override pathinfo.
+        $dispatcher = self::getEventDispatcher();
+        $event = new RouteRegisterEvent($method, $pathinfo);
+        $dispatcher->dispatch($event, RouteRegisterEvent::NAME);
+        $pathinfo = $event->getPathInfo();
         $register = $this->register[$method];
 
         do {
             // Filter berdasarkan fix string.
-            $register_filtered = array_filter($register, function ($key) use ($path_info) {
-                return $path_info === $key;
+            $register_filtered = array_filter($register, function ($key) use ($pathinfo) {
+                return $pathinfo === $key;
             }, ARRAY_FILTER_USE_KEY);
             if ($register_filtered) {
                 $key = key($register_filtered);
@@ -259,13 +253,13 @@ class Application
                 break;
             }
             // Filter berdasarkan regex.
-            $register_filtered = array_filter($register, function ($key) use ($path_info) {
+            $register_filtered = array_filter($register, function ($key) use ($pathinfo) {
                 $pattern_parts = preg_split('/\{[^}]+\}/', $key);
                 $pattern_quoted_parts = array_map(function ($value) {
                     return preg_quote($value,'/');
                 }, $pattern_parts);
                 $pattern_quoted = implode('[^\/]+', $pattern_quoted_parts);
-                return preg_match('/^'.$pattern_quoted.'$/', $path_info);
+                return preg_match('/^'.$pattern_quoted.'$/', $pathinfo);
             }, ARRAY_FILTER_USE_KEY);
             if ($register_filtered) {
                 $key = key($register_filtered);
@@ -284,7 +278,7 @@ class Application
                     return preg_quote($value,'/').$name;
                 }, $pattern_parts, $save);
                 $pattern_quoted = implode('', $pattern_quoted_parts);
-                preg_match('/^'.$pattern_quoted.'/', $path_info, $matches);
+                preg_match('/^'.$pattern_quoted.'/', $pathinfo, $matches);
                 $args = array_filter($matches, function ($key) {
                     return !is_numeric($key);
                 }, ARRAY_FILTER_USE_KEY);
