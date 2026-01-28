@@ -75,7 +75,7 @@ class ConfigLoader
             $config = $config_helper;
         }
         catch (WriteException $e) {
-            $config_replace_php = Application::$cwd.'/'.Template\ConfigReplace::BASENAME;
+            $config_replace_php = Application::$cwd.'/'.ConfigReplaceTemplate::BASENAME;
             if (file_exists($config_replace_php)) {
                 static::appendTemplateConfigReplace($config_replace_php, $module_name);
             }
@@ -116,11 +116,11 @@ class ConfigLoader
         }
 
         if (null === $module_name) {
-            $string = Template\ConfigReplace::TEMPLATE_CORE;
+            $string = ConfigReplaceTemplate::TEMPLATE_CORE;
         }
         else {
             $module_name = str_replace(' ', '', ucwords(str_replace('_', ' ', $module_name)));
-            $string = Template\ConfigReplace::TEMPLATE_MODULE;
+            $string = ConfigReplaceTemplate::TEMPLATE_MODULE;
             $string = str_replace('$module_name', $module_name, $string);
         }
         if (filesize($path) === 0) {

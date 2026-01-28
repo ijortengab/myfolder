@@ -1,10 +1,8 @@
 <?php
 
-namespace IjorTengab\MyFolder\Core\Template;
+namespace IjorTengab\MyFolder\Core;
 
-use IjorTengab\MyFolder\Core\Application;
-
-class ConfigReplace
+class ConfigReplaceTemplate
 {
     const BASENAME = 'config-replace.php';
 

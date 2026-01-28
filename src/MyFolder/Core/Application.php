@@ -132,7 +132,7 @@ class Application
     public function autoload($class_name)
     {
         static $valid;
-        $config_replace_php = self::$cwd.'/'.Template\ConfigReplace::BASENAME;
+        $config_replace_php = self::$cwd.'/'.ConfigReplaceTemplate::BASENAME;
         if (!file_exists($config_replace_php)) {
             return;
         }
