@@ -744,7 +744,8 @@ class Twig
         return $array;
     }
 
-    private function isQuoted($string) {
+    private function isQuoted($string)
+    {
         if (($left = substr($string, 0, 1)) && ($right = substr($string, -1)) && $left === $right && in_array($left, array('"', "'"))) {
             return true;
         }

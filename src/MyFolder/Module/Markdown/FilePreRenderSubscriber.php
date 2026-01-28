@@ -11,7 +11,7 @@ class FilePreRenderSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return array(
-            FilePreRenderEvent::NAME => ['onFilePreRenderEvent', -10],
+            FilePreRenderEvent::NAME => array('onFilePreRenderEvent', -10),
         );
     }
     public static function onFilePreRenderEvent(FilePreRenderEvent $event)
