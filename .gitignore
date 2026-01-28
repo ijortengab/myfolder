@@ -1,3 +1,5 @@
 config-replace.php
+composer.lock
+/result/
 /cdn/
 /vendor/
