@@ -7,7 +7,7 @@ use IjorTengab\MyFolder\Core\JsonResponse;
 use IjorTengab\MyFolder\Core\ConfigLoader;
 use IjorTengab\MyFolder\Core\WriteException;
 use IjorTengab\MyFolder\Core\TwigFile;
-use IjorTengab\MyFolder\Core\Template\ConfigReplace;
+use IjorTengab\MyFolder\Core\ConfigReplaceTemplate;
 use IjorTengab\MyFolder\Module\Index\IndexController;
 use IjorTengab\MyFolder\Module\Index\IndexInvokeCommandEvent;
 
@@ -159,7 +159,7 @@ class UserSysAdminCreateController
                 break;
 
             case 'confirmation-yes':
-                ConfigReplace::init('user');
+                ConfigReplaceTemplate::init('user');
                 $commands[] = array(
                     'command' => 'ajax',
                     'options' => array(
