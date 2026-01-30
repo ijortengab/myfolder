@@ -50,7 +50,7 @@ class MathematicalLogic
     // "0"
     protected $debug_8;
 
-    public function __construct($binary, callable $callback = null)
+    public function __construct($binary, $callback = null)
     {
         $this->binary = $binary;
         $this->callback = $callback;
