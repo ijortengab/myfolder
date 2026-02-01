@@ -7,7 +7,7 @@ class Application
     const SESSION_NAME = 'IjorTengabWasHere';
 
     public static $cwd;
-    public static $script_filename;
+    public static $script_php;
     protected static $user_session;
     protected static $http_request;
     protected static $event_dispatcher;
@@ -54,11 +54,11 @@ class Application
         // adalah '/home/ijortengab/repositories/ijortengab/myfolder/favicon.ico'.
         // Kita perlu mengubahnya kembali menjadi
         // '/home/ijortengab/repositories/ahmadkemal/myfolder/index.php'
-        // Solusi untuk hal ini adalah mengecek dengan nilai Application::$script_filename
+        // Solusi untuk hal ini adalah mengecek dengan nilai Application::$script_php
         $filename = basename($http_request->server->get('SCRIPT_FILENAME'));
-        if (realpath($http_request->server->get('SCRIPT_FILENAME')) !== Application::$script_filename) {
+        if (realpath($http_request->server->get('SCRIPT_FILENAME')) !== Application::$script_php) {
             // Koreksi.
-            $filename = basename(Application::$script_filename);
+            $filename = basename(Application::$script_php);
             // Nilai dari $path_info seharusnya bukan '/', melainkan
             // '/favicon.ico'.
             if ($path_info == '/') {
@@ -96,7 +96,7 @@ class Application
     public function __construct($directory, $file)
     {
         self::$cwd = $directory;
-        self::$script_filename = realpath($file);
+        self::$script_php = realpath($file);
     }
     public function post($pathinfo, $callback)
     {
