@@ -21,55 +21,7 @@ class Application
         $http_request = self::$http_request;
         $path_info = $http_request->getPathInfo();
         $base_path = $http_request->getBasePath();
-        $rewrite_url = true;
-
-        // Beri dukungan terhadap PHP built-in web server.
-        //
-        // Contoh 1:
-        // ```
-        // php -S 127.0.0.1:9090
-        // ```
-        // dengan request sbb:
-        // ```
-        // curl http://127.0.0.1:9090/index.php
-        // curl http://127.0.0.1:9090/subfolder/index.php
-        // ```
-        // Nilai variable `$base_path` adalah '' atau
-        // '/subfolder'. Kita perlu mengubahnya menjadi '/index.php' atau
-        // '/subfolder/index.php' sehingga PHP built-in web server dapat
-        // menerima request sbb:
-        // /index.php/directory/subdirectory/file.ext
-        // atau
-        // /subfolder/index.php/directory/subdirectory/file.ext
-        //
-        // Contoh 2:
-        // ```
-        // php -S 127.0.0.1:9090 /path/to/index.php
-        // ```
-        // dengan request sbb:
-        // ```
-        // curl http://127.0.0.1:9090/favicon.ico
-        // ```
-        // menghasilkan nilai $_SERVER['SCRIPT_FILENAME']
-        // adalah '/home/ijortengab/repositories/ijortengab/myfolder/favicon.ico'.
-        // Kita perlu mengubahnya kembali menjadi
-        // '/home/ijortengab/repositories/ahmadkemal/myfolder/index.php'
-        // Solusi untuk hal ini adalah mengecek dengan nilai Application::$script_php
-        $filename = basename($http_request->server->get('SCRIPT_FILENAME'));
-        if (realpath($http_request->server->get('SCRIPT_FILENAME')) !== Application::$script_php) {
-            // Koreksi.
-            $filename = basename(Application::$script_php);
-            // Nilai dari $path_info seharusnya bukan '/', melainkan
-            // '/favicon.ico'.
-            if ($path_info == '/') {
-                $path_info .= basename($http_request->server->get('SCRIPT_FILENAME'));
-            }
-        }
-        $base_url = $http_request->getBaseUrl();
-        if (str_ends_with($base_url, $filename)) {
-            $base_path = $base_url;
-            $rewrite_url = false;
-        }
+        $rewrite_url = Request::$rewrite_url;
         return array($base_path, $path_info, $rewrite_url);
     }
     public static function currentUser()
@@ -113,6 +65,57 @@ class Application
     }
     public function run()
     {
+        // Auto buat object HTTP Request.
+        $http_request = self::getHttpRequest();
+
+        // Handle Kasus Spesifik.
+        // Variable config $root sama dengan $DOCUMENT_ROOT.
+
+        // cd /home/ijortengab/github.com/ijortengab/myfolder
+        // php -S localhost:55661 index.php
+
+        // Pada mesin dengan PHP_SAPI: cli-server, maka request sbb:
+        // http://localhost:55661/.cache/myfolder/2f7eea290ec902b4e8249bb4ad4b802b.json
+        // menghasilkan nilai variable sbb:
+        // $base_url: /.cache/myfolder/2f7eea290ec902b4e8249bb4ad4b802b.json
+        // $base_path: /.cache/myfolder
+        // $path_info: /
+        // $SCRIPT_NAME: /.cache/myfolder/2f7eea290ec902b4e8249bb4ad4b802b.json
+        // $SCRIPT_FILENAME: /home/ijortengab/github.com/ijortengab/myfolder/.cache/myfolder/2f7eea290ec902b4e8249bb4ad4b802b.json
+        // $DOCUMENT_ROOT: /home/ijortengab/github.com/ijortengab/myfolder
+        // Unknown Rewrite URL true or false.
+
+        // cd /home/ijortengab/public_html/ijortengab.id.localhost
+        // php -S localhost:9999 web/index.php
+
+        // Pada mesin dengan PHP_SAPI: cli-server, maka request sbb:
+        // http://localhost:9999/web/.cache/myfolder/4a13c7110108a626efc1e43b2cd8cf05.json
+        // menghasilkan nilai variable sbb:
+        // $base_url: /web/.cache/myfolder/4a13c7110108a626efc1e43b2cd8cf05.json
+        // $base_path: /web/.cache/myfolder
+        // $path_info: /
+        // $SCRIPT_NAME: /web/.cache/myfolder/4a13c7110108a626efc1e43b2cd8cf05.json
+        // $SCRIPT_FILENAME: /home/ijortengab/public_html/ijortengab.id.localhost/web/.cache/myfolder/4a13c7110108a626efc1e43b2cd8cf05.json
+        // $DOCUMENT_ROOT: /home/ijortengab/public_html/ijortengab.id.localhost
+
+        // Kasus diatas, adalah PHP beneran menjadi web server seperti nginx.
+        // Karena tidak terdapat informasi variable $script_php pada berbagai
+        // variable diatas, maka kita perlakukan seperti web server yang mana
+        // menyajikan langsung file statis saja. Langsung kasih binary respond.
+        $DOCUMENT_ROOT = $http_request->server->get('DOCUMENT_ROOT');
+        $base_url = $http_request->getBaseUrl();
+        $SCRIPT_FILENAME = $http_request->server->get('SCRIPT_FILENAME');
+        if ($DOCUMENT_ROOT.$base_url == $SCRIPT_FILENAME) {
+            $response = new BinaryFileResponse(new \SplFileInfo($SCRIPT_FILENAME));
+            $response->send();
+            exit;
+        }
+
+        $rewrite_url = Request::$rewrite_url;
+        if ($rewrite_url === null) {
+            throw new \LogicException('Unknown Rewrite URL true or false.');
+        }
+
         spl_autoload_register(array($this, 'autoload'));
         try {
             $this->scanModule();
