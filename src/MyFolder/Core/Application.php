@@ -49,6 +49,20 @@ class Application
     {
         self::$cwd = $directory;
         self::$script_php = realpath($file);
+
+        // Jika variable $directory dan konstan __DIR__ berbeda, misalnya
+        // $directory adalah /home/ijortengab/public_html/cbt.systemix.id.localhost/cmsfolder
+        // sementara
+        // __DIR__ adalah /home/ijortengab/public_html/cbt.systemix.id.localhost/cmsfolder/vendor/ijortengab/myfolder/src/MyFolder/Core
+        // maka berarti project ini dijadikan required dari project lain.
+        // Oleh karena itu kita perlu set include path.
+        // Dengan menggunakan dirname() naik 3 level diatas, maka akan include direktori:
+        // /home/ijortengab/public_html/cbt.systemix.id.localhost/cmsfolder/vendor/ijortengab/myfolder
+        // yang mana terdapat file template dan asset.
+        set_include_path(get_include_path() . PATH_SEPARATOR . $directory);
+        if (__DIR__ != $directory) {
+            set_include_path(get_include_path() . PATH_SEPARATOR . dirname(__DIR__, 3));
+        }
     }
     public function post($pathinfo, $callback)
     {
