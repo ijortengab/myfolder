@@ -4,9 +4,10 @@ namespace IjorTengab\MyFolder\Core;
 
 /**
  * Based on Symfony Request version 2.8.18.
+ * Disederhanakan karena yang dibutuhkan hanyalah $pathInfo dan $basePath.
  * https://github.com/symfony/symfony/blob/2.8/src/Symfony/Component/HttpFoundation/Request.php
  */
-class Request
+class SymfonyRequest
 {
     public $server;
     public $request;
