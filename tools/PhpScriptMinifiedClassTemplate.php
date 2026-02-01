@@ -12,11 +12,11 @@ class PhpScriptMinifiedClassTemplate extends PhpScriptMinifiedClass
         $contents = array();
         foreach ($array as $line) {
             $contents[] = $line;
-            if (strpos($line, 'file_get_contents')) {
+            if (strpos($line, 'include')) {
                 $last = array_pop($contents);
 
-                $last = str_replace('Application::$cwd.\'', '\''.getcwd(), $last);
-                preg_match('/^(.*)return\s+file_get_contents\(\'(.*)\'\);$/', $last, $matches);
+                $last = str_replace('include(\'', 'include(\''.getcwd().'/', $last);
+                preg_match('/^(.*)include\(\'(.*)\'\)/', $last, $matches);
                 list(,,$asset_path) = $matches;
                 $contents[] = 'return <<<'."'MYFOLDER'";
                 $contents[] = file_get_contents($asset_path);
