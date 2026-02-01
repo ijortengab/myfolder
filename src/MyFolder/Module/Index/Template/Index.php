@@ -8,6 +8,8 @@ class Index
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/templates/index/index.html.twig');
+        ob_start();
+        include('templates/index/index.html.twig');
+        return ob_get_clean();
     }
 }

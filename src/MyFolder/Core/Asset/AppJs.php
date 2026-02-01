@@ -2,12 +2,10 @@
 
 namespace IjorTengab\MyFolder\Core\Asset;
 
-use IjorTengab\MyFolder\Core\Application;
-
 class AppJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/core/app.js');
+        ob_start(); include('assets/core/app.js'); return ob_get_clean();
     }
 }

@@ -2,12 +2,10 @@
 
 namespace IjorTengab\MyFolder\Module\User\Template;
 
-use IjorTengab\MyFolder\Core\Application;
-
 class CardUserSysAdminCreate 
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/templates/user/card-user-sysadmin-create.html.twig');
+        ob_start(); include('templates/user/card-user-sysadmin-create.html.twig'); return ob_get_clean();
     }
 }

@@ -2,12 +2,10 @@
 
 namespace IjorTengab\MyFolder\Module\Markdown\Asset;
 
-use IjorTengab\MyFolder\Core\Application;
-
 class IndexJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/markdown/index.js');
+        ob_start(); include('assets/markdown/index.js'); return ob_get_clean();
     }
 }

@@ -2,12 +2,10 @@
 
 namespace IjorTengab\MyFolder\Core\Asset;
 
-use IjorTengab\MyFolder\Core\Application;
-
 class DateFormatJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/core/date-format.js');
+        ob_start(); include('assets/core/date-format.js'); return ob_get_clean();
     }
 }

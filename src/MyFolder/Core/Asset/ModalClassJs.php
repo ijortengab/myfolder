@@ -2,12 +2,10 @@
 
 namespace IjorTengab\MyFolder\Core\Asset;
 
-use IjorTengab\MyFolder\Core\Application;
-
 class ModalClassJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/core/modal-class.js');
+        ob_start(); include('assets/core/modal-class.js'); return ob_get_clean();
     }
 }

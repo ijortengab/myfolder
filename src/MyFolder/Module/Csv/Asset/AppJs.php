@@ -2,12 +2,10 @@
 
 namespace IjorTengab\MyFolder\Module\Csv\Asset;
 
-use IjorTengab\MyFolder\Core\Application;
-
 class AppJs
 {
     public function __toString()
     {
-        return file_get_contents(Application::$cwd.'/assets/csv/app.js');
+        ob_start(); include('assets/csv/app.js'); return ob_get_clean();
     }
 }
